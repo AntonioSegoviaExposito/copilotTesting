@@ -6,6 +6,8 @@ A modern, modular contact management application for VCF (vCard) files with dupl
 
 **🌐 Live Demo**: [https://antoniosegoviaexposito.github.io/copilotTesting/](https://antoniosegoviaexposito.github.io/copilotTesting/)
 
+**📊 Code Coverage**: [https://antoniosegoviaexposito.github.io/copilotTesting/coverage/](https://antoniosegoviaexposito.github.io/copilotTesting/coverage/)
+
 ## 📖 Features
 
 - **Import/Export** - Parse and generate VCF (vCard) contact files
@@ -77,10 +79,12 @@ All features include comprehensive unit and integration tests.
 
 ### Continuous Integration
 
-This project uses GitHub Actions for automated testing:
+This project uses GitHub Actions for automated testing and deployment:
 - Tests run automatically on all pull requests
 - Tests run on push to main branch
 - Coverage reports are generated and available as artifacts
+- **GitHub Pages**: Automatically deployed from `/docs` directory on push to main
+- **Coverage Reports**: Test coverage is published to `/coverage` path on GitHub Pages
 
 See [.github/workflows/README.md](.github/workflows/README.md) for more details.
 

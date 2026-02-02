@@ -32,9 +32,17 @@ You can add this badge to your README to show test status:
 
 **What it does:**
 1. Checks out the repository code
-2. Configures GitHub Pages
-3. Uploads the `vcf-manager` directory as a Pages artifact
-4. Deploys to GitHub Pages
+2. Sets up Node.js v20 with npm caching
+3. Installs dependencies using `npm ci`
+4. Runs all Jest tests with coverage
+5. Copies coverage reports to `docs/coverage/` directory
+6. Configures GitHub Pages
+7. Uploads the `docs` directory as a Pages artifact
+8. Deploys to GitHub Pages
+
+**Published URLs:**
+- **Application**: `https://antoniosegoviaexposito.github.io/copilotTesting/`
+- **Coverage Report**: `https://antoniosegoviaexposito.github.io/copilotTesting/coverage/`
 
 **Requirements:**
 - GitHub Pages must be enabled in repository settings
@@ -74,11 +82,13 @@ npm run test:coverage
 
 ### Pages Deployment (Local Preview)
 ```bash
-cd vcf-manager
+cd docs
 # Open index.html in a web browser
 # Or use a simple HTTP server:
 python -m http.server 8000
-# Then visit: http://localhost:8000
+# Then visit: 
+#   - Application: http://localhost:8000
+#   - Coverage: http://localhost:8000/coverage/
 ```
 
 ## Workflow Status
@@ -99,7 +109,8 @@ You can check the status of workflows:
 - Verify GitHub Pages is enabled in repository settings
 - Check that the Pages source is set to "GitHub Actions"
 - Review deployment logs in the Actions tab
-- Ensure the `vcf-manager` directory contains all necessary files
+- Ensure the `docs` directory contains all necessary files
+- Verify that tests pass successfully (coverage is generated from tests)
 
 ## Maintenance
 
