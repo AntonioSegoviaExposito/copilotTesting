@@ -50,12 +50,18 @@ describe('VCFParser - Edge Cases', () => {
             expect(contacts).toEqual([]);
         });
 
-        test('should handle malformed VCF gracefully', () => {
-            // This may parse unexpectedly depending on implementation
+        test('should parse malformed VCF missing BEGIN gracefully', () => {
+            // The parser looks for cards between BEGIN:VCARD and END:VCARD
+            // Without BEGIN:VCARD, it may still parse if END:VCARD is present
             const vcf = 'VERSION:3.0\nFN:John Doe\nEND:VCARD';
             const contacts = VCFParser.parse(vcf);
-            // The parser may still find a contact if END:VCARD is present
+            // Parser implementation may find a card if END:VCARD exists
+            // Verify it returns an array (actual behavior depends on implementation)
             expect(Array.isArray(contacts)).toBe(true);
+            // If it does parse, verify it has expected structure
+            if (contacts.length > 0) {
+                expect(contacts[0]).toHaveProperty('fn');
+            }
         });
 
         test('should handle special characters in names', () => {

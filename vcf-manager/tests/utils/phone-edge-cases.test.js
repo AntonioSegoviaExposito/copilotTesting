@@ -10,7 +10,8 @@ describe('PhoneUtils - Edge Cases', () => {
         });
 
         test('should handle phone with multiple plus signs', () => {
-            // Multiple plus signs are preserved by the regex (not ideal but expected behavior)
+            // Current implementation preserves multiple plus signs
+            // This tests the actual behavior of the regex [^0-9+]
             expect(PhoneUtils.normalize('++34612345678')).toBe('++34612345678');
         });
 
@@ -46,7 +47,8 @@ describe('PhoneUtils - Edge Cases', () => {
         });
 
         test('should preserve plus in middle of number', () => {
-            // Plus signs are preserved even in middle (regex doesn't remove them)
+            // Current regex preserves all + characters anywhere in the string
+            // This tests the actual behavior of [^0-9+] which keeps all plus signs
             expect(PhoneUtils.normalize('612+345678')).toBe('+34612+345678');
         });
     });
