@@ -97,7 +97,7 @@ const VCFParser = {
      * PARSING STRATEGY:
      * - get(key): Extract single field value
      * - getAll(key): Extract multiple field values (for TEL, EMAIL)
-     * - Use FN field, fallback to N field, fallback to "Sin Nombre"
+     * - Use FN field, fallback to N field, fallback to "No Name"
      * - Decode quoted-printable encoding
      * - Optional fields return undefined (not empty string)
      * 

@@ -2,6 +2,8 @@
 
 ![Tests](https://github.com/AntonioSegoviaExposito/copilotTesting/workflows/Test%20%26%20Deploy/badge.svg)
 
+> **⚠️ AI-Generated & Maintained**: This project is generated and maintained by AI agents. Code quality, architecture decisions, and documentation are continuously optimized through automated processes.
+
 A modern contact management application for VCF (vCard) files with duplicate detection and merging.
 
 **Live Demo**: https://antoniosegoviaexposito.github.io/copilotTesting/

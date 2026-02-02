@@ -31,9 +31,9 @@
     <div class="divider"></div>
 
     <div class="header-group">
-        <div style="font-size:0.7rem; font-weight:bold; color:#94a3b8; margin-right:5px">Buscar por duplicados y fusionar:</div>
-        <button class="btn btn-warning" onclick="autoMerger.start('name')">🅰️ Por Nombre</button>
-        <button class="btn btn-warning" onclick="autoMerger.start('phone')">📞 Por Teléfono</button>
+        <div style="font-size:0.7rem; font-weight:bold; color:#94a3b8; margin-right:5px">Find duplicates and merge:</div>
+        <button class="btn btn-warning" onclick="autoMerger.start('name')">🅰️ By Name</button>
+        <button class="btn btn-warning" onclick="autoMerger.start('phone')">📞 By Phone</button>
     </div>
 
     <div class="divider"></div>
@@ -91,14 +91,14 @@
                     <div style="display:flex; gap:5px; margin-bottom:10px;">
                         <label for="addFieldSelector" class="visually-hidden">Add field</label>
                         <select id="addFieldSelector" class="input-field" style="font-size:0.8rem;">
-                            <option value="org">Añadir Organización</option>
-                            <option value="title">Añadir Cargo / Título</option>
-                            <option value="adr">Añadir Dirección</option>
-                            <option value="note">Añadir Notas</option>
-                            <option value="url">Añadir Sitio Web (URL)</option>
-                            <option value="bday">Añadir Cumpleaños</option>
+                            <option value="org">Add Organization</option>
+                            <option value="title">Add Title</option>
+                            <option value="adr">Add Address</option>
+                            <option value="note">Add Notes</option>
+                            <option value="url">Add Website (URL)</option>
+                            <option value="bday">Add Birthday</option>
                         </select>
-                        <button class="btn btn-outline btn-sm" onclick="mergeTool.addCustomField()">+ Añadir Campo</button>
+                        <button class="btn btn-outline btn-sm" onclick="mergeTool.addCustomField()">+ Add Field</button>
                     </div>
 
                     <button class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size:1rem" onclick="mergeTool.commit()">
