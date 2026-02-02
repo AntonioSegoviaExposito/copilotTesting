@@ -9,18 +9,17 @@
  * - Application metadata (version, name)
  * - Phone number handling configuration
  * - UI display settings
- * - User-facing messages (Spanish)
+ * - User-facing messages
  * 
  * AI MAINTENANCE NOTES:
  * - Add new constants here instead of hardcoding values
- * - UI messages are in Spanish for the target audience
- * - Phone settings default to Spanish format (+34)
+ * - Phone settings support international formats (default +34)
  * - When adding new settings, follow the existing structure
  */
 
 /**
  * @typedef {Object} PhoneConfig
- * @property {string} defaultCountryCode - Default country code for phone numbers (e.g., '+34' for Spain)
+ * @property {string} defaultCountryCode - Default country code for phone numbers (e.g., '+34' for Spain, '+1' for US)
  * @property {number} minLength - Minimum phone number length (digits only)
  */
 
@@ -51,7 +50,7 @@
  * @property {string} appName - Application display name
  * @property {PhoneConfig} phone - Phone number configuration
  * @property {UIConfig} ui - User interface settings
- * @property {Messages} messages - User-facing messages (Spanish)
+ * @property {Messages} messages - User-facing messages
  */
 
 /**
@@ -63,31 +62,31 @@ const Config = {
     version: '11.1',
     appName: 'VCF Manager',
 
-    // Phone number settings (Spanish format by default)
+    // Phone number settings (configurable for different countries)
     phone: {
-        defaultCountryCode: '+34',  // Spain country code
+        defaultCountryCode: '+34',  // Spain country code (can be configured)
         minLength: 9                 // Minimum digits for valid phone number
     },
 
     // UI display settings
     ui: {
         maxTelsDisplay: 3,          // Show up to 3 phone numbers per card (others collapsed)
-        defaultFileName: 'contactos' // Base filename for exports (timestamp added automatically)
+        defaultFileName: 'contacts' // Base filename for exports (timestamp added automatically)
     },
 
-    // User-facing messages (Spanish for target audience)
+    // User-facing messages
     messages: {
-        emptyList: 'Lista vacia',
-        noData: 'No hay datos',
-        noName: 'Sin Nombre',
-        confirmDelete: (count) => `¿Eliminar ${count} contactos?`,
-        confirmClear: '¿Borrar todo?',
-        emptyAgenda: 'Agenda vacia.',
-        noDuplicates: 'No se encontraron duplicados.',
-        autoMergeComplete: '¡Proceso automatico finalizado!',
-        autoMergeCancelled: 'Auto-Fusion cancelada.',
-        sortAlpha: 'Lista ordenada Alfabeticamente',
-        sortCreation: 'Lista ordenada por Creacion'
+        emptyList: 'Empty list',
+        noData: 'No data',
+        noName: 'No Name',
+        confirmDelete: (count) => `Delete ${count} contacts?`,
+        confirmClear: 'Clear everything?',
+        emptyAgenda: 'Empty agenda.',
+        noDuplicates: 'No duplicates found.',
+        autoMergeComplete: 'Automatic process completed!',
+        autoMergeCancelled: 'Auto-merge cancelled.',
+        sortAlpha: 'List sorted alphabetically',
+        sortCreation: 'List sorted by creation order'
     }
 };
 

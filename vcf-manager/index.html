@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,42 +15,42 @@
 
     <div class="header-group">
         <label class="btn btn-primary btn-file">
-            📂 Importar
+            📂 Import
             <input type="file" id="fileInput" accept=".vcf">
         </label>
-        <button class="btn btn-danger" onclick="core.clearAll()">Vaciar</button>
+        <button class="btn btn-danger" onclick="core.clearAll()">Clear</button>
     </div>
 
     <div class="divider"></div>
 
     <div class="header-group">
-        <button class="btn btn-outline" onclick="core.toggleSort()">🔤 Orden AZ</button>
+        <button class="btn btn-outline" onclick="core.toggleSort()">🔤 Sort A-Z</button>
     </div>
 
     <div class="divider"></div>
 
     <div class="header-group">
-        <div style="font-size:0.7rem; font-weight:bold; color:#94a3b8; margin-right:5px">DUPLICADOS:</div>
-        <button class="btn btn-warning" onclick="autoMerger.start('name')">🅰️ Nombre</button>
-        <button class="btn btn-warning" onclick="autoMerger.start('phone')">📞 Teléfono</button>
+        <div style="font-size:0.7rem; font-weight:bold; color:#94a3b8; margin-right:5px">DUPLICATES:</div>
+        <button class="btn btn-warning" onclick="autoMerger.start('name')">🅰️ Name</button>
+        <button class="btn btn-warning" onclick="autoMerger.start('phone')">📞 Phone</button>
     </div>
 
     <div class="divider"></div>
 
     <div class="header-group">
-        <button class="btn btn-primary" onclick="core.exportVCF()" id="btnExport">Exportar (0)</button>
+        <button class="btn btn-primary" onclick="core.exportVCF()" id="btnExport">Export (0)</button>
     </div>
 
     <div style="margin-left:auto; font-size:0.9rem; font-weight:bold; color:var(--text)" id="statDisplay">
-        0 contactos
+        0 contacts
     </div>
 </header>
 
 <div class="queue-toast" id="queueToast"></div>
 
 <main>
-    <label for="searchInput" class="visually-hidden">Buscar contactos</label>
-    <input type="text" id="searchInput" class="search" placeholder="Buscar..." oninput="core.setFilter(this.value)">
+    <label for="searchInput" class="visually-hidden">Search contacts</label>
+    <input type="text" id="searchInput" class="search" placeholder="Search..." oninput="core.setFilter(this.value)">
     <div id="grid" class="grid"></div>
 </main>
 
@@ -59,7 +59,7 @@
         <span id="selCount" style="color: #60a5fa;">0</span> sel.
     </div>
     <button class="btn btn-primary" style="padding: 0.6rem 1.2rem;" onclick="mergeTool.init()">
-        <span id="fabActionText">FUSIONAR</span>
+        <span id="fabActionText">MERGE</span>
     </button>
     <button class="btn btn-danger" onclick="core.deleteSelected()">🗑️</button>
     <button style="background:none; border:none; color:#94a3b8; font-size:1.5rem; cursor:pointer; margin-left:5px" onclick="core.deselectAll()">×</button>
@@ -69,38 +69,38 @@
 <div class="modal-overlay" id="mergeModal">
     <div class="modal">
         <div class="modal-header">
-            <h3 id="modalTitle" style="margin:0">Configurar Contacto</h3>
-            <button class="btn btn-outline" onclick="mergeTool.close(false)">Cancelar</button>
+            <h3 id="modalTitle" style="margin:0">Configure Contact</h3>
+            <button class="btn btn-outline" onclick="mergeTool.close(false)">Cancel</button>
         </div>
         <div class="modal-body">
             <div class="col-sources">
-                <div style="font-size:0.8rem; font-weight:bold; color:#94a3b8; margin-bottom:1rem; text-transform:uppercase">FUENTES (CLIC PARA HACER MASTER)</div>
+                <div style="font-size:0.8rem; font-weight:bold; color:#94a3b8; margin-bottom:1rem; text-transform:uppercase">SOURCES (CLICK TO SET AS MASTER)</div>
                 <div id="mergeSourcesList"></div>
             </div>
 
             <div class="col-result">
-                <div style="color:var(--success); font-weight:800; font-size:0.9rem; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px">RESULTADO FINAL</div>
+                <div style="color:var(--success); font-weight:800; font-size:0.9rem; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.5px">FINAL RESULT</div>
                 <div id="mergeResultForm"></div>
 
                 <div style="margin-top: auto; padding-top: 1.5rem; border-top:1px solid var(--border)">
                     <!-- Add Field Selector -->
                     <div style="display:flex; gap:5px; margin-bottom:10px;">
-                        <label for="addFieldSelector" class="visually-hidden">Añadir campo</label>
+                        <label for="addFieldSelector" class="visually-hidden">Add field</label>
                         <select id="addFieldSelector" class="input-field" style="font-size:0.8rem;">
-                            <option value="title">Añadir Título (Cargo)</option>
-                            <option value="adr">Añadir Dirección</option>
-                            <option value="note">Añadir Nota</option>
-                            <option value="url">Añadir Web (URL)</option>
-                            <option value="bday">Añadir Cumpleaños</option>
+                            <option value="title">Add Title (Job)</option>
+                            <option value="adr">Add Address</option>
+                            <option value="note">Add Note</option>
+                            <option value="url">Add Website (URL)</option>
+                            <option value="bday">Add Birthday</option>
                         </select>
                         <button class="btn btn-outline btn-sm" onclick="mergeTool.addCustomField()">+</button>
                     </div>
 
                     <button class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size:1rem" onclick="mergeTool.commit()">
-                        ✅ CONFIRMAR CAMBIOS
+                        ✅ CONFIRM CHANGES
                     </button>
                     <div id="autoMergeHint" style="text-align:center; font-size:0.75rem; color:#d97706; margin-top:5px; display:none">
-                        Siguiente grupo se abrirá automáticamente...
+                        Next group will open automatically...
                     </div>
                 </div>
             </div>

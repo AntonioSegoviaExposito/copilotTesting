@@ -216,7 +216,7 @@ describe('MergeTool', () => {
             expect(document.getElementById('mergeModal').style.display).toBe('flex');
         });
 
-        test('should set modal title for fusion', () => {
+        test('should set modal title for merge', () => {
             mergeTool.renderUI();
             expect(document.getElementById('modalTitle').innerText).toContain('2');
         });
@@ -224,7 +224,7 @@ describe('MergeTool', () => {
         test('should set modal title for single edit', () => {
             mergeTool.buildPending(['id1']);
             mergeTool.renderUI();
-            expect(document.getElementById('modalTitle').innerText).toContain('Edicion');
+            expect(document.getElementById('modalTitle').innerText).toContain('Edit');
         });
 
         test('should render source items', () => {

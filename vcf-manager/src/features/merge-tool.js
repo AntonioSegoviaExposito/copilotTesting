@@ -259,9 +259,9 @@ class MergeTool {
      * 4. Render editable result form
      * 
      * TITLE LOGIC:
-     * - Single contact (no slaves): "Edicion" (Edit mode)
-     * - Multiple contacts: "Fusion (N)" where N = total count
-     * - Example: "Fusion (3)" for 1 master + 2 slaves
+     * - Single contact (no slaves): "Edit" (Edit mode)
+     * - Multiple contacts: "Merge (N)" where N = total count
+     * - Example: "Merge (3)" for 1 master + 2 slaves
      * 
      * TWO-PANEL LAYOUT:
      * - Left panel (#mergeSourcesList): Shows master/slave contacts
@@ -271,7 +271,7 @@ class MergeTool {
      * 
      * @example
      * // After buildPending() with 3 contacts:
-     * // Modal shows "Fusion (3)"
+     * // Modal shows "Merge (3)"
      * // Left: MASTER + 2 SLAVE cards
      * // Right: Editable form with combined data
      */
@@ -287,7 +287,7 @@ class MergeTool {
         const title = document.getElementById('modalTitle');
         if (title) {
             // Single contact = edit mode, multiple = merge mode
-            title.innerText = slavesCount > 0 ? `Fusion (${slavesCount + 1})` : "Edicion";
+            title.innerText = slavesCount > 0 ? `Merge (${slavesCount + 1})` : "Edit";
         }
 
         // Render both panels
@@ -689,7 +689,7 @@ class MergeTool {
      * @returns {void}
      * 
      * @example
-     * // User clicks "Fusionar" button:
+     * // User clicks "Merge" button:
      * mergeTool.commit();           // Calls close(true) internally
      * 
      * // User clicks "Cancel" button:
