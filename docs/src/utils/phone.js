@@ -102,7 +102,5 @@ const PhoneUtils = {
     }
 };
 
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PhoneUtils;
-}
+// Export for module usage (ESM)
+export default PhoneUtils;

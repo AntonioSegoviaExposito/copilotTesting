@@ -238,7 +238,7 @@ class MergeTool {
                 fn: masterContact.fn, // Name always comes from master
                 tels: Array.from(combinedTels), // Combined and deduplicated
                 emails: Array.from(combinedEmails), // Combined and deduplicated
-                org: masterContact.org || slaves.find(s => s.org)?.org || '', // Fallback chain
+                org: masterContact.org || slaves.find(s => s.org)?.org || undefined, // Optional field
                 title: masterContact.title || slaves.find(s => s.title)?.title || undefined,
                 adr: masterContact.adr || slaves.find(s => s.adr)?.adr || undefined,
                 note: masterContact.note || slaves.find(s => s.note)?.note || undefined,
@@ -444,8 +444,8 @@ class MergeTool {
             
             <div class="input-group">
                 <div class="input-header">
-                    <span class="input-label">Telefonos (${data.tels.length})</span>
-                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('tels')">+ Anadir</button>
+                    <span class="input-label">Teléfonos (${data.tels.length})</span>
+                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('tels')">+ Añadir</button>
                 </div>
                 ${data.tels.map((tel, i) => `
                     <div class="item-row">
@@ -459,7 +459,7 @@ class MergeTool {
             <div class="input-group">
                 <div class="input-header">
                     <span class="input-label">Emails (${data.emails.length})</span>
-                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('emails')">+ Anadir</button>
+                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('emails')">+ Añadir</button>
                 </div>
                 ${data.emails.map((email, i) => `
                     <div class="item-row">
@@ -469,25 +469,31 @@ class MergeTool {
                     </div>
                 `).join('')}
             </div>
+        `;
 
+        // === OPTIONAL FIELDS ===
+        // Only show if at least one source contact has value or user added it
+        // This prevents clutter from unused fields
+        
+        // Organization field with datalist for autocomplete
+        if (data.org !== undefined) {
+            html += `
             <div class="input-group">
-                <div class="input-header"><span class="input-label">Organizacion</span></div>
+                <div class="input-header"><span class="input-label">Organización</span></div>
                 <input class="input-field" list="orgList" value="${data.org || ''}" 
                     oninput="mergeTool.pending.data.org = this.value" 
-                    placeholder="Selecciona o escribe una organizacion...">
+                    placeholder="Selecciona o escribe una organización...">
                 <datalist id="orgList">
                     ${existingOrgs.map(org => `<option value="${org}">`).join('')}
                 </datalist>
             </div>
-        `;
-
-        // === OPTIONAL FIELDS ===
-        // Only show if at least one source contact has value
-        // This prevents clutter from unused fields
-        if (data.title !== undefined) html += textInput('Cargo / Titulo', 'title', data.title);
-        if (data.adr !== undefined) html += textInput('Direccion', 'adr', data.adr);
+            `;
+        }
+        
+        if (data.title !== undefined) html += textInput('Cargo / Título', 'title', data.title);
+        if (data.adr !== undefined) html += textInput('Dirección', 'adr', data.adr);
         if (data.url !== undefined) html += textInput('Sitio Web', 'url', data.url);
-        if (data.bday !== undefined) html += textInput('Cumpleanos (YYYY-MM-DD)', 'bday', data.bday);
+        if (data.bday !== undefined) html += textInput('Cumpleaños (YYYY-MM-DD)', 'bday', data.bday);
         if (data.note !== undefined) html += textInput('Notas', 'note', data.note);
 
         // Inject HTML into container

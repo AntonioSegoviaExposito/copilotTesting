@@ -18,6 +18,7 @@
             📂 Import
             <input type="file" id="fileInput" accept=".vcf">
         </label>
+        <button class="btn btn-success" onclick="core.addNewContact()">➕ Add Contact</button>
         <button class="btn btn-danger" onclick="core.clearAll()">Clear</button>
     </div>
 
@@ -30,9 +31,9 @@
     <div class="divider"></div>
 
     <div class="header-group">
-        <div style="font-size:0.7rem; font-weight:bold; color:#94a3b8; margin-right:5px">DUPLICATES:</div>
-        <button class="btn btn-warning" onclick="autoMerger.start('name')">🅰️ Name</button>
-        <button class="btn btn-warning" onclick="autoMerger.start('phone')">📞 Phone</button>
+        <div style="font-size:0.7rem; font-weight:bold; color:#94a3b8; margin-right:5px">Buscar por duplicados y fusionar:</div>
+        <button class="btn btn-warning" onclick="autoMerger.start('name')">🅰️ Por Nombre</button>
+        <button class="btn btn-warning" onclick="autoMerger.start('phone')">📞 Por Teléfono</button>
     </div>
 
     <div class="divider"></div>
@@ -70,7 +71,10 @@
     <div class="modal">
         <div class="modal-header">
             <h3 id="modalTitle" style="margin:0">Configure Contact</h3>
-            <button class="btn btn-outline" onclick="mergeTool.close(false)">Cancel</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-outline" id="cloneButton" onclick="mergeTool.cloneContact()" style="display:none">📋 Clone</button>
+                <button class="btn btn-outline" onclick="mergeTool.close(false)">Cancel</button>
+            </div>
         </div>
         <div class="modal-body">
             <div class="col-sources">
@@ -87,13 +91,14 @@
                     <div style="display:flex; gap:5px; margin-bottom:10px;">
                         <label for="addFieldSelector" class="visually-hidden">Add field</label>
                         <select id="addFieldSelector" class="input-field" style="font-size:0.8rem;">
-                            <option value="title">Add Title (Job)</option>
-                            <option value="adr">Add Address</option>
-                            <option value="note">Add Note</option>
-                            <option value="url">Add Website (URL)</option>
-                            <option value="bday">Add Birthday</option>
+                            <option value="org">Añadir Organización</option>
+                            <option value="title">Añadir Cargo / Título</option>
+                            <option value="adr">Añadir Dirección</option>
+                            <option value="note">Añadir Notas</option>
+                            <option value="url">Añadir Sitio Web (URL)</option>
+                            <option value="bday">Añadir Cumpleaños</option>
                         </select>
-                        <button class="btn btn-outline btn-sm" onclick="mergeTool.addCustomField()">+</button>
+                        <button class="btn btn-outline btn-sm" onclick="mergeTool.addCustomField()">+ Añadir Campo</button>
                     </div>
 
                     <button class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size:1rem" onclick="mergeTool.commit()">
@@ -107,13 +112,6 @@
         </div>
     </div>
 </div>
-
-<!-- Footer with links to reports -->
-<footer style="position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); border-top: 1px solid var(--border); padding: 8px 16px; display: flex; gap: 16px; justify-content: center; font-size: 0.85rem; z-index: 100;">
-    <a href="test-report/index.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">📊 Test Report</a>
-    <span style="color: var(--border)">|</span>
-    <a href="coverage/index.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">📈 Coverage Report</a>
-</footer>
 
 <!-- JavaScript Modules -->
 <!-- Load order matters: config -> utils -> core -> features -> app -->

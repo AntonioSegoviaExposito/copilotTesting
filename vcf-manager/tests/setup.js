@@ -23,8 +23,12 @@ document.body.innerHTML = `
         <button id="cloneButton" style="display:none"></button>
     </div>
     <select id="addFieldSelector">
-        <option value="title">Title</option>
-        <option value="adr">Address</option>
+        <option value="org">Añadir Organización</option>
+        <option value="title">Añadir Cargo / Título</option>
+        <option value="adr">Añadir Dirección</option>
+        <option value="note">Añadir Notas</option>
+        <option value="url">Añadir Sitio Web (URL)</option>
+        <option value="bday">Añadir Cumpleaños</option>
     </select>
 `;
 

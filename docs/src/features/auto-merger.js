@@ -387,7 +387,5 @@ class AutoMerger {
     }
 }
 
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = AutoMerger;
-}
+// Export for module usage (ESM)
+export default AutoMerger;

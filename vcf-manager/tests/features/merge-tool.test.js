@@ -450,7 +450,7 @@ describe('MergeTool', () => {
 
         test('should render phone inputs', () => {
             const form = document.getElementById('mergeResultForm');
-            expect(form.innerHTML).toContain('Telefonos');
+            expect(form.innerHTML).toContain('Teléfonos');
         });
 
         test('should render email inputs', () => {
@@ -458,18 +458,18 @@ describe('MergeTool', () => {
             expect(form.innerHTML).toContain('Emails');
         });
 
-        test('should render org input', () => {
+        test('should render org input when org exists', () => {
             const form = document.getElementById('mergeResultForm');
-            expect(form.innerHTML).toContain('Organizacion');
+            expect(form.innerHTML).toContain('Organización');
         });
 
         test('should render optional fields when present', () => {
             const form = document.getElementById('mergeResultForm');
             expect(form.innerHTML).toContain('Cargo');
-            expect(form.innerHTML).toContain('Direccion');
+            expect(form.innerHTML).toContain('Dirección');
             expect(form.innerHTML).toContain('Notas');
             expect(form.innerHTML).toContain('Sitio Web');
-            expect(form.innerHTML).toContain('Cumpleanos');
+            expect(form.innerHTML).toContain('Cumpleaños');
         });
 
         test('should not render optional fields when undefined', () => {
@@ -481,7 +481,9 @@ describe('MergeTool', () => {
 
             const form = document.getElementById('mergeResultForm');
             expect(form.innerHTML).not.toContain('Cargo');
-            expect(form.innerHTML).not.toContain('Direccion');
+            expect(form.innerHTML).not.toContain('Dirección');
+            // Org should also not be present when empty
+            expect(form.innerHTML).not.toContain('Organización');
         });
 
         test('should render organization field with datalist', () => {
@@ -613,6 +615,75 @@ describe('MergeTool', () => {
             
             const cloneBtn = document.getElementById('cloneButton');
             expect(cloneBtn.style.display).toBe('none');
+        });
+    });
+
+    describe('addCustomField - Organization', () => {
+        beforeEach(() => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' }
+            ];
+            core.selectOrder = ['id1'];
+            mergeTool.init();
+        });
+
+        test('should add org field when selected from dropdown', () => {
+            // Org should be undefined initially (empty string becomes undefined)
+            expect(mergeTool.pending.data.org).toBeUndefined();
+            
+            document.getElementById('addFieldSelector').value = 'org';
+            mergeTool.addCustomField();
+            
+            expect(mergeTool.pending.data.org).toBeDefined();
+        });
+
+        test('should render org field after adding via dropdown', () => {
+            document.getElementById('addFieldSelector').value = 'org';
+            mergeTool.addCustomField();
+            
+            const form = document.getElementById('mergeResultForm');
+            expect(form.innerHTML).toContain('Organización');
+            expect(form.innerHTML).toContain('orgList'); // datalist for autocomplete
+        });
+
+        test('should not overwrite existing org field', () => {
+            mergeTool.pending.data.org = 'Existing Company';
+            document.getElementById('addFieldSelector').value = 'org';
+            mergeTool.addCustomField();
+            expect(mergeTool.pending.data.org).toBe('Existing Company');
+        });
+    });
+
+    describe('Optional Fields Behavior', () => {
+        test('should treat org as optional field like title, adr, etc.', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' }
+            ];
+            mergeTool.buildPending(['id1']);
+            
+            // org should be undefined when empty (not empty string)
+            expect(mergeTool.pending.data.org).toBeUndefined();
+            expect(mergeTool.pending.data.title).toBeUndefined();
+            expect(mergeTool.pending.data.adr).toBeUndefined();
+        });
+
+        test('should preserve org when contact has value', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: 'MyCompany' }
+            ];
+            mergeTool.buildPending(['id1']);
+            
+            expect(mergeTool.pending.data.org).toBe('MyCompany');
+        });
+
+        test('should fallback to slave org when master has none', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' },
+                { _id: 'id2', fn: 'John Copy', tels: [], emails: [], org: 'SlaveCompany' }
+            ];
+            mergeTool.buildPending(['id1', 'id2']);
+            
+            expect(mergeTool.pending.data.org).toBe('SlaveCompany');
         });
     });
 });

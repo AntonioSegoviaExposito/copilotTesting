@@ -238,7 +238,7 @@ class MergeTool {
                 fn: masterContact.fn, // Name always comes from master
                 tels: Array.from(combinedTels), // Combined and deduplicated
                 emails: Array.from(combinedEmails), // Combined and deduplicated
-                org: masterContact.org || slaves.find(s => s.org)?.org || '', // Fallback chain
+                org: masterContact.org || slaves.find(s => s.org)?.org || undefined, // Optional field
                 title: masterContact.title || slaves.find(s => s.title)?.title || undefined,
                 adr: masterContact.adr || slaves.find(s => s.adr)?.adr || undefined,
                 note: masterContact.note || slaves.find(s => s.note)?.note || undefined,
@@ -288,6 +288,12 @@ class MergeTool {
         if (title) {
             // Single contact = edit mode, multiple = merge mode
             title.innerText = slavesCount > 0 ? `Merge (${slavesCount + 1})` : "Edit";
+        }
+
+        // Show/hide clone button (only for single contact edit mode)
+        const cloneBtn = document.getElementById('cloneButton');
+        if (cloneBtn) {
+            cloneBtn.style.display = slavesCount === 0 ? 'block' : 'none';
         }
 
         // Render both panels
@@ -426,14 +432,20 @@ class MergeTool {
             </div>
         `;
 
+        // Get unique organizations from all contacts for dropdown
+        const existingOrgs = [...new Set(core.contacts
+            .map(c => c.org)
+            .filter(org => org && org.trim().length > 0)
+        )].sort();
+
         // === BUILD FORM HTML ===
         let html = `
             ${textInput('Nombre Completo', 'fn', data.fn)}
             
             <div class="input-group">
                 <div class="input-header">
-                    <span class="input-label">Telefonos (${data.tels.length})</span>
-                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('tels')">+ Anadir</button>
+                    <span class="input-label">Teléfonos (${data.tels.length})</span>
+                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('tels')">+ Añadir</button>
                 </div>
                 ${data.tels.map((tel, i) => `
                     <div class="item-row">
@@ -447,7 +459,7 @@ class MergeTool {
             <div class="input-group">
                 <div class="input-header">
                     <span class="input-label">Emails (${data.emails.length})</span>
-                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('emails')">+ Anadir</button>
+                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('emails')">+ Añadir</button>
                 </div>
                 ${data.emails.map((email, i) => `
                     <div class="item-row">
@@ -457,17 +469,31 @@ class MergeTool {
                     </div>
                 `).join('')}
             </div>
-
-            ${textInput('Organizacion', 'org', data.org || '')}
         `;
 
         // === OPTIONAL FIELDS ===
-        // Only show if at least one source contact has value
+        // Only show if at least one source contact has value or user added it
         // This prevents clutter from unused fields
-        if (data.title !== undefined) html += textInput('Cargo / Titulo', 'title', data.title);
-        if (data.adr !== undefined) html += textInput('Direccion', 'adr', data.adr);
+        
+        // Organization field with datalist for autocomplete
+        if (data.org !== undefined) {
+            html += `
+            <div class="input-group">
+                <div class="input-header"><span class="input-label">Organización</span></div>
+                <input class="input-field" list="orgList" value="${data.org || ''}" 
+                    oninput="mergeTool.pending.data.org = this.value" 
+                    placeholder="Selecciona o escribe una organización...">
+                <datalist id="orgList">
+                    ${existingOrgs.map(org => `<option value="${org}">`).join('')}
+                </datalist>
+            </div>
+            `;
+        }
+        
+        if (data.title !== undefined) html += textInput('Cargo / Título', 'title', data.title);
+        if (data.adr !== undefined) html += textInput('Dirección', 'adr', data.adr);
         if (data.url !== undefined) html += textInput('Sitio Web', 'url', data.url);
-        if (data.bday !== undefined) html += textInput('Cumpleanos (YYYY-MM-DD)', 'bday', data.bday);
+        if (data.bday !== undefined) html += textInput('Cumpleaños (YYYY-MM-DD)', 'bday', data.bday);
         if (data.note !== undefined) html += textInput('Notas', 'note', data.note);
 
         // Inject HTML into container
@@ -709,9 +735,66 @@ class MergeTool {
             autoMerger.cancel();
         }
     }
+
+    /**
+     * Clone the current contact being edited
+     * 
+     * CLONE WORKFLOW:
+     * 1. Validate that we're in edit mode (single contact)
+     * 2. Create a copy of the current pending data
+     * 3. Generate new unique ID for the clone
+     * 4. Add cloned contact to contacts array
+     * 5. Close modal and select the new clone
+     * 6. Show success message
+     * 
+     * USE CASE:
+     * - User wants to create a similar contact (e.g., family member, colleague)
+     * - Saves time by copying all fields and then editing
+     * 
+     * CALLED BY:
+     * - User clicking "Clone" button in edit mode
+     * 
+     * @returns {void}
+     * 
+     * @example
+     * // User edits contact, clicks "Clone"
+     * // New contact created with same data but different ID
+     * // User can then edit the clone separately
+     */
+    cloneContact() {
+        // Validate we're in edit mode (single contact)
+        if (!this.pending || this.pending.originalObjects.length > 1) return;
+
+        // Generate unique ID for clone
+        const cloneId = 'clone_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+
+        // Create cloned contact with current pending data
+        const clonedContact = {
+            _id: cloneId,
+            fn: this.pending.data.fn + ' (Copia)',
+            tels: [...this.pending.data.tels.filter(t => t.length > 0)],
+            emails: [...this.pending.data.emails.filter(e => e.length > 0)],
+            org: this.pending.data.org,
+            title: this.pending.data.title,
+            adr: this.pending.data.adr,
+            url: this.pending.data.url,
+            bday: this.pending.data.bday,
+            note: this.pending.data.note
+        };
+
+        // Add cloned contact to beginning of contacts array
+        core.contacts.unshift(clonedContact);
+
+        // Close modal
+        this.close(true);
+
+        // Deselect all and render
+        core.deselectAll();
+
+        // Show success message
+        alert('Contacto clonado correctamente');
+    }
 }
 
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = MergeTool;
-}
+// Export for module usage (ESM)
+export default MergeTool;

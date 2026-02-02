@@ -558,9 +558,53 @@ class ContactManager {
     findById(id) {
         return this.contacts.find(c => c._id === id);
     }
+
+    /**
+     * Add a new empty contact
+     * 
+     * Creates a new empty contact with minimal required fields and opens
+     * the merge tool in edit mode for the user to fill in the details.
+     * 
+     * WORKFLOW:
+     * 1. Generate unique ID for new contact
+     * 2. Create contact with empty/minimal fields
+     * 3. Add to beginning of contacts array (most recent)
+     * 4. Select the new contact
+     * 5. Open merge tool in edit mode
+     * 
+     * @returns {void}
+     * 
+     * @example
+     * // Called from "Add Contact" button
+     * <button onclick="core.addNewContact()">Add Contact</button>
+     */
+    addNewContact() {
+        // Generate unique ID
+        const newId = 'new_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+        
+        // Create new empty contact
+        const newContact = {
+            _id: newId,
+            fn: '',
+            tels: [],
+            emails: [],
+            org: ''
+        };
+        
+        // Add to beginning of contacts array
+        this.contacts.unshift(newContact);
+        
+        // Select the new contact and open edit mode
+        this.deselectAll();
+        this.toggleSelect(newId);
+        
+        // Open merge tool in edit mode
+        mergeTool.init();
+        
+        // Re-render to update UI
+        this.render();
+    }
 }
 
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = ContactManager;
-}
+// Export for module usage (ESM)
+export default ContactManager;
