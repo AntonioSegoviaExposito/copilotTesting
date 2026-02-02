@@ -19,6 +19,7 @@ document.body.innerHTML = `
         <div id="modalTitle"></div>
         <div id="mergeSourcesList"></div>
         <div id="mergeResultForm"></div>
+        <button id="cloneButton" style="display:none"></button>
     </div>
     <select id="addFieldSelector">
         <option value="title">Title</option>

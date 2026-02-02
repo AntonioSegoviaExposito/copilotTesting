@@ -483,5 +483,136 @@ describe('MergeTool', () => {
             expect(form.innerHTML).not.toContain('Cargo');
             expect(form.innerHTML).not.toContain('Direccion');
         });
+
+        test('should render organization field with datalist', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: 'Company A' },
+                { _id: 'id2', fn: 'Jane', tels: [], emails: [], org: 'Company B' }
+            ];
+            mergeTool.buildPending(['id1']);
+            mergeTool.renderResultForm();
+
+            const form = document.getElementById('mergeResultForm');
+            expect(form.innerHTML).toContain('orgList');
+            expect(form.innerHTML).toContain('Company A');
+            expect(form.innerHTML).toContain('Company B');
+        });
+
+        test('should deduplicate organizations in datalist', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: 'Company A' },
+                { _id: 'id2', fn: 'Jane', tels: [], emails: [], org: 'Company A' },
+                { _id: 'id3', fn: 'Bob', tels: [], emails: [], org: 'Company B' }
+            ];
+            mergeTool.buildPending(['id1']);
+            mergeTool.renderResultForm();
+
+            const form = document.getElementById('mergeResultForm');
+            // Count occurrences in datalist options only
+            const datalistMatches = form.innerHTML.match(/<option value="Company A">/g);
+            expect(datalistMatches.length).toBe(1); // Should appear only once in datalist
+        });
+    });
+
+    describe('cloneContact', () => {
+        beforeEach(() => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John Doe', tels: ['+34612345678'], emails: ['john@test.com'], org: 'Company A' }
+            ];
+            core.selectOrder = ['id1'];
+            mergeTool.init();
+        });
+
+        test('should create a cloned contact', () => {
+            const initialCount = core.contacts.length;
+            mergeTool.cloneContact();
+            expect(core.contacts.length).toBe(initialCount + 1);
+        });
+
+        test('should add clone with unique ID', () => {
+            mergeTool.cloneContact();
+            const clone = core.contacts[0];
+            
+            expect(clone._id).not.toBe('id1');
+            expect(clone._id).toMatch(/^clone_/);
+        });
+
+        test('should copy all contact data', () => {
+            mergeTool.cloneContact();
+            const clone = core.contacts[0];
+            
+            expect(clone.fn).toContain('John Doe');
+            expect(clone.tels).toContain('+34612345678');
+            expect(clone.emails).toContain('john@test.com');
+            expect(clone.org).toBe('Company A');
+        });
+
+        test('should add "(Copia)" to cloned name', () => {
+            mergeTool.cloneContact();
+            const clone = core.contacts[0];
+            
+            expect(clone.fn).toContain('(Copia)');
+        });
+
+        test('should close modal after cloning', () => {
+            mergeTool.cloneContact();
+            expect(document.getElementById('mergeModal').style.display).toBe('none');
+        });
+
+        test('should show success alert', () => {
+            mergeTool.cloneContact();
+            expect(alert).toHaveBeenCalledWith('Contacto clonado correctamente');
+        });
+
+        test('should not clone when multiple contacts selected', () => {
+            core.contacts.push({ _id: 'id2', fn: 'Jane', tels: [], emails: [], org: '' });
+            mergeTool.buildPending(['id1', 'id2']);
+            
+            const initialCount = core.contacts.length;
+            mergeTool.cloneContact();
+            
+            expect(core.contacts.length).toBe(initialCount);
+        });
+
+        test('should filter empty phone numbers when cloning', () => {
+            mergeTool.pending.data.tels = ['+34612345678', '', '+34698765432', ''];
+            mergeTool.cloneContact();
+            
+            const clone = core.contacts[0];
+            expect(clone.tels).toEqual(['+34612345678', '+34698765432']);
+        });
+
+        test('should filter empty emails when cloning', () => {
+            mergeTool.pending.data.emails = ['john@test.com', '', 'jane@test.com', ''];
+            mergeTool.cloneContact();
+            
+            const clone = core.contacts[0];
+            expect(clone.emails).toEqual(['john@test.com', 'jane@test.com']);
+        });
+    });
+
+    describe('renderUI - Clone Button', () => {
+        test('should show clone button for single contact', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' }
+            ];
+            mergeTool.buildPending(['id1']);
+            mergeTool.renderUI();
+            
+            const cloneBtn = document.getElementById('cloneButton');
+            expect(cloneBtn.style.display).toBe('block');
+        });
+
+        test('should hide clone button for multiple contacts', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' },
+                { _id: 'id2', fn: 'Jane', tels: [], emails: [], org: '' }
+            ];
+            mergeTool.buildPending(['id1', 'id2']);
+            mergeTool.renderUI();
+            
+            const cloneBtn = document.getElementById('cloneButton');
+            expect(cloneBtn.style.display).toBe('none');
+        });
     });
 });
