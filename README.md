@@ -6,7 +6,9 @@ A modern, modular contact management application for VCF (vCard) files with dupl
 
 **🌐 Live Demo**: [https://antoniosegoviaexposito.github.io/copilotTesting/](https://antoniosegoviaexposito.github.io/copilotTesting/)
 
-**📊 Code Coverage**: [https://antoniosegoviaexposito.github.io/copilotTesting/coverage/](https://antoniosegoviaexposito.github.io/copilotTesting/coverage/)
+**📊 Test Reports**: [https://antoniosegoviaexposito.github.io/copilotTesting/reports.html](https://antoniosegoviaexposito.github.io/copilotTesting/reports.html)
+
+**📈 Code Coverage**: [https://antoniosegoviaexposito.github.io/copilotTesting/coverage/](https://antoniosegoviaexposito.github.io/copilotTesting/coverage/)
 
 ## 📖 Features
 
@@ -38,8 +40,9 @@ This project follows standard JavaScript best practices:
 
 - **Vanilla JavaScript (ES6+)** - No framework dependencies
 - **Modular Design** - Clear separation of concerns (core, features, utilities)
-- **Comprehensive Testing** - Jest with 152+ passing tests
+- **Comprehensive Testing** - Jest with 197 passing tests and 97.98% coverage
 - **Clean Code** - JSDoc comments, consistent naming, clear structure
+- **Modern Test Reporting** - Beautiful, minimalist test and coverage reports
 
 ### Project Structure
 
@@ -47,7 +50,7 @@ This project follows standard JavaScript best practices:
 vcf-manager/
 ├── index.html           # Application entry point
 ├── package.json         # NPM dependencies and scripts
-├── jest.config.js       # Test configuration
+├── jest.config.js       # Test configuration with modern reporters
 ├── css/
 │   └── styles.css       # Application styles
 ├── src/
@@ -63,8 +66,17 @@ vcf-manager/
 │       └── phone.js       # Phone number handling
 └── tests/              # Test suites
     ├── core/          # Core module tests
+    │   ├── contacts.test.js
+    │   ├── contacts-init.test.js
+    │   ├── vcf-parser.test.js
+    │   └── vcf-parser-edge-cases.test.js
     ├── features/      # Feature tests
-    └── utils/         # Utility tests
+    │   ├── auto-merger.test.js
+    │   └── merge-tool.test.js
+    ├── utils/         # Utility tests
+    │   ├── phone.test.js
+    │   └── phone-edge-cases.test.js
+    └── integration.test.js  # Integration tests
 ```
 
 ## 🧪 Testing
@@ -75,16 +87,53 @@ npm run test:watch        # Watch mode for development
 npm run test:coverage     # Generate coverage report
 ```
 
-All features include comprehensive unit and integration tests.
+### Test Suite Statistics
+
+- **Total Tests**: 197 tests passing
+- **Test Suites**: 9 test suites
+- **Code Coverage**: 97.98% overall
+  - Statements: 97.98%
+  - Branches: 87.43%
+  - Functions: 98.98%
+  - Lines: 99.66%
+
+### Modern Test Reporting
+
+This project uses modern, minimalist test reporting tools:
+
+- **jest-html-reporters** - Beautiful, interactive HTML test reports
+- **Istanbul/NYC** - Comprehensive code coverage analysis
+- **Modern UI** - Clean, dark-themed reports with excellent readability
+
+View the reports online:
+- [Test Report](https://antoniosegoviaexposito.github.io/copilotTesting/test-report/)
+- [Coverage Report](https://antoniosegoviaexposito.github.io/copilotTesting/coverage/)
+- [Reports Dashboard](https://antoniosegoviaexposito.github.io/copilotTesting/reports.html)
+
+### Test Categories
+
+1. **Unit Tests** - Individual module functionality
+   - Phone utilities with edge cases (26 tests)
+   - VCF parser with edge cases (28 tests)
+   - Contact manager (88 tests)
+   - Auto-merger (36 tests)
+   - Merge tool (17 tests)
+
+2. **Integration Tests** - Complete workflows (14 tests)
+   - Import/export cycles
+   - Merge workflows
+   - Auto-merge operations
+   - Filter and selection
 
 ### Continuous Integration
 
 This project uses GitHub Actions for automated testing and deployment:
 - Tests run automatically on all pull requests
 - Tests run on push to main branch
-- Coverage reports are generated and available as artifacts
+- Test reports are generated and published to GitHub Pages
 - **GitHub Pages**: Automatically deployed from `/docs` directory on push to main
-- **Coverage Reports**: Test coverage is published to `/coverage` path on GitHub Pages
+- **Test Reports**: Modern test results published to `/test-report` path
+- **Coverage Reports**: Test coverage published to `/coverage` path
 
 See [.github/workflows/README.md](.github/workflows/README.md) for more details.
 
@@ -108,9 +157,10 @@ Configuration options are centralized in `src/config.js`:
 
 - JSDoc documentation for all functions and classes
 - Consistent code style and naming conventions
-- High test coverage (152+ tests)
+- High test coverage (197 tests, 97.98% coverage)
 - Modular architecture with clear dependencies
 - No external runtime dependencies (testing only)
+- Modern, minimalist test reporting
 
 ## 📝 Version
 
