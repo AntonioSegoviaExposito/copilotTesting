@@ -15,12 +15,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Test job - runs tests and generates reports
+  test:
     runs-on: ubuntu-latest
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -42,11 +39,47 @@ jobs:
         cd vcf-manager
         npm run test:coverage
         
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: vcf-manager/coverage/
+        
+    - name: Upload test report
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-report
+        path: vcf-manager/test-report/
+  
+  # Deploy job - deploys docs with test reports
+  deploy:
+    needs: test
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download coverage report
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-report
+        path: ./coverage-temp
+        
+    - name: Download test report
+      uses: actions/download-artifact@v4
+      with:
+        name: test-report
+        path: ./test-report-temp
+        
     - name: Copy reports to docs
       run: |
         mkdir -p docs/coverage docs/test-report
-        cp -r vcf-manager/coverage/* docs/coverage/
-        cp -r vcf-manager/test-report/* docs/test-report/
+        cp -r ./coverage-temp/* docs/coverage/ || echo "No coverage files to copy"
+        cp -r ./test-report-temp/* docs/test-report/ || echo "No test report files to copy"
       
     - name: Setup Pages
       uses: actions/configure-pages@v5
