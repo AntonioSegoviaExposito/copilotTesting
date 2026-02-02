@@ -1,0 +1,24 @@
+{
+  "name": "vcf-manager",
+  "version": "11.1.0",
+  "description": "A clean, single-page application for managing VCF (vCard) contact files.",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "vcf",
+    "vcard",
+    "contacts",
+    "merge",
+    "duplicate"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}
