@@ -2,8 +2,9 @@
 node_modules/
 package-lock.json
 
-# Test coverage
+# Test coverage and reports
 coverage/
+test-report/
 
 # IDE
 .idea/

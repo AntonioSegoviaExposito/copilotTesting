@@ -3,9 +3,6 @@
  * Configures DOM environment and global mocks
  */
 
-const fs = require('fs');
-const path = require('path');
-
 // Mock DOM elements required by the application
 document.body.innerHTML = `
     <input type="file" id="fileInput" accept=".vcf">
@@ -58,39 +55,16 @@ global.createMockVCFFile = (content) => {
     return file;
 };
 
-// Load all source modules in correct order
-const srcPath = path.join(__dirname, '../src');
-
-const configCode = fs.readFileSync(path.join(srcPath, 'config.js'), 'utf8');
-const phoneCode = fs.readFileSync(path.join(srcPath, 'utils/phone.js'), 'utf8');
-const vcfParserCode = fs.readFileSync(path.join(srcPath, 'core/vcf-parser.js'), 'utf8');
-const contactsCode = fs.readFileSync(path.join(srcPath, 'core/contacts.js'), 'utf8');
-const autoMergerCode = fs.readFileSync(path.join(srcPath, 'features/auto-merger.js'), 'utf8');
-const mergeToolCode = fs.readFileSync(path.join(srcPath, 'features/merge-tool.js'), 'utf8');
-
-// Combine and execute code
-const combinedCode = `
-    ${configCode}
-    ${phoneCode}
-    ${vcfParserCode}
-    ${contactsCode}
-    ${autoMergerCode}
-    ${mergeToolCode}
-    return { Config, PhoneUtils, VCFParser, ContactManager, AutoMerger, MergeTool };
-`;
-
-const modules = new Function(combinedCode)();
-
-// Export to global scope
-global.Config = modules.Config;
-global.PhoneUtils = modules.PhoneUtils;
-global.VCFParser = modules.VCFParser;
-global.ContactManager = modules.ContactManager;
-global.AutoMerger = modules.AutoMerger;
-global.MergeTool = modules.MergeTool;
+// Import modules using require (proper CommonJS imports for Jest coverage)
+global.Config = require('../src/config.js');
+global.PhoneUtils = require('../src/utils/phone.js');
+global.VCFParser = require('../src/core/vcf-parser.js');
+global.ContactManager = require('../src/core/contacts.js');
+global.AutoMerger = require('../src/features/auto-merger.js');
+global.MergeTool = require('../src/features/merge-tool.js');
 
 // Also export CoreSystem alias for backward compatibility with existing tests
-global.CoreSystem = modules.ContactManager;
+global.CoreSystem = global.ContactManager;
 
 // Create global instances like app.js does
 global.core = new global.ContactManager();
