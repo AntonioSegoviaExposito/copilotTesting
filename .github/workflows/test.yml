@@ -26,12 +26,7 @@ jobs:
         cd vcf-manager
         npm ci
         
-    - name: Run tests
-      run: |
-        cd vcf-manager
-        npm test
-        
-    - name: Generate coverage report
+    - name: Run tests with coverage
       run: |
         cd vcf-manager
         npm run test:coverage
