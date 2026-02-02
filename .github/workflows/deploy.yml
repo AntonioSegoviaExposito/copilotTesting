@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -25,13 +25,35 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: vcf-manager/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd vcf-manager
+        npm ci
+        
+    - name: Run tests with coverage
+      run: |
+        cd vcf-manager
+        npm run test:coverage
+        
+    - name: Copy coverage to docs
+      run: |
+        mkdir -p docs/coverage
+        cp -r vcf-manager/coverage/* docs/coverage/
+      
     - name: Setup Pages
       uses: actions/configure-pages@v5
       
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: './vcf-manager'
+        path: './docs'
         
     - name: Deploy to GitHub Pages
       id: deployment
