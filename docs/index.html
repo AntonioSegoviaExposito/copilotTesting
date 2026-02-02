@@ -113,15 +113,9 @@
     </div>
 </div>
 
-<!-- JavaScript Modules -->
-<!-- Load order matters: config -> utils -> core -> features -> app -->
-<script src="src/config.js"></script>
-<script src="src/utils/phone.js"></script>
-<script src="src/core/vcf-parser.js"></script>
-<script src="src/core/contacts.js"></script>
-<script src="src/features/auto-merger.js"></script>
-<script src="src/features/merge-tool.js"></script>
-<script src="src/app.js"></script>
+<!-- JavaScript Module Entry Point -->
+<!-- app.js imports all dependencies as ES modules -->
+<script type="module" src="src/app.js"></script>
 
 </body>
 </html>

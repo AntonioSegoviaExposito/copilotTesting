@@ -30,6 +30,9 @@
  * - Optional fields return undefined (not empty string) when missing
  */
 
+import Config from '../config.js';
+import PhoneUtils from '../utils/phone.js';
+
 /**
  * @typedef {Object} Contact
  * @property {string} _id - Unique identifier (generated)

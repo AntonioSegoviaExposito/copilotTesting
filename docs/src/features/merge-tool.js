@@ -44,6 +44,8 @@
  * - To add new field type, update buildPending() and renderResultForm()
  */
 
+import PhoneUtils from '../utils/phone.js';
+
 /**
  * @typedef {Object} PendingMerge
  * @property {string} targetId - ID of master contact (merge target)

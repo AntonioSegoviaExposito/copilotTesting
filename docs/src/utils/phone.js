@@ -17,6 +17,8 @@
  * - To support new country, update format() method with pattern
  */
 
+import Config from '../config.js';
+
 /**
  * Phone utility functions
  * @namespace PhoneUtils

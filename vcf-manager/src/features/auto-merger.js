@@ -34,6 +34,9 @@
  * - To add new detection mode, implement _findDuplicatesBy*() method
  */
 
+import Config from '../config.js';
+import PhoneUtils from '../utils/phone.js';
+
 /**
  * Auto Merger Class
  * Manages automatic duplicate detection and sequential merge queue processing
