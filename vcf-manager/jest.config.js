@@ -9,5 +9,19 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
+  reporters: [
+    'default',
+    [
+      'jest-html-reporters',
+      {
+        publicPath: './test-report',
+        filename: 'index.html',
+        pageTitle: 'VCF Manager Test Report',
+        expand: true,
+        openReport: false,
+        darkTheme: false
+      }
+    ]
+  ],
   verbose: true
 };
