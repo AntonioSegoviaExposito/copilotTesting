@@ -42,10 +42,11 @@ jobs:
         cd vcf-manager
         npm run test:coverage
         
-    - name: Copy coverage to docs
+    - name: Copy reports to docs
       run: |
-        mkdir -p docs/coverage
+        mkdir -p docs/coverage docs/test-report
         cp -r vcf-manager/coverage/* docs/coverage/
+        cp -r vcf-manager/test-report/* docs/test-report/
       
     - name: Setup Pages
       uses: actions/configure-pages@v5
