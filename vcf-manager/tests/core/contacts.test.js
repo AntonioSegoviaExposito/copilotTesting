@@ -15,7 +15,7 @@ describe('ContactManager', () => {
 
         // Create fresh instance
         contactManager = new ContactManager();
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     describe('Constructor', () => {
@@ -48,7 +48,7 @@ describe('ContactManager', () => {
         });
 
         test('should trigger render', () => {
-            const renderSpy = jest.spyOn(contactManager, 'render');
+            const renderSpy = vi.spyOn(contactManager, 'render');
             contactManager.setFilter('test');
             expect(renderSpy).toHaveBeenCalled();
         });
@@ -404,7 +404,7 @@ END:VCARD`;
         });
 
         test('should create download link for export', () => {
-            const appendSpy = jest.spyOn(document.body, 'appendChild');
+            const appendSpy = vi.spyOn(document.body, 'appendChild');
 
             contactManager.contacts = [
                 { _id: 'id1', fn: 'John', tels: ['612345678'], emails: ['john@test.com'], org: 'Test' }
@@ -420,7 +420,7 @@ END:VCARD`;
         beforeEach(() => {
             // Create global instances for mergeTool
             global.mergeTool = {
-                init: jest.fn()
+                init: vi.fn()
             };
         });
 

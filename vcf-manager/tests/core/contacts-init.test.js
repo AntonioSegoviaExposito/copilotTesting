@@ -20,7 +20,7 @@ describe('ContactManager - Init', () => {
         `;
 
         contactManager = new ContactManager();
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     describe('init', () => {
@@ -28,7 +28,7 @@ describe('ContactManager - Init', () => {
             const fileInput = document.getElementById('fileInput');
             
             // Spy on addEventListener to verify it's called
-            const addEventListenerSpy = jest.spyOn(fileInput, 'addEventListener');
+            const addEventListenerSpy = vi.spyOn(fileInput, 'addEventListener');
             
             // Call init to bind the event
             contactManager.init();

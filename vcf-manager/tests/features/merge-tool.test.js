@@ -16,7 +16,7 @@ describe('MergeTool', () => {
         global.autoMerger = new AutoMerger();
         global.mergeTool = new MergeTool();
 
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     describe('Constructor', () => {
@@ -28,7 +28,7 @@ describe('MergeTool', () => {
     describe('init', () => {
         test('should return early when selectOrder is empty', () => {
             core.selectOrder = [];
-            const buildSpy = jest.spyOn(mergeTool, 'buildPending');
+            const buildSpy = vi.spyOn(mergeTool, 'buildPending');
 
             mergeTool.init();
 
@@ -41,7 +41,7 @@ describe('MergeTool', () => {
             ];
             core.selectOrder = ['id1'];
 
-            const buildSpy = jest.spyOn(mergeTool, 'buildPending');
+            const buildSpy = vi.spyOn(mergeTool, 'buildPending');
             mergeTool.init();
 
             expect(buildSpy).toHaveBeenCalledWith(['id1']);
@@ -53,7 +53,7 @@ describe('MergeTool', () => {
             ];
             core.selectOrder = ['id1'];
 
-            const renderSpy = jest.spyOn(mergeTool, 'renderUI');
+            const renderSpy = vi.spyOn(mergeTool, 'renderUI');
             mergeTool.init();
 
             expect(renderSpy).toHaveBeenCalled();
@@ -378,14 +378,14 @@ describe('MergeTool', () => {
 
         test('should trigger autoMerger processNext when active', () => {
             autoMerger.active = true;
-            const processSpy = jest.spyOn(autoMerger, 'processNext');
+            const processSpy = vi.spyOn(autoMerger, 'processNext');
 
-            jest.useFakeTimers();
+            vi.useFakeTimers();
             mergeTool.commit();
-            jest.advanceTimersByTime(250);
+            vi.advanceTimersByTime(250);
 
             expect(processSpy).toHaveBeenCalled();
-            jest.useRealTimers();
+            vi.useRealTimers();
         });
     });
 

@@ -606,7 +606,5 @@ class ContactManager {
     }
 }
 
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = ContactManager;
-}
+// Export for module usage (ESM)
+export default ContactManager;

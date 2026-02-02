@@ -790,7 +790,5 @@ class MergeTool {
     }
 }
 
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = MergeTool;
-}
+// Export for module usage (ESM)
+export default MergeTool;

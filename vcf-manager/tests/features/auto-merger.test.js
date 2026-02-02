@@ -15,7 +15,7 @@ describe('AutoMerger', () => {
         global.mergeTool = new MergeTool();
         global.autoMerger = new AutoMerger();
 
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     describe('Constructor', () => {
@@ -43,7 +43,7 @@ describe('AutoMerger', () => {
             ];
 
             // Mock processNext to prevent full execution
-            autoMerger.processNext = jest.fn();
+            autoMerger.processNext = vi.fn();
             autoMerger.start('name');
 
             expect(autoMerger.queue.length).toBe(1);
@@ -57,7 +57,7 @@ describe('AutoMerger', () => {
                 { _id: 'id2', fn: 'john doe', tels: [], emails: [], org: '' }
             ];
 
-            autoMerger.processNext = jest.fn();
+            autoMerger.processNext = vi.fn();
             autoMerger.start('name');
 
             expect(autoMerger.queue.length).toBe(1);
@@ -69,7 +69,7 @@ describe('AutoMerger', () => {
                 { _id: 'id2', fn: '  John Doe', tels: [], emails: [], org: '' }
             ];
 
-            autoMerger.processNext = jest.fn();
+            autoMerger.processNext = vi.fn();
             autoMerger.start('name');
 
             expect(autoMerger.queue.length).toBe(1);
@@ -91,7 +91,7 @@ describe('AutoMerger', () => {
                 { _id: 'id2', fn: 'John', tels: [], emails: [], org: '' }
             ];
 
-            autoMerger.processNext = jest.fn();
+            autoMerger.processNext = vi.fn();
             autoMerger.start('name');
 
             expect(autoMerger.active).toBe(true);
@@ -105,7 +105,7 @@ describe('AutoMerger', () => {
                 { _id: 'id4', fn: 'Jane', tels: [], emails: [], org: '' }
             ];
 
-            autoMerger.processNext = jest.fn();
+            autoMerger.processNext = vi.fn();
             autoMerger.start('name');
 
             expect(autoMerger.queue.length).toBe(2);
@@ -120,7 +120,7 @@ describe('AutoMerger', () => {
                 { _id: 'id3', fn: 'Bob', tels: ['+34999999999'], emails: [], org: '' }
             ];
 
-            autoMerger.processNext = jest.fn();
+            autoMerger.processNext = vi.fn();
             autoMerger.start('phone');
 
             expect(autoMerger.queue.length).toBe(1);
@@ -132,7 +132,7 @@ describe('AutoMerger', () => {
                 { _id: 'id2', fn: 'Jane', tels: ['+34612345678'], emails: [], org: '' }
             ];
 
-            autoMerger.processNext = jest.fn();
+            autoMerger.processNext = vi.fn();
             autoMerger.start('phone');
 
             expect(autoMerger.queue.length).toBe(1);
@@ -144,7 +144,7 @@ describe('AutoMerger', () => {
                 { _id: 'id2', fn: 'Jane', tels: ['333333333', '111111111'], emails: [], org: '' }
             ];
 
-            autoMerger.processNext = jest.fn();
+            autoMerger.processNext = vi.fn();
             autoMerger.start('phone');
 
             expect(autoMerger.queue.length).toBe(1);
@@ -156,7 +156,7 @@ describe('AutoMerger', () => {
                 { _id: 'id2', fn: 'Same John', tels: ['111111111', '222222222'], emails: [], org: '' }
             ];
 
-            autoMerger.processNext = jest.fn();
+            autoMerger.processNext = vi.fn();
             autoMerger.start('phone');
 
             // Should only have one group even though both phones match

@@ -325,7 +325,5 @@ const VCFParser = {
     }
 };
 
-// Export for module usage (Node.js/Jest)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = VCFParser;
-}
+// Export for module usage (ESM)
+export default VCFParser;

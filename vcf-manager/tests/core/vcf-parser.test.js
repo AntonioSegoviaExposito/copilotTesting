@@ -146,7 +146,7 @@ END:VCARD`;
         });
 
         test('should create download link', () => {
-            const appendSpy = jest.spyOn(document.body, 'appendChild');
+            const appendSpy = vi.spyOn(document.body, 'appendChild');
             
             VCFParser.download([
                 { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' }

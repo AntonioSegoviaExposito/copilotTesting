@@ -16,7 +16,7 @@ describe('Integration Tests', () => {
         global.mergeTool = new MergeTool();
         global.autoMerger = new AutoMerger();
 
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     describe('Complete Merge Workflow', () => {
@@ -94,7 +94,7 @@ describe('Integration Tests', () => {
                 { _id: 'id3', fn: 'Contact C', tels: ['0034612345678'], emails: [], org: '' }
             ];
 
-            autoMerger.processNext = jest.fn();
+            autoMerger.processNext = vi.fn();
             autoMerger.start('phone');
 
             // All three should be in one group

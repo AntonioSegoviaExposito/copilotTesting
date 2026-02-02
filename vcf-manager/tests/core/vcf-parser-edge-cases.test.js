@@ -178,7 +178,7 @@ END:VCARD`;
 
     describe('download - Edge Cases', () => {
         test('should not create download for empty contact list', () => {
-            const createElementSpy = jest.spyOn(document, 'createElement');
+            const createElementSpy = vi.spyOn(document, 'createElement');
             VCFParser.download([]);
             expect(alert).toHaveBeenCalledWith(Config.messages.emptyList);
             expect(createElementSpy).not.toHaveBeenCalledWith('a');
@@ -186,13 +186,13 @@ END:VCARD`;
 
         test('should create download link with timestamp', () => {
             const mockElement = {
-                setAttribute: jest.fn(),
-                click: jest.fn(),
+                setAttribute: vi.fn(),
+                click: vi.fn(),
                 style: {}
             };
-            jest.spyOn(document, 'createElement').mockReturnValue(mockElement);
-            jest.spyOn(document.body, 'appendChild').mockReturnValue(undefined);
-            jest.spyOn(document.body, 'removeChild').mockReturnValue(undefined);
+            vi.spyOn(document, 'createElement').mockReturnValue(mockElement);
+            vi.spyOn(document.body, 'appendChild').mockReturnValue(undefined);
+            vi.spyOn(document.body, 'removeChild').mockReturnValue(undefined);
             
             const contacts = [{ id: '1', fn: 'Test', tels: [], emails: [] }];
             VCFParser.download(contacts);

@@ -1,7 +1,8 @@
 /**
- * Jest Setup File
+ * Vitest Setup File
  * Configures DOM environment and global mocks
  */
+import { vi } from 'vitest';
 
 // Mock DOM elements required by the application
 document.body.innerHTML = `
@@ -28,13 +29,13 @@ document.body.innerHTML = `
 `;
 
 // Mock window.alert
-global.alert = jest.fn();
+globalThis.alert = vi.fn();
 
 // Mock window.confirm
-global.confirm = jest.fn(() => true);
+globalThis.confirm = vi.fn(() => true);
 
 // Mock URL.createObjectURL
-global.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
+globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
 
 // Mock FileReader
 class MockFileReader {
@@ -47,27 +48,36 @@ class MockFileReader {
         }
     }
 }
-global.FileReader = MockFileReader;
+globalThis.FileReader = MockFileReader;
 
 // Helper to create mock files with VCF content
-global.createMockVCFFile = (content) => {
+globalThis.createMockVCFFile = (content) => {
     const file = new Blob([content], { type: 'text/vcard' });
     file._content = content;
     return file;
 };
 
-// Import modules using require (proper CommonJS imports for Jest coverage)
-global.Config = require('../src/config.js');
-global.PhoneUtils = require('../src/utils/phone.js');
-global.VCFParser = require('../src/core/vcf-parser.js');
-global.ContactManager = require('../src/core/contacts.js');
-global.AutoMerger = require('../src/features/auto-merger.js');
-global.MergeTool = require('../src/features/merge-tool.js');
+// Import modules using dynamic import for ESM compatibility
+// These are imported synchronously since Vitest setup supports top-level await
+const Config = (await import('../src/config.js')).default;
+const PhoneUtils = (await import('../src/utils/phone.js')).default;
+const VCFParser = (await import('../src/core/vcf-parser.js')).default;
+const ContactManager = (await import('../src/core/contacts.js')).default;
+const AutoMerger = (await import('../src/features/auto-merger.js')).default;
+const MergeTool = (await import('../src/features/merge-tool.js')).default;
+
+// Expose to global scope
+globalThis.Config = Config;
+globalThis.PhoneUtils = PhoneUtils;
+globalThis.VCFParser = VCFParser;
+globalThis.ContactManager = ContactManager;
+globalThis.AutoMerger = AutoMerger;
+globalThis.MergeTool = MergeTool;
 
 // Also export CoreSystem alias for backward compatibility with existing tests
-global.CoreSystem = global.ContactManager;
+globalThis.CoreSystem = ContactManager;
 
 // Create global instances like app.js does
-global.core = new global.ContactManager();
-global.mergeTool = new global.MergeTool();
-global.autoMerger = new global.AutoMerger();
+globalThis.core = new ContactManager();
+globalThis.mergeTool = new MergeTool();
+globalThis.autoMerger = new AutoMerger();
