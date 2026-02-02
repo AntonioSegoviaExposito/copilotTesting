@@ -1,9 +1,10 @@
-name: Deploy to GitHub Pages
+name: Test & Deploy
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -11,86 +12,65 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  # Test job - runs tests and generates reports
   test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: vcf-manager/package-lock.json
-        
-    - name: Install dependencies
-      run: |
-        cd vcf-manager
-        npm ci
-        
-    - name: Run tests with coverage
-      run: |
-        cd vcf-manager
-        npm run test:coverage
-        
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: coverage-report
-        path: vcf-manager/coverage/
-        
-    - name: Upload test report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-report
-        path: vcf-manager/test-report/
-  
-  # Deploy job - deploys docs with test reports
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: vcf-manager/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+        working-directory: vcf-manager
+      
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        working-directory: vcf-manager
+      
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: vcf-manager/coverage/
+
   deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: test
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
-    - name: Download coverage report
-      uses: actions/download-artifact@v4
-      with:
-        name: coverage-report
-        path: ./coverage-temp
-        
-    - name: Download test report
-      uses: actions/download-artifact@v4
-      with:
-        name: test-report
-        path: ./test-report-temp
-        
-    - name: Copy reports to docs
-      run: |
-        mkdir -p docs/coverage docs/test-report
-        cp -r ./coverage-temp/* docs/coverage/ || echo "No coverage files to copy"
-        cp -r ./test-report-temp/* docs/test-report/ || echo "No test report files to copy"
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage
+          path: coverage
       
-    - name: Setup Pages
-      uses: actions/configure-pages@v5
+      - name: Build deploy folder
+        run: |
+          mkdir -p deploy
+          cp vcf-manager/index.html deploy/
+          cp -r vcf-manager/css deploy/
+          cp -r vcf-manager/src deploy/
+          cp -r coverage deploy/
+          touch deploy/.nojekyll
       
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: './docs'
-        
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      - uses: actions/configure-pages@v5
+      
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: deploy
+      
+      - uses: actions/deploy-pages@v4
+        id: deployment
