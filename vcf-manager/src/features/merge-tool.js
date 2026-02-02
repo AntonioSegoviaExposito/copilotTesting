@@ -290,6 +290,12 @@ class MergeTool {
             title.innerText = slavesCount > 0 ? `Merge (${slavesCount + 1})` : "Edit";
         }
 
+        // Show/hide clone button (only for single contact edit mode)
+        const cloneBtn = document.getElementById('cloneButton');
+        if (cloneBtn) {
+            cloneBtn.style.display = slavesCount === 0 ? 'block' : 'none';
+        }
+
         // Render both panels
         this._renderSourcesList();
         this.renderResultForm();
@@ -426,6 +432,12 @@ class MergeTool {
             </div>
         `;
 
+        // Get unique organizations from all contacts for dropdown
+        const existingOrgs = [...new Set(core.contacts
+            .map(c => c.org)
+            .filter(org => org && org.trim().length > 0)
+        )].sort();
+
         // === BUILD FORM HTML ===
         let html = `
             ${textInput('Nombre Completo', 'fn', data.fn)}
@@ -458,7 +470,15 @@ class MergeTool {
                 `).join('')}
             </div>
 
-            ${textInput('Organizacion', 'org', data.org || '')}
+            <div class="input-group">
+                <div class="input-header"><span class="input-label">Organizacion</span></div>
+                <input class="input-field" list="orgList" value="${data.org || ''}" 
+                    oninput="mergeTool.pending.data.org = this.value" 
+                    placeholder="Selecciona o escribe una organizacion...">
+                <datalist id="orgList">
+                    ${existingOrgs.map(org => `<option value="${org}">`).join('')}
+                </datalist>
+            </div>
         `;
 
         // === OPTIONAL FIELDS ===
@@ -708,6 +728,65 @@ class MergeTool {
         if (autoMerger.active && !isSuccess) {
             autoMerger.cancel();
         }
+    }
+
+    /**
+     * Clone the current contact being edited
+     * 
+     * CLONE WORKFLOW:
+     * 1. Validate that we're in edit mode (single contact)
+     * 2. Create a copy of the current pending data
+     * 3. Generate new unique ID for the clone
+     * 4. Add cloned contact to contacts array
+     * 5. Close modal and select the new clone
+     * 6. Show success message
+     * 
+     * USE CASE:
+     * - User wants to create a similar contact (e.g., family member, colleague)
+     * - Saves time by copying all fields and then editing
+     * 
+     * CALLED BY:
+     * - User clicking "Clone" button in edit mode
+     * 
+     * @returns {void}
+     * 
+     * @example
+     * // User edits contact, clicks "Clone"
+     * // New contact created with same data but different ID
+     * // User can then edit the clone separately
+     */
+    cloneContact() {
+        // Validate we're in edit mode (single contact)
+        if (!this.pending || this.pending.originalObjects.length > 1) return;
+
+        // Generate unique ID for clone
+        const cloneId = 'clone_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        // Create cloned contact with current pending data
+        const clonedContact = {
+            _id: cloneId,
+            fn: this.pending.data.fn + ' (Copia)',
+            tels: [...this.pending.data.tels.filter(t => t.length > 0)],
+            emails: [...this.pending.data.emails.filter(e => e.length > 0)],
+            org: this.pending.data.org,
+            title: this.pending.data.title,
+            adr: this.pending.data.adr,
+            url: this.pending.data.url,
+            bday: this.pending.data.bday,
+            note: this.pending.data.note
+        };
+
+        // Add cloned contact to beginning of contacts array
+        core.contacts.unshift(clonedContact);
+
+        // Close modal
+        this.close(true);
+
+        // Deselect all and render
+        core.deselectAll();
+
+        // Show success message
+        alert('Contacto clonado correctamente');
     }
 }
 

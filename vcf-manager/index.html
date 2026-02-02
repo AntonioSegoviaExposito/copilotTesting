@@ -18,6 +18,7 @@
             📂 Import
             <input type="file" id="fileInput" accept=".vcf">
         </label>
+        <button class="btn btn-success" onclick="core.addNewContact()">➕ Add Contact</button>
         <button class="btn btn-danger" onclick="core.clearAll()">Clear</button>
     </div>
 
@@ -30,7 +31,7 @@
     <div class="divider"></div>
 
     <div class="header-group">
-        <div style="font-size:0.7rem; font-weight:bold; color:#94a3b8; margin-right:5px">DUPLICATES:</div>
+        <div style="font-size:0.7rem; font-weight:bold; color:#94a3b8; margin-right:5px">DUPLICATES: Buscar por duplicados y fusionar</div>
         <button class="btn btn-warning" onclick="autoMerger.start('name')">🅰️ Name</button>
         <button class="btn btn-warning" onclick="autoMerger.start('phone')">📞 Phone</button>
     </div>
@@ -70,7 +71,10 @@
     <div class="modal">
         <div class="modal-header">
             <h3 id="modalTitle" style="margin:0">Configure Contact</h3>
-            <button class="btn btn-outline" onclick="mergeTool.close(false)">Cancel</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-outline" id="cloneButton" onclick="mergeTool.cloneContact()" style="display:none">📋 Clone</button>
+                <button class="btn btn-outline" onclick="mergeTool.close(false)">Cancel</button>
+            </div>
         </div>
         <div class="modal-body">
             <div class="col-sources">
