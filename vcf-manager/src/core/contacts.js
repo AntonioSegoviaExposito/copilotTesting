@@ -580,7 +580,7 @@ class ContactManager {
      */
     addNewContact() {
         // Generate unique ID
-        const newId = 'new_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        const newId = 'new_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
         
         // Create new empty contact
         const newContact = {

@@ -760,7 +760,7 @@ class MergeTool {
         if (!this.pending || this.pending.originalObjects.length > 1) return;
 
         // Generate unique ID for clone
-        const cloneId = 'clone_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        const cloneId = 'clone_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
 
         // Create cloned contact with current pending data
         const clonedContact = {
