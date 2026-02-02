@@ -415,4 +415,77 @@ END:VCARD`;
             expect(URL.createObjectURL).toHaveBeenCalled();
         });
     });
+
+    describe('addNewContact', () => {
+        beforeEach(() => {
+            // Create global instances for mergeTool
+            global.mergeTool = {
+                init: jest.fn()
+            };
+        });
+
+        test('should add a new empty contact to contacts array', () => {
+            contactManager.addNewContact();
+            expect(contactManager.contacts.length).toBe(1);
+        });
+
+        test('should add contact with empty required fields', () => {
+            contactManager.addNewContact();
+            const newContact = contactManager.contacts[0];
+            
+            expect(newContact.fn).toBe('');
+            expect(newContact.tels).toEqual([]);
+            expect(newContact.emails).toEqual([]);
+            expect(newContact.org).toBe('');
+        });
+
+        test('should add contact with unique ID', () => {
+            contactManager.addNewContact();
+            const firstId = contactManager.contacts[0]._id;
+            
+            contactManager.addNewContact();
+            const secondId = contactManager.contacts[0]._id;
+            
+            expect(firstId).not.toBe(secondId);
+            expect(firstId).toMatch(/^new_/);
+            expect(secondId).toMatch(/^new_/);
+        });
+
+        test('should add new contact at the beginning of array', () => {
+            contactManager.contacts = [
+                { _id: 'existing', fn: 'Existing', tels: [], emails: [], org: '' }
+            ];
+            
+            contactManager.addNewContact();
+            
+            expect(contactManager.contacts.length).toBe(2);
+            expect(contactManager.contacts[0]._id).toMatch(/^new_/);
+            expect(contactManager.contacts[1]._id).toBe('existing');
+        });
+
+        test('should select the new contact', () => {
+            contactManager.addNewContact();
+            const newId = contactManager.contacts[0]._id;
+            
+            expect(contactManager.selected.has(newId)).toBe(true);
+            expect(contactManager.selectOrder).toContain(newId);
+        });
+
+        test('should open merge tool in edit mode', () => {
+            contactManager.addNewContact();
+            expect(mergeTool.init).toHaveBeenCalled();
+        });
+
+        test('should deselect all before selecting new contact', () => {
+            contactManager.selected.add('id1');
+            contactManager.selectOrder.push('id1');
+            
+            contactManager.addNewContact();
+            const newId = contactManager.contacts[0]._id;
+            
+            expect(contactManager.selected.size).toBe(1);
+            expect(contactManager.selected.has('id1')).toBe(false);
+            expect(contactManager.selected.has(newId)).toBe(true);
+        });
+    });
 });
