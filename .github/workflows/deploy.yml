@@ -41,12 +41,14 @@ jobs:
         
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: coverage-report
         path: vcf-manager/coverage/
         
     - name: Upload test report
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: test-report
         path: vcf-manager/test-report/
