@@ -20,8 +20,8 @@ vcf-manager/
 │   │ Modify when: Adding/updating dependencies, changing scripts
 │   │ Key commands: npm test, npm run test:watch, npm run test:coverage
 │
-├── 📄 jest.config.js
-│   │ Purpose: Jest testing configuration
+├── 📄 vitest.config.js
+│   │ Purpose: Vitest testing configuration
 │   │ Dependencies: None
 │   │ Modify when: Changing test environment, adding setup files
 │   │ Current: Uses jsdom environment for DOM testing
@@ -157,7 +157,7 @@ vcf-manager/
 │   │   │           │   - Add default country code if missing
 │   │   │
 │   │   └── 📁 tests/
-│   │       │ Purpose: Jest test suites
+│   │       │ Purpose: Vitest test suites
 │   │       │ Structure: Mirrors src/ directory
 │   │       │
 │   │       ├── 📄 setup.js

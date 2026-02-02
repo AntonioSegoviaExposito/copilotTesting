@@ -8,7 +8,7 @@
 
 **Technology Stack:**
 - **Frontend**: Vanilla JavaScript (ES6+), HTML5, CSS3
-- **Testing**: Jest with jsdom
+- **Testing**: Vitest with jsdom
 - **Architecture**: Modular, class-based design with clear separation of concerns
 
 ## 📁 Directory Structure
@@ -17,7 +17,7 @@
 vcf-manager/
 ├── index.html              # Main HTML entry point
 ├── package.json            # NPM configuration & dependencies
-├── jest.config.js          # Jest test configuration
+├── vitest.config.js        # Vitest test configuration
 │
 ├── css/
 │   └── styles.css          # All application styles (CSS Variables)
@@ -37,7 +37,7 @@ vcf-manager/
 │   └── utils/              # Utility functions
 │       └── phone.js        # Phone number normalization (PhoneUtils utility)
 │
-└── tests/                  # Test suites (Jest)
+└── tests/                  # Test suites (Vitest)
     ├── setup.js            # Test environment setup
     ├── integration.test.js # End-to-end integration tests
     ├── core/               # Unit tests for core modules
@@ -343,7 +343,7 @@ Scripts loaded in specific order in `index.html`:
 
 ## 🐛 Common Issues & Solutions
 
-### Issue: Tests fail with "jest: not found"
+### Issue: Tests fail with "vitest: not found"
 **Solution**: Run `npm install` to install dependencies
 
 ### Issue: Changes not reflected in browser
@@ -358,7 +358,7 @@ Scripts loaded in specific order in `index.html`:
 ## 📚 Additional Resources
 
 - **VCF Specification**: RFC 6350 (vCard Format Specification)
-- **Testing**: Jest Documentation (jestjs.io)
+- **Testing**: Vitest Documentation (vitest.dev)
 - **ES6 Modules**: MDN Web Docs
 
 ---

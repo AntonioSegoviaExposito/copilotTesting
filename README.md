@@ -40,7 +40,7 @@ This project follows standard JavaScript best practices:
 
 - **Vanilla JavaScript (ES6+)** - No framework dependencies
 - **Modular Design** - Clear separation of concerns (core, features, utilities)
-- **Comprehensive Testing** - Jest with 197 passing tests and 97.98% coverage
+- **Comprehensive Testing** - Vitest with 259 passing tests and 99.87% coverage
 - **Clean Code** - JSDoc comments, consistent naming, clear structure
 - **Modern Test Reporting** - Beautiful, minimalist test and coverage reports
 
@@ -50,7 +50,7 @@ This project follows standard JavaScript best practices:
 vcf-manager/
 ├── index.html           # Application entry point
 ├── package.json         # NPM dependencies and scripts
-├── jest.config.js       # Test configuration with modern reporters
+├── vitest.config.js     # Vitest test configuration
 ├── css/
 │   └── styles.css       # Application styles
 ├── src/
@@ -89,20 +89,21 @@ npm run test:coverage     # Generate coverage report
 
 ### Test Suite Statistics
 
-- **Total Tests**: 197 tests passing
-- **Test Suites**: 9 test suites
-- **Code Coverage**: 97.98% overall
-  - Statements: 97.98%
-  - Branches: 87.43%
-  - Functions: 98.98%
-  - Lines: 99.66%
+- **Total Tests**: 259 tests passing
+- **Test Suites**: 10 test suites
+- **Code Coverage**: 99.87% overall
+  - Statements: 99.87%
+  - Branches: 95.61%
+  - Functions: 98.03%
+  - Lines: 99.87%
 
 ### Modern Test Reporting
 
 This project uses modern, minimalist test reporting tools:
 
-- **jest-html-reporters** - Beautiful, interactive HTML test reports
-- **Istanbul/NYC** - Comprehensive code coverage analysis
+- **Vitest** - Fast, modern test runner with native ESM support
+- **@vitest/ui** - Beautiful, interactive HTML test reports
+- **@vitest/coverage-v8** - Fast and accurate code coverage with V8
 - **Modern UI** - Clean, dark-themed reports with excellent readability
 
 View the reports online:
