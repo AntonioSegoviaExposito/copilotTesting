@@ -111,7 +111,7 @@ src/
 #### `config.js` - Edit when:
 - Adding new configuration options
 - Changing default values
-- Adding UI messages (Spanish)
+- Adding UI messages
 - Modifying phone settings
 
 #### `core/contacts.js` - Edit when:

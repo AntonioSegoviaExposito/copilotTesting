@@ -49,7 +49,7 @@ vcf-manager/
 │   │   │   - appName: Application name
 │   │   │   - phone: Phone number settings
 │   │   │   - ui: UI configuration
-│   │   │   - messages: Spanish UI messages
+│   │   │   - messages: UI messages
 │   │
 │   ├── 📄 app.js
 │   │   │ Purpose: Application entry point and initialization
