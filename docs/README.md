@@ -8,7 +8,7 @@ A modern contact management application for VCF (vCard) files with duplicate det
 vcf-manager/
 ├── index.html              # Application entry point
 ├── package.json            # Dependencies and scripts
-├── jest.config.js          # Test configuration
+├── vitest.config.js        # Vitest test configuration
 ├── css/
 │   └── styles.css          # Application styles
 ├── src/
@@ -22,14 +22,14 @@ vcf-manager/
 │   │   └── merge-tool.js  # Manual merge UI
 │   └── utils/
 │       └── phone.js       # Phone number utilities
-└── tests/                 # Jest test suites
+└── tests/                 # Vitest test suites
 ```
 
 ## 🛠️ Technology Stack
 
 - **Core**: Vanilla JavaScript (ES6+)
 - **UI**: HTML5 + CSS3 (CSS Variables)
-- **Testing**: Jest with jsdom
+- **Testing**: Vitest with jsdom
 - **No framework dependencies** - Pure JavaScript implementation
 
 ## ⚡ Commands
