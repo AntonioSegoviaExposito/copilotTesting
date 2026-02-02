@@ -1,6 +1,10 @@
 # VCF Manager
 
+![Tests](https://github.com/AntonioSegoviaExposito/copilotTesting/workflows/Run%20Tests/badge.svg)
+
 A modern, modular contact management application for VCF (vCard) files with duplicate detection and merging capabilities.
+
+**🌐 Live Demo**: [https://antoniosegoviaexposito.github.io/copilotTesting/](https://antoniosegoviaexposito.github.io/copilotTesting/)
 
 ## 📖 Features
 
@@ -71,11 +75,21 @@ npm run test:coverage     # Generate coverage report
 
 All features include comprehensive unit and integration tests.
 
+### Continuous Integration
+
+This project uses GitHub Actions for automated testing:
+- Tests run automatically on all pull requests
+- Tests run on push to main branch
+- Coverage reports are generated and available as artifacts
+
+See [.github/workflows/README.md](.github/workflows/README.md) for more details.
+
 ## 📚 Documentation
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed system architecture and design patterns
 - **[CONTRIBUTING_FOR_AI.md](CONTRIBUTING_FOR_AI.md)** - Development guidelines for AI-assisted development
 - **[CODE_STRUCTURE.md](CODE_STRUCTURE.md)** - Complete file structure reference
+- **[.github/workflows/README.md](.github/workflows/README.md)** - GitHub Actions workflows documentation
 
 ## 🔧 Configuration
 
