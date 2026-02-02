@@ -20,7 +20,7 @@ describe('PhoneUtils', () => {
             expect(PhoneUtils.normalize('0034612345678')).toBe('+34612345678');
         });
 
-        test('should add +34 prefix for Spanish numbers without prefix', () => {
+        test('should add +34 prefix for numbers without prefix', () => {
             expect(PhoneUtils.normalize('612345678')).toBe('+34612345678');
         });
 
@@ -39,12 +39,12 @@ describe('PhoneUtils', () => {
     });
 
     describe('format', () => {
-        test('should format Spanish phone numbers with spaces', () => {
+        test('should format phone numbers with +34 country code with spaces', () => {
             expect(PhoneUtils.format('+34612345678')).toBe('+34 612 345 678');
             expect(PhoneUtils.format('612345678')).toBe('+34 612 345 678');
         });
 
-        test('should return normalized phone for non-Spanish numbers', () => {
+        test('should return normalized phone for other country codes', () => {
             expect(PhoneUtils.format('+1234567890')).toBe('+1234567890');
         });
 

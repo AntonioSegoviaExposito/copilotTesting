@@ -1,7 +1,7 @@
 {
   "name": "vcf-manager",
   "version": "11.1.0",
-  "description": "A clean, single-page application for managing VCF (vCard) contact files.",
+  "description": "A modern contact management application for VCF (vCard) files with duplicate detection and merging capabilities.",
   "private": true,
   "scripts": {
     "test": "jest",
@@ -13,10 +13,11 @@
     "vcard",
     "contacts",
     "merge",
-    "duplicate"
+    "duplicate",
+    "contact-management"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0"

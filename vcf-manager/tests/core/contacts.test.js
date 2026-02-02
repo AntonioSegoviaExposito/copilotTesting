@@ -9,8 +9,8 @@ describe('ContactManager', () => {
     beforeEach(() => {
         // Reset DOM
         document.getElementById('grid').innerHTML = '';
-        document.getElementById('statDisplay').innerText = '0 contactos';
-        document.getElementById('btnExport').innerText = 'Exportar (0)';
+        document.getElementById('statDisplay').innerText = '0 contacts';
+        document.getElementById('btnExport').innerText = 'Export (0)';
         document.getElementById('fab').classList.remove('visible');
 
         // Create fresh instance
@@ -245,12 +245,12 @@ describe('ContactManager', () => {
 
         test('should update stat display with contact count', () => {
             contactManager.render();
-            expect(document.getElementById('statDisplay').innerText).toBe('3 contactos');
+            expect(document.getElementById('statDisplay').innerText).toBe('3 contacts');
         });
 
         test('should update export button text', () => {
             contactManager.render();
-            expect(document.getElementById('btnExport').innerText).toBe('Exportar (3)');
+            expect(document.getElementById('btnExport').innerText).toBe('Export (3)');
         });
 
         test('should filter contacts by name', () => {
@@ -288,19 +288,19 @@ describe('ContactManager', () => {
             expect(document.getElementById('fab').classList.contains('visible')).toBe(false);
         });
 
-        test('should show "EDITAR" text when one contact selected', () => {
+        test('should show "EDIT" text when one contact selected', () => {
             contactManager.selected.add('id1');
             contactManager.selectOrder.push('id1');
             contactManager.render();
-            expect(document.getElementById('fabActionText').innerText).toContain('EDITAR');
+            expect(document.getElementById('fabActionText').innerText).toContain('EDIT');
         });
 
-        test('should show "FUSIONAR" text when multiple contacts selected', () => {
+        test('should show "MERGE" text when multiple contacts selected', () => {
             contactManager.selected.add('id1');
             contactManager.selected.add('id2');
             contactManager.selectOrder.push('id1', 'id2');
             contactManager.render();
-            expect(document.getElementById('fabActionText').innerText).toContain('FUSIONAR');
+            expect(document.getElementById('fabActionText').innerText).toContain('MERGE');
         });
 
         test('should show empty state when no contacts match filter', () => {

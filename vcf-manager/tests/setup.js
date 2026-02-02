@@ -10,11 +10,11 @@ const path = require('path');
 document.body.innerHTML = `
     <input type="file" id="fileInput" accept=".vcf">
     <div id="grid" class="grid"></div>
-    <div id="statDisplay">0 contactos</div>
-    <button id="btnExport">Exportar (0)</button>
+    <div id="statDisplay">0 contacts</div>
+    <button id="btnExport">Export (0)</button>
     <div id="fab" class="fab">
         <span id="selCount">0</span>
-        <span id="fabActionText">FUSIONAR</span>
+        <span id="fabActionText">MERGE</span>
     </div>
     <div id="queueToast" class="queue-toast"></div>
     <div id="autoMergeHint"></div>
@@ -24,8 +24,8 @@ document.body.innerHTML = `
         <div id="mergeResultForm"></div>
     </div>
     <select id="addFieldSelector">
-        <option value="title">Titulo</option>
-        <option value="adr">Direccion</option>
+        <option value="title">Title</option>
+        <option value="adr">Address</option>
     </select>
 `;
 

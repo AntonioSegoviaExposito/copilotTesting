@@ -31,7 +31,7 @@ const PhoneUtils = {
      * 3. Add default country code if no prefix present
      * 
      * EXAMPLES:
-     * - '612345678' → '+34612345678' (adds Spanish code)
+     * - '612345678' → '+34612345678' (adds default code)
      * - '0034612345678' → '+34612345678' (converts 00 to +)
      * - '+34 612 345 678' → '+34612345678' (removes spaces)
      * - '+44123456789' → '+44123456789' (preserves non-default code)
@@ -67,13 +67,13 @@ const PhoneUtils = {
     /**
      * Format a phone number for display
      * 
-     * Currently supports Spanish format: +34 XXX XXX XXX
+     * Currently supports formatting for +34 country code (Spain): +34 XXX XXX XXX
      * For other countries, returns normalized format without spacing
      * 
      * LOGIC:
      * 1. Normalize the phone number first
-     * 2. Check if it matches Spanish pattern (+34 + 9 digits)
-     * 3. If Spanish, format with spaces: +34 XXX XXX XXX
+     * 2. Check if it matches +34 pattern (country code + 9 digits)
+     * 3. If matches, format with spaces: +34 XXX XXX XXX
      * 4. Otherwise, return normalized format as-is
      * 
      * AI MAINTENANCE NOTE:
@@ -92,7 +92,7 @@ const PhoneUtils = {
     format(phone) {
         const normalized = this.normalize(phone);
         
-        // Format Spanish numbers: +34 XXX XXX XXX (12 chars total)
+        // Format numbers with +34 country code: +34 XXX XXX XXX (12 chars total)
         if (normalized.startsWith('+34') && normalized.length === 12) {
             return normalized.replace(/(\+34)(\d{3})(\d{3})(\d{3})/, '$1 $2 $3 $4');
         }

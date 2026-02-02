@@ -201,12 +201,12 @@ User clicks auto-merge (name or phone)
 
 **Key Methods**:
 - `normalize(phone, defaultCode)`: Normalize to international format
-- `format(phone)`: Format for display (Spanish format)
+- `format(phone)`: Format for display (supports +34 country code formatting)
 
 **Normalization Rules**:
 1. Remove non-numeric except `+`
 2. Convert `00` prefix to `+`
-3. Add default country code if missing (default: `+34`)
+3. Add default country code if missing (configurable, default: `+34`)
 
 ### Config (config.js)
 **Responsibility**: Centralized configuration and constants
@@ -218,7 +218,7 @@ User clicks auto-merge (name or phone)
   appName: string,
   phone: { defaultCountryCode, minLength },
   ui: { maxTelsDisplay, defaultFileName },
-  messages: { /* Spanish UI messages */ }
+  messages: { /* UI messages */ }
 }
 ```
 

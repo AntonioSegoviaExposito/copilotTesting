@@ -1,37 +1,50 @@
-# VCF Manager 11.1
+# VCF Manager
 
-SPA for managing VCF contact files (Parse, Merge, Export).
-Maintained by AI Agents.
+A modern contact management application for VCF (vCard) files with duplicate detection and merging capabilities.
 
-## 📁 System Architecture
+## 📁 Project Structure
 
 ```
 vcf-manager/
-├── index.html
+├── index.html              # Application entry point
+├── package.json            # Dependencies and scripts
+├── jest.config.js          # Test configuration
+├── css/
+│   └── styles.css          # Application styles
 ├── src/
-│   ├── app.js              # Entry point
-│   ├── config.js
+│   ├── app.js             # Application initialization
+│   ├── config.js          # Configuration
 │   ├── core/
-│   │   ├── contacts.js     # State store & basic operations
-│   │   └── vcf-parser.js   # VCard parsing logic
-│   └── features/
-│       ├── auto-merger.js  # Duplicate detection logic
-│       └── merge-tool.js   # Merge UI & resolution strategy
-├── css/styles.css
-└── tests/                  # Jest suites
+│   │   ├── contacts.js    # Contact state management
+│   │   └── vcf-parser.js  # VCF parsing/export
+│   ├── features/
+│   │   ├── auto-merger.js # Duplicate detection
+│   │   └── merge-tool.js  # Manual merge UI
+│   └── utils/
+│       └── phone.js       # Phone number utilities
+└── tests/                 # Jest test suites
 ```
 
-## 🛠️ Stack
+## 🛠️ Technology Stack
 
-- **Core**: Vanilla JS (ES Modules)
-- **UI**: HTML5 + CSS Variables (No frameworks)
-- **Test**: Jest + JSDOM
+- **Core**: Vanilla JavaScript (ES6+)
+- **UI**: HTML5 + CSS3 (CSS Variables)
+- **Testing**: Jest with jsdom
+- **No framework dependencies** - Pure JavaScript implementation
 
-## ⚡ Key Commands
+## ⚡ Commands
 
 ```bash
-npm test              # Run all unit/integration tests
+npm install           # Install dependencies
+npm test              # Run all tests
+npm run test:watch    # Watch mode for development
 npm run test:coverage # Generate coverage report
 ```
+
+## 📊 Test Coverage
+
+152+ passing tests covering all core functionality.
+
+## 📄 License
 
 MIT License

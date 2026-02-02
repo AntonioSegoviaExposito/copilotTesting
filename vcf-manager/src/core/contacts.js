@@ -129,7 +129,7 @@ class ContactManager {
      * Export all contacts to VCF file
      * 
      * Triggers browser download of all contacts in VCF format.
-     * File name format: contactos_[timestamp].vcf
+     * File name format: contacts_[timestamp].vcf
      * 
      * DELEGATES TO: VCFParser.download() which handles:
      * - Converting contacts to VCF format
@@ -141,7 +141,7 @@ class ContactManager {
      * 
      * @example
      * // Called from Export button
-     * <button onclick="core.exportVCF()">Exportar</button>
+     * <button onclick="core.exportVCF()">Export</button>
      */
     exportVCF() {
         VCFParser.download(this.contacts);
@@ -239,8 +239,8 @@ class ContactManager {
         const statDisplay = document.getElementById('statDisplay');
         const btnExport = document.getElementById('btnExport');
         
-        if (statDisplay) statDisplay.innerText = `${this.contacts.length} contactos`;
-        if (btnExport) btnExport.innerText = `Exportar (${this.contacts.length})`;
+        if (statDisplay) statDisplay.innerText = `${this.contacts.length} contacts`;
+        if (btnExport) btnExport.innerText = `Export (${this.contacts.length})`;
 
         // === FILTER CONTACTS ===
         // Filter by name or phone numbers (case-insensitive)
@@ -349,13 +349,13 @@ class ContactManager {
      * - Visible when 1+ contacts selected
      * - Shows selection count
      * - Button text changes based on selection:
-     *   - 1 selected: "✏️ EDITAR" (edit single contact)
-     *   - 2+ selected: "⚡ FUSIONAR" (merge multiple contacts)
+     *   - 1 selected: "✏️ EDIT" (edit single contact)
+     *   - 2+ selected: "⚡ MERGE" (merge multiple contacts)
      * 
      * DOM ELEMENTS UPDATED:
      * - #fab: Main button (add/remove 'visible' class)
      * - #selCount: Selection count text
-     * - #fabActionText: Action label (EDITAR vs FUSIONAR)
+     * - #fabActionText: Action label (EDIT vs MERGE)
      * 
      * @private
      * @returns {void}
@@ -376,7 +376,7 @@ class ContactManager {
             
             // Update action text based on selection count
             if (fabActionText) {
-                fabActionText.innerText = this.selected.size === 1 ? "✏️ EDITAR" : "⚡ FUSIONAR";
+                fabActionText.innerText = this.selected.size === 1 ? "✏️ EDIT" : "⚡ MERGE";
             }
         } else {
             // Hide FAB when no selection
@@ -489,7 +489,7 @@ class ContactManager {
      * <button onclick="core.deleteSelected()">Eliminar</button>
      */
     deleteSelected() {
-        // Show confirmation dialog (Spanish message)
+        // Show confirmation dialog
         if (!confirm(Config.messages.confirmDelete(this.selected.size))) return;
         
         // Filter out selected contacts
@@ -519,10 +519,10 @@ class ContactManager {
      * 
      * @example
      * // Called from Clear All button
-     * <button onclick="core.clearAll()">Borrar Todo</button>
+     * <button onclick="core.clearAll()">Clear All</button>
      */
     clearAll() {
-        // Show confirmation dialog (Spanish message)
+        // Show confirmation dialog
         if (confirm(Config.messages.confirmClear)) {
             // Empty the contacts array
             this.contacts = [];

@@ -1,27 +1,19 @@
-# VCF Manager - AI-Maintained Project
+# VCF Manager
 
-> 🤖 **AI-Maintained Codebase**: This project is designed and structured specifically for AI agents to understand, maintain, and extend.
+A modern, modular contact management application for VCF (vCard) files with duplicate detection and merging capabilities.
 
-## 📖 Documentation for AI Agents
+## 📖 Features
 
-This repository contains comprehensive documentation to help AI agents work effectively:
-
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Complete system architecture, data flows, and module descriptions
-- **[CONTRIBUTING_FOR_AI.md](CONTRIBUTING_FOR_AI.md)** - Development guidelines, patterns, and workflows for AI agents
-- **[CODE_STRUCTURE.md](CODE_STRUCTURE.md)** - File organization, dependencies, and quick reference guide
-
-## 🎯 Project Overview
-
-**VCF Manager** is a single-page application for managing VCF (vCard) contact files with features for:
-- Importing and parsing VCF files
-- Automatic duplicate detection (by name or phone)
-- Manual contact merging and editing
-- Exporting clean contact lists
+- **Import/Export** - Parse and generate VCF (vCard) contact files
+- **Duplicate Detection** - Automatic detection by name or phone number
+- **Contact Merging** - Manual and automatic merge capabilities
+- **Search & Filter** - Real-time contact search
+- **Clean UI** - Modern, responsive single-page application
 
 ## 🚀 Quick Start
 
 ```bash
-# Navigate to project
+# Navigate to project directory
 cd vcf-manager
 
 # Install dependencies
@@ -30,75 +22,77 @@ npm install
 # Run tests
 npm test
 
-# Open in browser
-# Simply open index.html in a web browser (via HTTP server)
+# Open application
+# Open index.html in a web browser (use a local HTTP server for best results)
 ```
 
-## 🏗️ Architecture Highlights
+## 🏗️ Architecture
 
-- **Pure Vanilla JavaScript** - No frameworks, easy to understand
-- **Modular Design** - Clear separation: core, features, utils
-- **Well-Tested** - 152+ tests with Jest
-- **AI-Friendly** - Explicit types, clear naming, comprehensive docs
+This project follows standard JavaScript best practices:
 
-## 📁 Repository Structure
+- **Vanilla JavaScript (ES6+)** - No framework dependencies
+- **Modular Design** - Clear separation of concerns (core, features, utilities)
+- **Comprehensive Testing** - Jest with 152+ passing tests
+- **Clean Code** - JSDoc comments, consistent naming, clear structure
+
+### Project Structure
 
 ```
-234578/
-├── ARCHITECTURE.md              # Complete system documentation
-├── CONTRIBUTING_FOR_AI.md       # AI agent development guide
-├── CODE_STRUCTURE.md            # File organization reference
-├── README.md                    # This file
-└── vcf-manager/                 # Main application
-    ├── index.html               # Entry point
-    ├── css/styles.css           # Styles
-    ├── src/                     # Source code
-    │   ├── config.js           # Configuration
-    │   ├── core/               # Core modules
-    │   ├── features/           # Features
-    │   └── utils/              # Utilities
-    └── tests/                   # Test suites
+vcf-manager/
+├── index.html           # Application entry point
+├── package.json         # NPM dependencies and scripts
+├── jest.config.js       # Test configuration
+├── css/
+│   └── styles.css       # Application styles
+├── src/
+│   ├── app.js          # Application initialization
+│   ├── config.js       # Configuration and constants
+│   ├── core/           # Core business logic
+│   │   ├── contacts.js    # Contact management
+│   │   └── vcf-parser.js  # VCF parsing/export
+│   ├── features/       # Feature modules
+│   │   ├── auto-merger.js # Auto-merge functionality
+│   │   └── merge-tool.js  # Manual merge UI
+│   └── utils/          # Utility functions
+│       └── phone.js       # Phone number handling
+└── tests/              # Test suites
+    ├── core/          # Core module tests
+    ├── features/      # Feature tests
+    └── utils/         # Utility tests
 ```
 
 ## 🧪 Testing
 
-All features are thoroughly tested:
-
 ```bash
 npm test                  # Run all tests
-npm run test:watch        # Watch mode
-npm run test:coverage     # Coverage report
+npm run test:watch        # Watch mode for development
+npm run test:coverage     # Generate coverage report
 ```
 
-Current status: **152 tests passing** ✅
+All features include comprehensive unit and integration tests.
 
-## 🤖 For AI Agents
+## 📚 Documentation
 
-### Before Making Changes
-1. Read [ARCHITECTURE.md](ARCHITECTURE.md) to understand the system
-2. Check [CODE_STRUCTURE.md](CODE_STRUCTURE.md) to find relevant files
-3. Follow [CONTRIBUTING_FOR_AI.md](CONTRIBUTING_FOR_AI.md) guidelines
-4. Run tests to understand current state
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed system architecture and design patterns
+- **[CONTRIBUTING_FOR_AI.md](CONTRIBUTING_FOR_AI.md)** - Development guidelines for AI-assisted development
+- **[CODE_STRUCTURE.md](CODE_STRUCTURE.md)** - Complete file structure reference
 
-### Key Principles
-- **Minimal Changes** - Only modify what's necessary
-- **Test-Driven** - Run tests before and after changes
-- **Clear Documentation** - Update docs when changing structure
-- **Consistent Patterns** - Follow existing code style
+## 🔧 Configuration
 
-### Common Tasks
-- **Adding VCF fields** - See CONTRIBUTING_FOR_AI.md → "Adding a New Contact Field"
-- **Adding duplicate detection** - See CONTRIBUTING_FOR_AI.md → "Adding a New Duplicate Detection Method"
-- **Modifying UI** - See CODE_STRUCTURE.md → "Where to Make Changes"
+Configuration options are centralized in `src/config.js`:
 
-## 📊 Code Quality
+- Application metadata (version, name)
+- Phone number format settings
+- UI display preferences
+- User-facing messages
 
-- ✅ Comprehensive JSDoc comments
-- ✅ Clear naming conventions
-- ✅ Modular architecture
-- ✅ High test coverage
-- ✅ Well-documented data flows
-- ✅ AI-friendly structure
+## 📊 Code Quality Standards
+
+- JSDoc documentation for all functions and classes
+- Consistent code style and naming conventions
+- High test coverage (152+ tests)
+- Modular architecture with clear dependencies
+- No external runtime dependencies (testing only)
 
 ## 📝 Version
 
@@ -107,7 +101,3 @@ Current status: **152 tests passing** ✅
 ## 📄 License
 
 MIT License
-
----
-
-**Maintained exclusively by AI Agents** | Last Updated: 2026-02-02
