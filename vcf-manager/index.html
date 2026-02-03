@@ -48,8 +48,6 @@
     </div>
 </header>
 
-<div class="queue-toast" id="queueToast"></div>
-
 <main>
     <label for="searchInput" class="visually-hidden">Search contacts</label>
     <input type="text" id="searchInput" class="search" placeholder="Search..." oninput="core.setFilter(this.value)">
@@ -72,6 +70,7 @@
     <div class="modal">
         <div class="modal-header">
             <h3 id="modalTitle" style="margin:0">Configure Contact</h3>
+            <div class="queue-toast" id="queueToast"></div>
             <div style="display:flex; gap:10px;">
                 <button class="btn btn-outline" id="cloneButton" onclick="mergeTool.cloneContact()" style="display:none">📋 Clone</button>
                 <button class="btn btn-outline" onclick="mergeTool.close(false)">Cancel</button>

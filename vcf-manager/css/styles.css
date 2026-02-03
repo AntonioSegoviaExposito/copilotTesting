@@ -348,20 +348,16 @@ main {
 }
 
 .queue-toast {
-    position: fixed;
-    top: 80px;
-    left: 50%;
-    transform: translateX(-50%);
     background: #fef3c7;
     color: #92400e;
     padding: 0.5rem 1rem;
     border-radius: 20px;
     border: 1px solid #fcd34d;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     display: none;
-    z-index: 200;
+    text-align: center;
 }
 
 .master-badge {
@@ -398,11 +394,11 @@ main {
 /* Toast Notification System */
 .toast-container {
     position: fixed;
-    top: 20px;
+    bottom: 100px;
     right: 20px;
     z-index: 9999;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     gap: 10px;
     pointer-events: none;
 }

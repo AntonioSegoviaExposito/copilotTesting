@@ -331,7 +331,7 @@ class AutoMerger {
         const toast = document.getElementById('queueToast');
         if (toast) {
             // Show remaining count (including current group)
-            toast.innerText = `Cola: ${this.queue.length + 1} grupos restantes`;
+            toast.innerText = `Queue: ${this.queue.length + 1} groups remaining`;
             toast.style.display = 'block';
         }
 

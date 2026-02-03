@@ -375,27 +375,29 @@ class MergeTool {
             // Only slaves are clickable (to become master)
             const onclick = isMaster ? '' : `onclick="mergeTool.swapMaster('${contact._id}')"`;
 
-            // Import group indicator (with validation and sanitization)
-            const importGroupHtml = contact._importColor && isValidHexColor(contact._importColor)
-                ? `<div style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${contact._importColor}; margin-right:4px;" title="Importado de: ${escapeHtml(contact._importFileName || 'Desconocido')}"></div>`
+            // Import group color indicator (separate element to avoid border conflicts)
+            const hasImportColor = contact._importColor && isValidHexColor(contact._importColor);
+            const importColorBar = hasImportColor
+                ? `<div style="position:absolute; left:0; top:0; bottom:0; width:4px; background:${contact._importColor}; border-radius:8px 0 0 8px;"></div>`
                 : '';
-
-            // Safe border style with color validation
-            const borderStyle = contact._importColor && isValidHexColor(contact._importColor)
-                ? `border-left: 3px solid ${contact._importColor};`
+            
+            // Import group dot indicator in header
+            const importGroupDot = hasImportColor
+                ? `<div style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${contact._importColor}; margin-right:4px;" title="Imported from: ${escapeHtml(contact._importFileName || 'Unknown')}"></div>`
                 : '';
 
             // Build contact card HTML
             list.innerHTML += `
-                <div class="source-item ${isMaster ? 'master' : ''}" ${onclick} style="${borderStyle}">
+                <div class="source-item ${isMaster ? 'master' : ''}" ${onclick} style="position:relative;">
+                    ${importColorBar}
                     <div style="font-weight:bold; color:${isMaster ? 'var(--primary)' : '#64748b'}; font-size:0.7rem; margin-bottom:5px;">
-                        ${importGroupHtml}
+                        ${importGroupDot}
                         ${isMaster ? '<span class="master-badge">MASTER</span>' : '<span class="slave-badge">SLAVE</span>'}
                         <span class="click-hint">👈 Set as Master</span>
                     </div>
-                    <div style="font-weight:bold; font-size:1rem">${contact.fn}</div>
+                    <div style="font-weight:bold; font-size:1rem">${escapeHtml(contact.fn)}</div>
                     <div style="font-size:0.8rem; margin-top:5px; color:#475569">
-                        ${contact.tels.map(t => `<div>${t}</div>`).join('')}
+                        ${contact.tels.map(t => `<div>${escapeHtml(t)}</div>`).join('')}
                     </div>
                 </div>
             `;
