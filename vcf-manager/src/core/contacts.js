@@ -29,7 +29,37 @@
 
 import Config from '../config.js';
 import PhoneUtils from '../utils/phone.js';
+import Toast from '../utils/toast.js';
 import VCFParser from './vcf-parser.js';
+
+/**
+ * Validate that a string is a safe hex color
+ * @private
+ * @param {string} color - Color to validate
+ * @returns {boolean} True if valid hex color
+ */
+function isValidHexColor(color) {
+    return /^#[0-9A-Fa-f]{6}$/.test(color);
+}
+
+/**
+ * Escape HTML for safe attribute insertion
+ * @private
+ * @param {string} str - String to escape
+ * @returns {string} Escaped string
+ */
+function escapeHtmlAttr(str) {
+    return str.replace(/[&<>"']/g, char => {
+        const escape = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        };
+        return escape[char];
+    });
+}
 
 /**
  * @typedef {Object} Contact
@@ -78,6 +108,21 @@ class ContactManager {
         
         /** @type {boolean} Show only contacts without phone numbers (false = show all) */
         this.showOnlyWithoutPhones = false;
+        
+        /** @type {number} Counter for import groups to assign unique colors */
+        this.importGroupCounter = 0;
+        
+        /** @type {string[]} Array of colors for import groups */
+        this.importGroupColors = [
+            '#2563eb', // blue
+            '#16a34a', // green
+            '#f59e0b', // orange
+            '#ef4444', // red
+            '#8b5cf6', // purple
+            '#ec4899', // pink
+            '#06b6d4', // cyan
+            '#84cc16'  // lime
+        ];
     }
 
     /**
@@ -93,13 +138,90 @@ class ContactManager {
     init() {
         const fileInput = document.getElementById('fileInput');
         if (fileInput) {
-            // Bind file selection to loadFile method
-            fileInput.addEventListener('change', (e) => this.loadFile(e.target.files[0]));
+            // Bind file selection to loadFiles method (supports multiple files)
+            fileInput.addEventListener('change', (e) => this.loadFiles(e.target.files));
         }
     }
 
     /**
-     * Load contacts from a VCF file
+     * Load contacts from multiple VCF files
+     * 
+     * LOADING PROCESS:
+     * 1. Process each file sequentially
+     * 2. Assign unique import group to each file
+     * 3. Parse contacts and add import group metadata
+     * 4. Append to existing contacts (doesn't replace)
+     * 5. Re-render UI to display all contacts
+     * 
+     * Each import group gets a unique color for visual identification.
+     * 
+     * @param {FileList} files - FileList object from file input
+     * @returns {void}
+     * 
+     * @example
+     * // Called from file input event listener
+     * fileInput.addEventListener('change', (e) => this.loadFiles(e.target.files));
+     */
+    loadFiles(files) {
+        if (!files || files.length === 0) return;
+
+        // Convert FileList to Array for easier processing
+        const fileArray = Array.from(files);
+        
+        // Process files sequentially
+        this._processFilesSequentially(fileArray, 0);
+    }
+
+    /**
+     * Process files sequentially to maintain import group order
+     * @private
+     */
+    _processFilesSequentially(fileArray, index) {
+        if (index >= fileArray.length) {
+            // All files processed, render UI
+            this.render();
+            
+            // Show success toast
+            const fileCount = fileArray.length;
+            Toast.success(`${fileCount} ${fileCount === 1 ? 'archivo importado' : 'archivos importados'} correctamente`);
+            return;
+        }
+
+        const file = fileArray[index];
+        const importGroupId = this.importGroupCounter++;
+        const importColor = this.importGroupColors[importGroupId % this.importGroupColors.length];
+
+        // Use FileReader API to read file as text
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            // Parse VCF content
+            const newContacts = VCFParser.parse(e.target.result);
+            
+            // Add import group metadata to each contact
+            newContacts.forEach(contact => {
+                contact._importGroup = importGroupId;
+                contact._importColor = importColor;
+                contact._importFileName = file.name;
+            });
+            
+            // Append to existing contacts
+            this.contacts = this.contacts.concat(newContacts);
+            
+            // Process next file
+            this._processFilesSequentially(fileArray, index + 1);
+        };
+        
+        reader.onerror = () => {
+            Toast.error(`Error al leer el archivo: ${file.name}`);
+            // Continue with next file even if this one fails
+            this._processFilesSequentially(fileArray, index + 1);
+        };
+        
+        reader.readAsText(file);
+    }
+
+    /**
+     * Load contacts from a single VCF file (legacy method)
      * 
      * LOADING PROCESS:
      * 1. Validate file is provided
@@ -109,13 +231,13 @@ class ContactManager {
      * 5. Re-render UI to display new contacts
      * 
      * NOTE: This replaces all existing contacts. To add contacts,
-     * use merge operations instead.
+     * use merge operations instead. For multiple files, use loadFiles().
      * 
      * @param {File} file - VCF file object from file input
      * @returns {void}
      * 
      * @example
-     * // Called from file input event listener
+     * // Called from file input event listener (single file mode)
      * fileInput.addEventListener('change', (e) => this.loadFile(e.target.files[0]));
      */
     loadFile(file) {
@@ -201,7 +323,7 @@ class ContactManager {
         this.render();
         
         // Show confirmation message
-        alert(this.sortAZ ? Config.messages.sortAlpha : Config.messages.sortCreation);
+        Toast.info(this.sortAZ ? Config.messages.sortAlpha : Config.messages.sortCreation);
     }
 
     /**
@@ -355,6 +477,15 @@ class ContactManager {
         // Create card container
         const card = document.createElement('div');
         card.className = `card ${isSelected ? 'selected' : ''}`;
+        
+        // Add import group indicator if present (with validation)
+        if (contact._importColor && isValidHexColor(contact._importColor)) {
+            card.style.borderLeft = `4px solid ${contact._importColor}`;
+            card.setAttribute('data-import-group', contact._importGroup);
+            if (contact._importFileName) {
+                card.setAttribute('title', `Importado de: ${escapeHtmlAttr(contact._importFileName)}`);
+            }
+        }
         
         // Bind click to toggle selection
         card.onclick = () => this.toggleSelect(contact._id);
@@ -533,9 +664,10 @@ class ContactManager {
      * // Called from Delete button
      * <button onclick="core.deleteSelected()">Eliminar</button>
      */
-    deleteSelected() {
+    async deleteSelected() {
         // Show confirmation dialog
-        if (!confirm(Config.messages.confirmDelete(this.selected.size))) return;
+        const confirmed = await Toast.confirm(Config.messages.confirmDelete(this.selected.size), 'Eliminar', 'Cancelar');
+        if (!confirmed) return;
         
         // Filter out selected contacts
         this.contacts = this.contacts.filter(c => !this.selected.has(c._id));
@@ -566,9 +698,10 @@ class ContactManager {
      * // Called from Clear All button
      * <button onclick="core.clearAll()">Clear All</button>
      */
-    clearAll() {
+    async clearAll() {
         // Show confirmation dialog
-        if (confirm(Config.messages.confirmClear)) {
+        const confirmed = await Toast.confirm(Config.messages.confirmClear, 'Limpiar todo', 'Cancelar');
+        if (confirmed) {
             // Empty the contacts array
             this.contacts = [];
             

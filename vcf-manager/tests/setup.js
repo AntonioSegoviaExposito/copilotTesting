@@ -38,6 +38,25 @@ globalThis.alert = vi.fn();
 // Mock window.confirm
 globalThis.confirm = vi.fn(() => true);
 
+// Mock Toast for testing
+const Toast = (await import('../src/utils/toast.js')).default;
+globalThis.Toast = Toast;
+
+// Mock Toast methods to be spies that can be verified in tests
+Toast.show = vi.fn();
+Toast.info = vi.fn();
+Toast.success = vi.fn();
+Toast.warning = vi.fn();
+Toast.error = vi.fn();
+Toast.confirm = vi.fn(async () => true); // Default to confirmed
+
+// Mock DuplicatePreview for testing
+const DuplicatePreview = (await import('../src/features/duplicate-preview.js')).default;
+globalThis.DuplicatePreview = DuplicatePreview;
+
+// Mock DuplicatePreview.show to auto-confirm by default
+DuplicatePreview.show = vi.fn(async () => true); // Default to confirmed
+
 // Mock URL.createObjectURL
 globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
 

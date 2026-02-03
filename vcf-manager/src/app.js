@@ -21,15 +21,19 @@
 // Import all modules (ES Module syntax)
 import Config from './config.js';
 import PhoneUtils from './utils/phone.js';
+import Toast from './utils/toast.js';
 import VCFParser from './core/vcf-parser.js';
 import ContactManager from './core/contacts.js';
 import MergeTool from './features/merge-tool.js';
 import AutoMerger from './features/auto-merger.js';
+import DuplicatePreview from './features/duplicate-preview.js';
 
 // Expose utilities to window for modules that depend on globals
 window.Config = Config;
 window.PhoneUtils = PhoneUtils;
+window.Toast = Toast;
 window.VCFParser = VCFParser;
+window.DuplicatePreview = DuplicatePreview;
 
 /**
  * Initialize the application

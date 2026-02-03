@@ -45,6 +45,29 @@
  */
 
 import PhoneUtils from '../utils/phone.js';
+import Toast from '../utils/toast.js';
+
+/**
+ * Escape HTML special characters to prevent XSS
+ * @private
+ * @param {string} str - String to escape
+ * @returns {string} Escaped string safe for HTML insertion
+ */
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+/**
+ * Validate that a string is a safe hex color
+ * @private
+ * @param {string} color - Color to validate
+ * @returns {boolean} True if valid hex color
+ */
+function isValidHexColor(color) {
+    return /^#[0-9A-Fa-f]{6}$/.test(color);
+}
 
 /**
  * @typedef {Object} PendingMerge
@@ -352,10 +375,21 @@ class MergeTool {
             // Only slaves are clickable (to become master)
             const onclick = isMaster ? '' : `onclick="mergeTool.swapMaster('${contact._id}')"`;
 
+            // Import group indicator (with validation and sanitization)
+            const importGroupHtml = contact._importColor && isValidHexColor(contact._importColor)
+                ? `<div style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${contact._importColor}; margin-right:4px;" title="Importado de: ${escapeHtml(contact._importFileName || 'Desconocido')}"></div>`
+                : '';
+
+            // Safe border style with color validation
+            const borderStyle = contact._importColor && isValidHexColor(contact._importColor)
+                ? `border-left: 3px solid ${contact._importColor};`
+                : '';
+
             // Build contact card HTML
             list.innerHTML += `
-                <div class="source-item ${isMaster ? 'master' : ''}" ${onclick}>
+                <div class="source-item ${isMaster ? 'master' : ''}" ${onclick} style="${borderStyle}">
                     <div style="font-weight:bold; color:${isMaster ? 'var(--primary)' : '#64748b'}; font-size:0.7rem; margin-bottom:5px;">
+                        ${importGroupHtml}
                         ${isMaster ? '<span class="master-badge">MASTER</span>' : '<span class="slave-badge">SLAVE</span>'}
                         <span class="click-hint">👈 Set as Master</span>
                     </div>
@@ -794,7 +828,7 @@ class MergeTool {
         core.deselectAll();
 
         // Show success message
-        alert('Contacto clonado correctamente');
+        Toast.success('Contacto clonado correctamente');
     }
 }
 

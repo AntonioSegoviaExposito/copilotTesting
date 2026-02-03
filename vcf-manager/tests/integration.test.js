@@ -66,7 +66,7 @@ describe('Integration Tests', () => {
     });
 
     describe('Auto Merge Workflow', () => {
-        test('should process duplicate names sequentially', () => {
+        test('should process duplicate names sequentially', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: ['111'], emails: [], org: '' },
                 { _id: 'id2', fn: 'John', tels: ['222'], emails: [], org: '' },
@@ -74,7 +74,7 @@ describe('Integration Tests', () => {
                 { _id: 'id4', fn: 'Jane', tels: ['444'], emails: [], org: '' }
             ];
 
-            autoMerger.start('name');
+            await autoMerger.start('name');
 
             // First group should be shown
             expect(document.getElementById('mergeModal').style.display).toBe('flex');
@@ -87,7 +87,7 @@ describe('Integration Tests', () => {
             expect(autoMerger.active).toBe(true);
         });
 
-        test('should find phone duplicates with different formats', () => {
+        test('should find phone duplicates with different formats', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'Contact A', tels: ['+34612345678'], emails: [], org: '' },
                 { _id: 'id2', fn: 'Contact B', tels: ['612345678'], emails: [], org: '' },
@@ -95,7 +95,7 @@ describe('Integration Tests', () => {
             ];
 
             autoMerger.processNext = vi.fn();
-            autoMerger.start('phone');
+            await autoMerger.start('phone');
 
             // All three should be in one group
             expect(autoMerger.queue.length).toBe(1);
@@ -230,7 +230,7 @@ END:VCARD`;
     });
 
     describe('Delete Workflow', () => {
-        test('should delete selected contacts and clear selection', () => {
+        test('should delete selected contacts and clear selection', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' },
                 { _id: 'id2', fn: 'Jane', tels: [], emails: [], org: '' },
@@ -240,8 +240,8 @@ END:VCARD`;
             core.toggleSelect('id1');
             core.toggleSelect('id2');
 
-            confirm.mockReturnValue(true);
-            core.deleteSelected();
+            Toast.confirm.mockResolvedValue(true);
+            await core.deleteSelected();
 
             expect(core.contacts.length).toBe(1);
             expect(core.contacts[0].fn).toBe('Bob');

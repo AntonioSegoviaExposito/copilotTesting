@@ -180,7 +180,7 @@ END:VCARD`;
         test('should not create download for empty contact list', () => {
             const createElementSpy = vi.spyOn(document, 'createElement');
             VCFParser.download([]);
-            expect(alert).toHaveBeenCalledWith(Config.messages.emptyList);
+            expect(Toast.warning).toHaveBeenCalledWith(Config.messages.emptyList);
             expect(createElementSpy).not.toHaveBeenCalledWith('a');
         });
 
