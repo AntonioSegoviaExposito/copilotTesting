@@ -30,13 +30,23 @@ const PhoneUtils = {
      * LOGIC:
      * 1. Remove all non-numeric characters except '+'
      * 2. Convert '00' prefix to '+' (international dialing code)
-     * 3. Add default country code if no prefix present
+     * 3. Add default country code if no prefix present and meets minimum length
+     * 4. Non-restrictive: If can't normalize, keep cleaned version
+     * 
+     * SUPPORTED COUNTRY CODES:
+     * - +34 (Spain): 9 digits
+     * - +1 (USA/Canada): 10 digits
+     * - +44 (UK): 10 digits (mobile/landline)
+     * - +33 (France): 9 digits
+     * - +49 (Germany): Variable length (10-11 digits typical)
      * 
      * EXAMPLES:
      * - '612345678' → '+34612345678' (adds default code)
      * - '0034612345678' → '+34612345678' (converts 00 to +)
      * - '+34 612 345 678' → '+34612345678' (removes spaces)
-     * - '+44123456789' → '+44123456789' (preserves non-default code)
+     * - '+44 7911 123456' → '+447911123456' (preserves UK mobile)
+     * - '+1 415 555 1234' → '+14155551234' (preserves USA)
+     * - 'invalid' → 'invalid' (non-restrictive)
      * 
      * @param {string} phone - Raw phone number (may contain spaces, dashes, etc.)
      * @param {string} [defaultCode='+34'] - Default country code to add if missing
@@ -45,6 +55,7 @@ const PhoneUtils = {
      * @example
      * PhoneUtils.normalize('612 345 678') // Returns: '+34612345678'
      * PhoneUtils.normalize('0034612345678') // Returns: '+34612345678'
+     * PhoneUtils.normalize('+1 415 555 1234') // Returns: '+14155551234'
      */
     normalize(phone, defaultCode = '+34') {
         if (!phone) return '';
@@ -63,43 +74,98 @@ const PhoneUtils = {
             clean = defaultCode + clean;
         }
         
+        // Step 4: If still no '+' prefix and too short, keep as-is (non-restrictive)
+        // This allows free-form text like extensions, special numbers, etc.
+        
         return clean;
     },
 
     /**
      * Format a phone number for display
      * 
-     * Currently supports formatting for +34 country code (Spain): +34 XXX XXX XXX
-     * For other countries, returns normalized format without spacing
+     * Supports formatting for multiple country codes:
+     * - +34 (Spain): +34 XXX XXX XXX
+     * - +1 (USA/Canada): +1 XXX XXX XXXX
+     * - +44 (UK): +44 XXXX XXXXXX (mobile: +44 7XXX XXXXXX)
+     * - +33 (France): +33 X XX XX XX XX
+     * - +49 (Germany): +49 XXX XXXXXXXX (variable length)
+     * 
+     * For other countries or non-standard formats, returns normalized format
      * 
      * LOGIC:
      * 1. Normalize the phone number first
-     * 2. Check if it matches +34 pattern (country code + 9 digits)
-     * 3. If matches, format with spaces: +34 XXX XXX XXX
-     * 4. Otherwise, return normalized format as-is
-     * 
-     * AI MAINTENANCE NOTE:
-     * To add new country format:
-     * 1. Add country code check (e.g., if (normalized.startsWith('+44')))
-     * 2. Add length check for that country
-     * 3. Add regex replace pattern for formatting
+     * 2. Check country code and apply appropriate format
+     * 3. If no format matches, return normalized format as-is
      * 
      * @param {string} phone - Phone number to format
      * @returns {string} Formatted phone number for display
      * 
      * @example
-     * PhoneUtils.format('612345678') // Returns: '+34 612 345 678'
-     * PhoneUtils.format('+44123456789') // Returns: '+44123456789' (no special format)
+     * PhoneUtils.format('612345678') // Returns: '+34 612 345 678' (Spain)
+     * PhoneUtils.format('+14155551234') // Returns: '+1 415 555 1234' (USA)
+     * PhoneUtils.format('+447911123456') // Returns: '+44 7911 123456' (UK mobile)
+     * PhoneUtils.format('+33612345678') // Returns: '+33 6 12 34 56 78' (France)
      */
     format(phone) {
         const normalized = this.normalize(phone);
         
-        // Format numbers with +34 country code: +34 XXX XXX XXX (12 chars total)
+        // Spain +34: +34 XXX XXX XXX (12 chars: +34 + 9 digits)
         if (normalized.startsWith('+34') && normalized.length === 12) {
             return normalized.replace(/(\+34)(\d{3})(\d{3})(\d{3})/, '$1 $2 $3 $4');
         }
         
-        // For other countries, return normalized format
+        // USA/Canada +1: +1 XXX XXX XXXX (12 chars: +1 + 10 digits)
+        if (normalized.startsWith('+1') && normalized.length === 12) {
+            return normalized.replace(/(\+1)(\d{3})(\d{3})(\d{4})/, '$1 $2 $3 $4');
+        }
+        
+        // UK +44: Variable length, typically 10 digits after +44
+        // Mobile: +44 7XXX XXXXXX
+        // Landline London: +44 20 XXXX XXXX
+        if (normalized.startsWith('+44') && normalized.length >= 12 && normalized.length <= 13) {
+            // Mobile numbers (start with 7)
+            if (normalized[3] === '7' && normalized.length === 13) {
+                return normalized.replace(/(\+44)(\d{4})(\d{6})/, '$1 $2 $3');
+            }
+            // Landline with 2-digit area code (like London 20) or 3-digit area code
+            if (normalized.length === 13) {
+                // Try 2-digit area code format first
+                const areaCode = normalized.substring(3, 5);
+                if (['20', '23', '24', '28', '29'].includes(areaCode)) {
+                    return normalized.replace(/(\+44)(\d{2})(\d{4})(\d{4})/, '$1 $2 $3 $4');
+                }
+                // Fall back to 3-digit area code
+                return normalized.replace(/(\+44)(\d{3})(\d{7})/, '$1 $2 $3');
+            }
+        }
+        
+        // France +33: +33 X XX XX XX XX (12 chars: +33 + 9 digits)
+        if (normalized.startsWith('+33') && normalized.length === 12) {
+            return normalized.replace(/(\+33)(\d{1})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5 $6');
+        }
+        
+        // Germany +49: Variable length (10-11 digits typical)
+        // Format: +49 XXX XXXXXXXX or +49 XXXX XXXXXXX
+        if (normalized.startsWith('+49')) {
+            // Mobile (starts with 15, 16, or 17)
+            const mobilePrefix = normalized.substring(3, 5);
+            if (normalized.length === 13 && ['15', '16', '17'].includes(mobilePrefix)) {
+                return normalized.replace(/(\+49)(\d{3})(\d{8})/, '$1 $2 $3');
+            }
+            // Berlin (30), Munich (89), Hamburg (40), Frankfurt (69) - 2 digit area codes
+            if (normalized.length >= 13 && normalized.length <= 14) {
+                const areaCode = normalized.substring(3, 5);
+                if (['30', '89', '40', '69'].includes(areaCode)) {
+                    return normalized.replace(/(\+49)(\d{2})(\d+)/, '$1 $2 $3');
+                }
+            }
+            // Other area codes (3-5 digits)
+            if (normalized.length >= 12 && normalized.length <= 15) {
+                return normalized.replace(/(\+49)(\d{3})(\d+)/, '$1 $2 $3');
+            }
+        }
+        
+        // For other countries or non-standard formats, return normalized format
         return normalized;
     }
 };

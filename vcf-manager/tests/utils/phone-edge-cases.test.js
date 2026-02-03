@@ -66,8 +66,9 @@ describe('PhoneUtils - Edge Cases', () => {
             expect(PhoneUtils.format('+346123456789')).toBe('+346123456789'); // 13 chars, not formatted
         });
 
-        test('should not format non-Spanish numbers with extra length', () => {
-            expect(PhoneUtils.format('+441234567890')).toBe('+441234567890');
+        test('should format UK numbers appropriately', () => {
+            // UK numbers are now formatted, updated expectation for 3-digit area code
+            expect(PhoneUtils.format('+441234567890')).toBe('+44 123 4567890');
         });
 
         test('should handle empty after normalization', () => {

@@ -697,6 +697,15 @@ main {
     gap: 10px;
 }
 
+.duplicate-preview-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px white, 0 0 0 3px rgba(0,0,0,0.1);
+}
+
 .duplicate-preview-phone {
     margin-left: auto;
     color: #64748b;
@@ -710,4 +719,57 @@ main {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
+}
+
+/* Drag and Drop Zone */
+.drop-zone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(37, 99, 235, 0.95);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.drop-zone-active {
+    display: flex;
+    opacity: 1;
+}
+
+.drop-zone-content {
+    text-align: center;
+    color: white;
+    pointer-events: none;
+}
+
+.drop-zone-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+.drop-zone-text {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.drop-zone-hint {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
 }

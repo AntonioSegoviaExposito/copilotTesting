@@ -338,4 +338,77 @@ describe('DuplicatePreview', () => {
             vi.advanceTimersByTime(200);
         });
     });
+
+    describe('Import Group Colors', () => {
+        test('should display color dots for contacts with import colors', async () => {
+            const groups = [[
+                { _id: '1', fn: 'Contact A', tels: [], _importColor: '#2563eb', _importGroup: 0 },
+                { _id: '2', fn: 'Contact B', tels: [], _importColor: '#16a34a', _importGroup: 1 }
+            ]];
+            
+            const promise = DuplicatePreview.show(groups, 'name');
+            await vi.advanceTimersByTimeAsync(0);
+            
+            const colorDots = document.querySelectorAll('.duplicate-preview-color-dot');
+            expect(colorDots.length).toBe(2);
+            expect(colorDots[0].style.backgroundColor).toBe('rgb(37, 99, 235)'); // #2563eb
+            expect(colorDots[1].style.backgroundColor).toBe('rgb(22, 163, 74)'); // #16a34a
+            
+            // Clean up
+            document.querySelector('.duplicate-preview-cancel').click();
+            vi.advanceTimersByTime(200);
+        });
+
+        test('should not display color dot for contacts without import colors', async () => {
+            const groups = [[
+                { _id: '1', fn: 'Contact A', tels: [] },
+                { _id: '2', fn: 'Contact B', tels: [] }
+            ]];
+            
+            const promise = DuplicatePreview.show(groups, 'name');
+            await vi.advanceTimersByTimeAsync(0);
+            
+            const colorDots = document.querySelectorAll('.duplicate-preview-color-dot');
+            expect(colorDots.length).toBe(0);
+            
+            // Clean up
+            document.querySelector('.duplicate-preview-cancel').click();
+            vi.advanceTimersByTime(200);
+        });
+
+        test('should not display color dot for invalid colors', async () => {
+            const groups = [[
+                { _id: '1', fn: 'Contact A', tels: [], _importColor: 'invalid', _importGroup: 0 },
+                { _id: '2', fn: 'Contact B', tels: [], _importColor: 'rgb(255,0,0)', _importGroup: 1 }
+            ]];
+            
+            const promise = DuplicatePreview.show(groups, 'name');
+            await vi.advanceTimersByTimeAsync(0);
+            
+            const colorDots = document.querySelectorAll('.duplicate-preview-color-dot');
+            expect(colorDots.length).toBe(0);
+            
+            // Clean up
+            document.querySelector('.duplicate-preview-cancel').click();
+            vi.advanceTimersByTime(200);
+        });
+
+        test('should show mixed groups with and without colors', async () => {
+            const groups = [[
+                { _id: '1', fn: 'Contact A', tels: [], _importColor: '#2563eb', _importGroup: 0 },
+                { _id: '2', fn: 'Contact B', tels: [] },
+                { _id: '3', fn: 'Contact C', tels: [], _importColor: '#16a34a', _importGroup: 1 }
+            ]];
+            
+            const promise = DuplicatePreview.show(groups, 'name');
+            await vi.advanceTimersByTimeAsync(0);
+            
+            const colorDots = document.querySelectorAll('.duplicate-preview-color-dot');
+            expect(colorDots.length).toBe(2);
+            
+            // Clean up
+            document.querySelector('.duplicate-preview-cancel').click();
+            vi.advanceTimersByTime(200);
+        });
+    });
 });

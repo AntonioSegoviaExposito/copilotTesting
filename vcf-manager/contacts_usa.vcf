@@ -1,0 +1,14 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:John Smith
+TEL:+1 415 555 1234
+EMAIL:john.smith@example.com
+ORG:Tech Corp USA
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+FN:Emily Johnson
+TEL:+1 212 555 6789
+EMAIL:emily.j@example.com
+ORG:NYC Company
+END:VCARD

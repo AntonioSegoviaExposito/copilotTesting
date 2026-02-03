@@ -1,0 +1,14 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:Marie Dubois
+TEL:+33 6 12 34 56 78
+EMAIL:marie.d@example.fr
+ORG:Paris SARL
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+FN:Jean Martin
+TEL:+33 1 23 45 67 89
+EMAIL:jean.m@example.fr
+ORG:French Company
+END:VCARD
