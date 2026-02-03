@@ -79,6 +79,21 @@ class ContactManager {
         
         /** @type {boolean} Show only contacts without phone numbers (false = show all) */
         this.showOnlyWithoutPhones = false;
+        
+        /** @type {number} Counter for import groups to assign unique colors */
+        this.importGroupCounter = 0;
+        
+        /** @type {string[]} Array of colors for import groups */
+        this.importGroupColors = [
+            '#2563eb', // blue
+            '#16a34a', // green
+            '#f59e0b', // orange
+            '#ef4444', // red
+            '#8b5cf6', // purple
+            '#ec4899', // pink
+            '#06b6d4', // cyan
+            '#84cc16'  // lime
+        ];
     }
 
     /**
@@ -94,13 +109,90 @@ class ContactManager {
     init() {
         const fileInput = document.getElementById('fileInput');
         if (fileInput) {
-            // Bind file selection to loadFile method
-            fileInput.addEventListener('change', (e) => this.loadFile(e.target.files[0]));
+            // Bind file selection to loadFiles method (supports multiple files)
+            fileInput.addEventListener('change', (e) => this.loadFiles(e.target.files));
         }
     }
 
     /**
-     * Load contacts from a VCF file
+     * Load contacts from multiple VCF files
+     * 
+     * LOADING PROCESS:
+     * 1. Process each file sequentially
+     * 2. Assign unique import group to each file
+     * 3. Parse contacts and add import group metadata
+     * 4. Append to existing contacts (doesn't replace)
+     * 5. Re-render UI to display all contacts
+     * 
+     * Each import group gets a unique color for visual identification.
+     * 
+     * @param {FileList} files - FileList object from file input
+     * @returns {void}
+     * 
+     * @example
+     * // Called from file input event listener
+     * fileInput.addEventListener('change', (e) => this.loadFiles(e.target.files));
+     */
+    loadFiles(files) {
+        if (!files || files.length === 0) return;
+
+        // Convert FileList to Array for easier processing
+        const fileArray = Array.from(files);
+        
+        // Process files sequentially
+        this._processFilesSequentially(fileArray, 0);
+    }
+
+    /**
+     * Process files sequentially to maintain import group order
+     * @private
+     */
+    _processFilesSequentially(fileArray, index) {
+        if (index >= fileArray.length) {
+            // All files processed, render UI
+            this.render();
+            
+            // Show success toast
+            const fileCount = fileArray.length;
+            Toast.success(`${fileCount} ${fileCount === 1 ? 'archivo importado' : 'archivos importados'} correctamente`);
+            return;
+        }
+
+        const file = fileArray[index];
+        const importGroupId = this.importGroupCounter++;
+        const importColor = this.importGroupColors[importGroupId % this.importGroupColors.length];
+
+        // Use FileReader API to read file as text
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            // Parse VCF content
+            const newContacts = VCFParser.parse(e.target.result);
+            
+            // Add import group metadata to each contact
+            newContacts.forEach(contact => {
+                contact._importGroup = importGroupId;
+                contact._importColor = importColor;
+                contact._importFileName = file.name;
+            });
+            
+            // Append to existing contacts
+            this.contacts = this.contacts.concat(newContacts);
+            
+            // Process next file
+            this._processFilesSequentially(fileArray, index + 1);
+        };
+        
+        reader.onerror = () => {
+            Toast.error(`Error al leer el archivo: ${file.name}`);
+            // Continue with next file even if this one fails
+            this._processFilesSequentially(fileArray, index + 1);
+        };
+        
+        reader.readAsText(file);
+    }
+
+    /**
+     * Load contacts from a single VCF file (legacy method)
      * 
      * LOADING PROCESS:
      * 1. Validate file is provided
@@ -110,13 +202,13 @@ class ContactManager {
      * 5. Re-render UI to display new contacts
      * 
      * NOTE: This replaces all existing contacts. To add contacts,
-     * use merge operations instead.
+     * use merge operations instead. For multiple files, use loadFiles().
      * 
      * @param {File} file - VCF file object from file input
      * @returns {void}
      * 
      * @example
-     * // Called from file input event listener
+     * // Called from file input event listener (single file mode)
      * fileInput.addEventListener('change', (e) => this.loadFile(e.target.files[0]));
      */
     loadFile(file) {
@@ -356,6 +448,13 @@ class ContactManager {
         // Create card container
         const card = document.createElement('div');
         card.className = `card ${isSelected ? 'selected' : ''}`;
+        
+        // Add import group indicator if present
+        if (contact._importColor) {
+            card.style.borderLeft = `4px solid ${contact._importColor}`;
+            card.setAttribute('data-import-group', contact._importGroup);
+            card.setAttribute('title', `Importado de: ${contact._importFileName}`);
+        }
         
         // Bind click to toggle selection
         card.onclick = () => this.toggleSelect(contact._id);

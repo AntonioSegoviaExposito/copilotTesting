@@ -353,10 +353,16 @@ class MergeTool {
             // Only slaves are clickable (to become master)
             const onclick = isMaster ? '' : `onclick="mergeTool.swapMaster('${contact._id}')"`;
 
+            // Import group indicator
+            const importGroupHtml = contact._importColor 
+                ? `<div style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${contact._importColor}; margin-right:4px;" title="Importado de: ${contact._importFileName}"></div>`
+                : '';
+
             // Build contact card HTML
             list.innerHTML += `
-                <div class="source-item ${isMaster ? 'master' : ''}" ${onclick}>
+                <div class="source-item ${isMaster ? 'master' : ''}" ${onclick} style="${contact._importColor ? `border-left: 3px solid ${contact._importColor};` : ''}">
                     <div style="font-weight:bold; color:${isMaster ? 'var(--primary)' : '#64748b'}; font-size:0.7rem; margin-bottom:5px;">
+                        ${importGroupHtml}
                         ${isMaster ? '<span class="master-badge">MASTER</span>' : '<span class="slave-badge">SLAVE</span>'}
                         <span class="click-hint">👈 Set as Master</span>
                     </div>
