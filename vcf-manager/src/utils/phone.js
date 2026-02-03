@@ -127,12 +127,14 @@ const PhoneUtils = {
             if (normalized[3] === '7' && normalized.length === 13) {
                 return normalized.replace(/(\+44)(\d{4})(\d{6})/, '$1 $2 $3');
             }
-            // Landline (2-digit area code like London 20)
+            // Landline with 2-digit area code (like London 20) or 3-digit area code
             if (normalized.length === 13) {
-                return normalized.replace(/(\+44)(\d{2})(\d{4})(\d{4})/, '$1 $2 $3 $4');
-            }
-            // Other formats (3-digit area code)
-            if (normalized.length === 13) {
+                // Try 2-digit area code format first
+                const areaCode = normalized.substring(3, 5);
+                if (['20', '23', '24', '28', '29'].includes(areaCode)) {
+                    return normalized.replace(/(\+44)(\d{2})(\d{4})(\d{4})/, '$1 $2 $3 $4');
+                }
+                // Fall back to 3-digit area code
                 return normalized.replace(/(\+44)(\d{3})(\d{7})/, '$1 $2 $3');
             }
         }
@@ -146,7 +148,8 @@ const PhoneUtils = {
         // Format: +49 XXX XXXXXXXX or +49 XXXX XXXXXXX
         if (normalized.startsWith('+49')) {
             // Mobile (starts with 15, 16, or 17)
-            if (normalized.length === 13 && (normalized.startsWith('+4915') || normalized.startsWith('+4916') || normalized.startsWith('+4917'))) {
+            const mobilePrefix = normalized.substring(3, 5);
+            if (normalized.length === 13 && ['15', '16', '17'].includes(mobilePrefix)) {
                 return normalized.replace(/(\+49)(\d{3})(\d{8})/, '$1 $2 $3');
             }
             // Berlin (30), Munich (89), Hamburg (40), Frankfurt (69) - 2 digit area codes

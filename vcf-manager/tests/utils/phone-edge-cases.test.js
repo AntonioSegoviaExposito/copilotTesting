@@ -67,8 +67,8 @@ describe('PhoneUtils - Edge Cases', () => {
         });
 
         test('should format UK numbers appropriately', () => {
-            // UK numbers are now formatted, so this should be formatted
-            expect(PhoneUtils.format('+441234567890')).toBe('+44 12 3456 7890');
+            // UK numbers are now formatted, updated expectation for 3-digit area code
+            expect(PhoneUtils.format('+441234567890')).toBe('+44 123 4567890');
         });
 
         test('should handle empty after normalization', () => {
