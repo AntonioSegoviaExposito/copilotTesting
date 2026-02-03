@@ -614,10 +614,10 @@ export const customMatchers = {
 
 ### Tools & Dependencies
 
-- **Vitest** (existing): Unit and integration tests
+- **Vitest** (existing): Unit and integration tests with built-in benchmarking
 - **Playwright**: Visual regression testing
 - **istanbul/v8**: Coverage reporting
-- **Benchmark.js**: Performance benchmarking
+- **Performance API** (native): Browser performance monitoring
 - **MSW** (Mock Service Worker): API mocking if needed
 
 ### User Impact
