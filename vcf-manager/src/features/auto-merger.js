@@ -37,6 +37,7 @@
 import Config from '../config.js';
 import PhoneUtils from '../utils/phone.js';
 import Toast from '../utils/toast.js';
+import DuplicatePreview from './duplicate-preview.js';
 
 /**
  * Auto Merger Class
@@ -61,24 +62,25 @@ class AutoMerger {
      * WORKFLOW:
      * 1. Validate contacts exist
      * 2. Find duplicates using selected algorithm
-     * 3. Build queue of duplicate groups
-     * 4. Start processing queue
+     * 3. Show preview to user for confirmation
+     * 4. Build queue of duplicate groups
+     * 5. Start processing queue if user confirms
      * 
      * @param {string} mode - Detection mode: 'name' or 'phone'
      *   - 'name': Groups by exact name match (case-insensitive)
      *   - 'phone': Groups by shared phone numbers
      * 
-     * @returns {void} Shows alert if no contacts or no duplicates found
+     * @returns {Promise<void>} Shows toast if no contacts or no duplicates found
      * 
      * @example
      * // Find duplicates by name
-     * autoMerger.start('name');
+     * await autoMerger.start('name');
      * 
      * @example
      * // Find duplicates by phone number
-     * autoMerger.start('phone');
+     * await autoMerger.start('phone');
      */
-    start(mode) {
+    async start(mode) {
         // Guard: Ensure contacts exist before processing
         if (core.contacts.length === 0) {
             return Toast.warning(Config.messages.emptyAgenda);
@@ -89,13 +91,26 @@ class AutoMerger {
             ? this._findDuplicatesByName() 
             : this._findDuplicatesByPhone();
 
-        // Initialize queue with found groups
-        this.queue = groups;
-
         // Guard: Stop if no duplicates found
-        if (this.queue.length === 0) {
+        if (groups.length === 0) {
             return Toast.info(Config.messages.noDuplicates);
         }
+
+        // Resolve contact IDs to full contact objects for preview
+        const groupsWithContacts = groups.map(groupIds => 
+            groupIds.map(id => core.findById(id)).filter(c => c)
+        );
+
+        // Show preview and get user confirmation
+        const shouldContinue = await DuplicatePreview.show(groupsWithContacts, mode);
+        
+        // If user cancelled, exit without starting merge
+        if (!shouldContinue) {
+            return Toast.info('Fusión automática cancelada');
+        }
+
+        // Initialize queue with found groups
+        this.queue = groups;
 
         // Begin queue processing
         this.active = true;

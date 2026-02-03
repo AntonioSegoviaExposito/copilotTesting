@@ -35,7 +35,7 @@ describe('AutoMerger', () => {
             expect(Toast.warning).toHaveBeenCalledWith(Config.messages.emptyAgenda);
         });
 
-        test('should find duplicates by name', () => {
+        test('should find duplicates by name', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John Doe', tels: ['111'], emails: [], org: '' },
                 { _id: 'id2', fn: 'John Doe', tels: ['222'], emails: [], org: '' },
@@ -44,60 +44,60 @@ describe('AutoMerger', () => {
 
             // Mock processNext to prevent full execution
             autoMerger.processNext = vi.fn();
-            autoMerger.start('name');
+            await autoMerger.start('name');
 
             expect(autoMerger.queue.length).toBe(1);
             expect(autoMerger.queue[0]).toContain('id1');
             expect(autoMerger.queue[0]).toContain('id2');
         });
 
-        test('should be case insensitive for name matching', () => {
+        test('should be case insensitive for name matching', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'JOHN DOE', tels: [], emails: [], org: '' },
                 { _id: 'id2', fn: 'john doe', tels: [], emails: [], org: '' }
             ];
 
             autoMerger.processNext = vi.fn();
-            autoMerger.start('name');
+            await autoMerger.start('name');
 
             expect(autoMerger.queue.length).toBe(1);
         });
 
-        test('should trim names when matching', () => {
+        test('should trim names when matching', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John Doe  ', tels: [], emails: [], org: '' },
                 { _id: 'id2', fn: '  John Doe', tels: [], emails: [], org: '' }
             ];
 
             autoMerger.processNext = vi.fn();
-            autoMerger.start('name');
+            await autoMerger.start('name');
 
             expect(autoMerger.queue.length).toBe(1);
         });
 
-        test('should show info toast when no duplicates found', () => {
+        test('should show info toast when no duplicates found', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' },
                 { _id: 'id2', fn: 'Jane', tels: [], emails: [], org: '' }
             ];
 
-            autoMerger.start('name');
+            await autoMerger.start('name');
             expect(Toast.info).toHaveBeenCalledWith(Config.messages.noDuplicates);
         });
 
-        test('should set active to true when duplicates found', () => {
+        test('should set active to true when duplicates found', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' },
                 { _id: 'id2', fn: 'John', tels: [], emails: [], org: '' }
             ];
 
             autoMerger.processNext = vi.fn();
-            autoMerger.start('name');
+            await autoMerger.start('name');
 
             expect(autoMerger.active).toBe(true);
         });
 
-        test('should handle multiple duplicate groups', () => {
+        test('should handle multiple duplicate groups', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' },
                 { _id: 'id2', fn: 'John', tels: [], emails: [], org: '' },
@@ -106,14 +106,14 @@ describe('AutoMerger', () => {
             ];
 
             autoMerger.processNext = vi.fn();
-            autoMerger.start('name');
+            await autoMerger.start('name');
 
             expect(autoMerger.queue.length).toBe(2);
         });
     });
 
     describe('start - Phone Mode', () => {
-        test('should find duplicates by phone number', () => {
+        test('should find duplicates by phone number', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: ['+34612345678'], emails: [], org: '' },
                 { _id: 'id2', fn: 'Jane', tels: ['612345678'], emails: [], org: '' },
@@ -121,43 +121,43 @@ describe('AutoMerger', () => {
             ];
 
             autoMerger.processNext = vi.fn();
-            autoMerger.start('phone');
+            await autoMerger.start('phone');
 
             expect(autoMerger.queue.length).toBe(1);
         });
 
-        test('should normalize phone numbers when comparing', () => {
+        test('should normalize phone numbers when comparing', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: ['0034612345678'], emails: [], org: '' },
                 { _id: 'id2', fn: 'Jane', tels: ['+34612345678'], emails: [], org: '' }
             ];
 
             autoMerger.processNext = vi.fn();
-            autoMerger.start('phone');
+            await autoMerger.start('phone');
 
             expect(autoMerger.queue.length).toBe(1);
         });
 
-        test('should find duplicates when contact has multiple phones', () => {
+        test('should find duplicates when contact has multiple phones', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: ['111111111', '222222222'], emails: [], org: '' },
                 { _id: 'id2', fn: 'Jane', tels: ['333333333', '111111111'], emails: [], org: '' }
             ];
 
             autoMerger.processNext = vi.fn();
-            autoMerger.start('phone');
+            await autoMerger.start('phone');
 
             expect(autoMerger.queue.length).toBe(1);
         });
 
-        test('should not duplicate contact in group when multiple phones match', () => {
+        test('should not duplicate contact in group when multiple phones match', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: ['111111111', '222222222'], emails: [], org: '' },
                 { _id: 'id2', fn: 'Same John', tels: ['111111111', '222222222'], emails: [], org: '' }
             ];
 
             autoMerger.processNext = vi.fn();
-            autoMerger.start('phone');
+            await autoMerger.start('phone');
 
             // Should only have one group even though both phones match
             const flatIds = autoMerger.queue.flat();
