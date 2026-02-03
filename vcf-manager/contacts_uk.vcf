@@ -1,0 +1,21 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:Oliver Brown
+TEL:+44 7911 123456
+EMAIL:oliver.brown@example.co.uk
+ORG:London Ltd
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+FN:Sophie Williams
+TEL:+44 20 7946 0958
+EMAIL:sophie.w@example.co.uk
+ORG:British Corp
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+FN:Oliver Brown
+TEL:+44 7911 123456
+EMAIL:oliver.brown@example.co.uk
+ORG:London Ltd
+END:VCARD
