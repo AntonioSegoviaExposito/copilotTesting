@@ -304,7 +304,6 @@ Create `vcf-manager/tests/performance.test.js`:
 
 ```javascript
 import { describe, it, expect } from 'vitest';
-import { performance } from 'perf_hooks';
 
 describe('Performance Tests', () => {
     it('should parse 1000 contacts in under 1 second', () => {
@@ -520,24 +519,31 @@ Create `vcf-manager/tests/performance.test.js` (see Issue 4 for details):
 **4. Visual Regression Tests**
 
 Implement visual testing with tools like:
-- **Playwright** for screenshot comparison
-- **Storybook** for component isolation
-- **Percy** or **Chromatic** for visual diffs
+- **Playwright** for screenshot comparison and browser automation
+- **Percy** or **Chromatic** for visual diffs (if budget allows)
+- **pixelmatch** for local image comparison
 
 Example structure:
 ```javascript
 // vcf-manager/tests/visual.test.js
+import { test, expect } from '@playwright/test';
+
 describe('Visual Regression Tests', () => {
-    it('should match contact card snapshot', async () => {
-        // Render component, take screenshot, compare
+    test('should match contact card snapshot', async ({ page }) => {
+        await page.goto('http://localhost:5173');
+        await expect(page.locator('.contact-card').first()).toHaveScreenshot('contact-card.png');
     });
     
-    it('should match modal layout snapshot', async () => {
-        // Test modal appearance
+    test('should match modal layout snapshot', async ({ page }) => {
+        await page.goto('http://localhost:5173');
+        await page.click('button:has-text("Add Contact")');
+        await expect(page.locator('.modal')).toHaveScreenshot('modal-layout.png');
     });
     
-    it('should maintain responsive design', async () => {
-        // Test at multiple viewport sizes
+    test('should maintain responsive design', async ({ page }) => {
+        await page.setViewportSize({ width: 375, height: 667 }); // Mobile
+        await page.goto('http://localhost:5173');
+        await expect(page).toHaveScreenshot('mobile-view.png');
     });
 });
 ```
