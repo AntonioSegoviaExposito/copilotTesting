@@ -374,6 +374,9 @@ class ContactManager {
      * Export all contacts to VCF file
      * 
      * Triggers browser download of all contacts in VCF format.
+     * If contacts were imported from a legacy vCard version (< 4.0),
+     * shows a modal to let user choose between modern (4.0) or legacy (3.0) format.
+     * 
      * File name format: contacts_[timestamp].vcf
      * 
      * DELEGATES TO: VCFParser.download() which handles:
@@ -389,7 +392,36 @@ class ContactManager {
      * <button onclick="core.exportVCF()">Export</button>
      */
     exportVCF() {
-        VCFParser.download(this.contacts);
+        // Check if any contacts have legacy version
+        if (VCFParser.hasLegacyVersionContacts(this.contacts)) {
+            // Show version selection modal
+            const modal = document.getElementById('exportVersionModal');
+            if (modal) modal.style.display = 'flex';
+        } else {
+            // Export with default version (4.0)
+            VCFParser.download(this.contacts);
+        }
+    }
+
+    /**
+     * Export contacts with specific vCard version
+     * 
+     * @param {string} version - vCard version ('3.0' or '4.0')
+     * @returns {void}
+     */
+    exportWithVersion(version) {
+        this.closeVersionModal();
+        VCFParser.download(this.contacts, version);
+    }
+
+    /**
+     * Close the version selection modal
+     * 
+     * @returns {void}
+     */
+    closeVersionModal() {
+        const modal = document.getElementById('exportVersionModal');
+        if (modal) modal.style.display = 'none';
     }
 
     /**

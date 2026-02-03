@@ -98,6 +98,10 @@
                             <option value="note">Add Notes</option>
                             <option value="url">Add Website (URL)</option>
                             <option value="bday">Add Birthday</option>
+                            <option value="gender">Add Gender (vCard 4.0)</option>
+                            <option value="anniversary">Add Anniversary (vCard 4.0)</option>
+                            <option value="kind">Add Kind (vCard 4.0)</option>
+                            <option value="lang">Add Language (vCard 4.0)</option>
                         </select>
                         <button class="btn btn-outline btn-sm" onclick="mergeTool.addCustomField()">+ Add Field</button>
                     </div>
@@ -109,6 +113,33 @@
                         Next group will open automatically...
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Version Selection Modal -->
+<div class="modal-overlay" id="exportVersionModal" style="display: none;">
+    <div class="modal" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3 style="margin:0">Choose Export Format</h3>
+            <button class="btn btn-outline" onclick="core.closeVersionModal()">Cancel</button>
+        </div>
+        <div class="modal-body" style="padding: 2rem;">
+            <p style="color: #94a3b8; margin-bottom: 1.5rem; line-height: 1.6;">
+                This file was imported in an older vCard format. Would you like to export it in the modern format for better compatibility with current devices, or keep the legacy format?
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <button class="btn btn-primary" style="width: 100%; padding: 1rem; text-align: left;" onclick="core.exportWithVersion('4.0')">
+                    <div style="font-size: 1rem; font-weight: bold; margin-bottom: 0.3rem;">📱 Modern Format (vCard 4.0) - Recommended</div>
+                    <div style="font-size: 0.85rem; opacity: 0.8;">Best for iOS 14+, Android 10+, modern email clients, and cloud services</div>
+                </button>
+                
+                <button class="btn btn-outline" style="width: 100%; padding: 1rem; text-align: left;" onclick="core.exportWithVersion('3.0')">
+                    <div style="font-size: 1rem; font-weight: bold; margin-bottom: 0.3rem;">💾 Legacy Format (vCard 3.0)</div>
+                    <div style="font-size: 0.85rem; opacity: 0.8;">For older devices and email clients (pre-2015)</div>
+                </button>
             </div>
         </div>
     </div>
