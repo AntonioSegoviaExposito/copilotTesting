@@ -29,6 +29,7 @@
 
 import Config from '../config.js';
 import PhoneUtils from '../utils/phone.js';
+import Toast from '../utils/toast.js';
 import VCFParser from './vcf-parser.js';
 
 /**
@@ -201,7 +202,7 @@ class ContactManager {
         this.render();
         
         // Show confirmation message
-        alert(this.sortAZ ? Config.messages.sortAlpha : Config.messages.sortCreation);
+        Toast.info(this.sortAZ ? Config.messages.sortAlpha : Config.messages.sortCreation);
     }
 
     /**
@@ -533,9 +534,10 @@ class ContactManager {
      * // Called from Delete button
      * <button onclick="core.deleteSelected()">Eliminar</button>
      */
-    deleteSelected() {
+    async deleteSelected() {
         // Show confirmation dialog
-        if (!confirm(Config.messages.confirmDelete(this.selected.size))) return;
+        const confirmed = await Toast.confirm(Config.messages.confirmDelete(this.selected.size), 'Delete', 'Cancel');
+        if (!confirmed) return;
         
         // Filter out selected contacts
         this.contacts = this.contacts.filter(c => !this.selected.has(c._id));
@@ -566,9 +568,10 @@ class ContactManager {
      * // Called from Clear All button
      * <button onclick="core.clearAll()">Clear All</button>
      */
-    clearAll() {
+    async clearAll() {
         // Show confirmation dialog
-        if (confirm(Config.messages.confirmClear)) {
+        const confirmed = await Toast.confirm(Config.messages.confirmClear, 'Clear All', 'Cancel');
+        if (confirmed) {
             // Empty the contacts array
             this.contacts = [];
             

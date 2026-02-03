@@ -140,9 +140,9 @@ END:VCARD`;
     });
 
     describe('download', () => {
-        test('should alert when contacts list is empty', () => {
+        test('should show warning toast when contacts list is empty', () => {
             VCFParser.download([]);
-            expect(alert).toHaveBeenCalledWith(Config.messages.emptyList);
+            expect(Toast.warning).toHaveBeenCalledWith(Config.messages.emptyList);
         });
 
         test('should create download link', () => {

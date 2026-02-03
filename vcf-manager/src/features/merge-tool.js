@@ -45,6 +45,7 @@
  */
 
 import PhoneUtils from '../utils/phone.js';
+import Toast from '../utils/toast.js';
 
 /**
  * @typedef {Object} PendingMerge
@@ -794,7 +795,7 @@ class MergeTool {
         core.deselectAll();
 
         // Show success message
-        alert('Contacto clonado correctamente');
+        Toast.success('Contacto clonado correctamente');
     }
 }
 

@@ -29,10 +29,10 @@ describe('AutoMerger', () => {
     });
 
     describe('start - Name Mode', () => {
-        test('should alert when contacts list is empty', () => {
+        test('should show warning toast when contacts list is empty', () => {
             core.contacts = [];
             autoMerger.start('name');
-            expect(alert).toHaveBeenCalledWith(Config.messages.emptyAgenda);
+            expect(Toast.warning).toHaveBeenCalledWith(Config.messages.emptyAgenda);
         });
 
         test('should find duplicates by name', () => {
@@ -75,14 +75,14 @@ describe('AutoMerger', () => {
             expect(autoMerger.queue.length).toBe(1);
         });
 
-        test('should alert when no duplicates found', () => {
+        test('should show info toast when no duplicates found', () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' },
                 { _id: 'id2', fn: 'Jane', tels: [], emails: [], org: '' }
             ];
 
             autoMerger.start('name');
-            expect(alert).toHaveBeenCalledWith(Config.messages.noDuplicates);
+            expect(Toast.info).toHaveBeenCalledWith(Config.messages.noDuplicates);
         });
 
         test('should set active to true when duplicates found', () => {
@@ -175,11 +175,11 @@ describe('AutoMerger', () => {
             expect(autoMerger.active).toBe(false);
         });
 
-        test('should show completion alert when queue is empty', () => {
+        test('should show completion success toast when queue is empty', () => {
             autoMerger.queue = [];
             autoMerger.processNext();
 
-            expect(alert).toHaveBeenCalledWith(Config.messages.autoMergeComplete);
+            expect(Toast.success).toHaveBeenCalledWith(Config.messages.autoMergeComplete);
         });
 
         test('should hide toast and hint when completed', () => {
@@ -197,7 +197,7 @@ describe('AutoMerger', () => {
             autoMerger.queue = [['id1', 'nonexistent']];
             autoMerger.processNext();
 
-            expect(alert).toHaveBeenCalledWith(Config.messages.autoMergeComplete);
+            expect(Toast.success).toHaveBeenCalledWith(Config.messages.autoMergeComplete);
         });
     });
 
@@ -218,9 +218,9 @@ describe('AutoMerger', () => {
             expect(document.getElementById('autoMergeHint').style.display).toBe('none');
         });
 
-        test('should show cancelled alert', () => {
+        test('should show cancelled info toast', () => {
             autoMerger.cancel();
-            expect(alert).toHaveBeenCalledWith(Config.messages.autoMergeCancelled);
+            expect(Toast.info).toHaveBeenCalledWith(Config.messages.autoMergeCancelled);
         });
     });
 });

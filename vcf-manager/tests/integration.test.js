@@ -230,7 +230,7 @@ END:VCARD`;
     });
 
     describe('Delete Workflow', () => {
-        test('should delete selected contacts and clear selection', () => {
+        test('should delete selected contacts and clear selection', async () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' },
                 { _id: 'id2', fn: 'Jane', tels: [], emails: [], org: '' },
@@ -240,8 +240,8 @@ END:VCARD`;
             core.toggleSelect('id1');
             core.toggleSelect('id2');
 
-            confirm.mockReturnValue(true);
-            core.deleteSelected();
+            Toast.confirm.mockResolvedValue(true);
+            await core.deleteSelected();
 
             expect(core.contacts.length).toBe(1);
             expect(core.contacts[0].fn).toBe('Bob');

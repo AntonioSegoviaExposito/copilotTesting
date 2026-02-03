@@ -561,9 +561,9 @@ describe('MergeTool', () => {
             expect(document.getElementById('mergeModal').style.display).toBe('none');
         });
 
-        test('should show success alert', () => {
+        test('should show success toast', () => {
             mergeTool.cloneContact();
-            expect(alert).toHaveBeenCalledWith('Contacto clonado correctamente');
+            expect(Toast.success).toHaveBeenCalledWith('Contacto clonado correctamente');
         });
 
         test('should not clone when multiple contacts selected', () => {

@@ -32,6 +32,7 @@
 
 import Config from '../config.js';
 import PhoneUtils from '../utils/phone.js';
+import Toast from '../utils/toast.js';
 
 /**
  * @typedef {Object} Contact
@@ -304,7 +305,7 @@ const VCFParser = {
     download(contacts) {
         // Validate non-empty list
         if (contacts.length === 0) {
-            alert(Config.messages.emptyList);
+            Toast.warning(Config.messages.emptyList);
             return;
         }
 

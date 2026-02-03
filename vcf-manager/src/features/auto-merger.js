@@ -36,6 +36,7 @@
 
 import Config from '../config.js';
 import PhoneUtils from '../utils/phone.js';
+import Toast from '../utils/toast.js';
 
 /**
  * Auto Merger Class
@@ -80,7 +81,7 @@ class AutoMerger {
     start(mode) {
         // Guard: Ensure contacts exist before processing
         if (core.contacts.length === 0) {
-            return alert(Config.messages.emptyAgenda);
+            return Toast.warning(Config.messages.emptyAgenda);
         }
 
         // Run appropriate duplicate detection algorithm
@@ -93,7 +94,7 @@ class AutoMerger {
 
         // Guard: Stop if no duplicates found
         if (this.queue.length === 0) {
-            return alert(Config.messages.noDuplicates);
+            return Toast.info(Config.messages.noDuplicates);
         }
 
         // Begin queue processing
@@ -282,7 +283,7 @@ class AutoMerger {
         // Queue is now empty - auto-merge complete
         this.active = false;
         this._hideUI();
-        alert(Config.messages.autoMergeComplete);
+        Toast.success(Config.messages.autoMergeComplete);
     }
 
     /**
@@ -386,7 +387,7 @@ class AutoMerger {
         this._hideUI();
         
         // Notify user of cancellation
-        alert(Config.messages.autoMergeCancelled);
+        Toast.info(Config.messages.autoMergeCancelled);
     }
 }
 

@@ -67,12 +67,12 @@ describe('ContactManager', () => {
             expect(contactManager.sortAZ).toBe(false);
         });
 
-        test('should show alert with correct message', () => {
+        test('should show info toast with correct message', () => {
             contactManager.toggleSort();
-            expect(alert).toHaveBeenCalledWith(Config.messages.sortAlpha);
+            expect(Toast.info).toHaveBeenCalledWith(Config.messages.sortAlpha);
 
             contactManager.toggleSort();
-            expect(alert).toHaveBeenCalledWith(Config.messages.sortCreation);
+            expect(Toast.info).toHaveBeenCalledWith(Config.messages.sortCreation);
         });
     });
 
@@ -174,22 +174,22 @@ describe('ContactManager', () => {
             contactManager.selectOrder = ['id1', 'id2'];
         });
 
-        test('should remove selected contacts when confirmed', () => {
-            confirm.mockReturnValue(true);
-            contactManager.deleteSelected();
+        test('should remove selected contacts when confirmed', async () => {
+            Toast.confirm.mockResolvedValue(true);
+            await contactManager.deleteSelected();
             expect(contactManager.contacts.length).toBe(1);
             expect(contactManager.contacts[0]._id).toBe('id3');
         });
 
-        test('should not remove contacts when cancelled', () => {
-            confirm.mockReturnValue(false);
-            contactManager.deleteSelected();
+        test('should not remove contacts when cancelled', async () => {
+            Toast.confirm.mockResolvedValue(false);
+            await contactManager.deleteSelected();
             expect(contactManager.contacts.length).toBe(3);
         });
 
-        test('should clear selection after delete', () => {
-            confirm.mockReturnValue(true);
-            contactManager.deleteSelected();
+        test('should clear selection after delete', async () => {
+            Toast.confirm.mockResolvedValue(true);
+            await contactManager.deleteSelected();
             expect(contactManager.selected.size).toBe(0);
             expect(contactManager.selectOrder).toEqual([]);
         });
@@ -202,15 +202,15 @@ describe('ContactManager', () => {
             ];
         });
 
-        test('should clear all contacts when confirmed', () => {
-            confirm.mockReturnValue(true);
-            contactManager.clearAll();
+        test('should clear all contacts when confirmed', async () => {
+            Toast.confirm.mockResolvedValue(true);
+            await contactManager.clearAll();
             expect(contactManager.contacts).toEqual([]);
         });
 
-        test('should not clear contacts when cancelled', () => {
-            confirm.mockReturnValue(false);
-            contactManager.clearAll();
+        test('should not clear contacts when cancelled', async () => {
+            Toast.confirm.mockResolvedValue(false);
+            await contactManager.clearAll();
             expect(contactManager.contacts.length).toBe(1);
         });
     });
@@ -397,10 +397,10 @@ END:VCARD`;
     });
 
     describe('exportVCF', () => {
-        test('should alert when contacts list is empty', () => {
+        test('should show warning toast when contacts list is empty', () => {
             contactManager.contacts = [];
             contactManager.exportVCF();
-            expect(alert).toHaveBeenCalledWith(Config.messages.emptyList);
+            expect(Toast.warning).toHaveBeenCalledWith(Config.messages.emptyList);
         });
 
         test('should create download link for export', () => {
