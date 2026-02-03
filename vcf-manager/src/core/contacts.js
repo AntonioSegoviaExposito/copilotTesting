@@ -58,6 +58,7 @@ class ContactManager {
      * - No selections
      * - No active filter
      * - Sort by creation order (not alphabetical)
+     * - Show all contacts (not filtering by phone presence)
      */
     constructor() {
         /** @type {Contact[]} Array of all contacts */
@@ -74,6 +75,9 @@ class ContactManager {
         
         /** @type {boolean} Sort alphabetically (true) or by creation order (false) */
         this.sortAZ = false;
+        
+        /** @type {boolean} Show only contacts without phone numbers (false = show all) */
+        this.showOnlyWithoutPhones = false;
     }
 
     /**
@@ -201,6 +205,38 @@ class ContactManager {
     }
 
     /**
+     * Toggle filter to show only contacts without phone numbers
+     * 
+     * FILTER MODES:
+     * - showOnlyWithoutPhones = false: Show all contacts (default)
+     * - showOnlyWithoutPhones = true: Show only contacts with no phone numbers
+     * 
+     * This is a display-only filter that doesn't modify contact data.
+     * Useful for finding contacts that need phone numbers added.
+     * 
+     * @returns {void}
+     * 
+     * @example
+     * // Called from toggle button
+     * <button onclick="core.togglePhoneFilter()">Show Only Without Phones</button>
+     */
+    togglePhoneFilter() {
+        // Toggle phone filter flag
+        this.showOnlyWithoutPhones = !this.showOnlyWithoutPhones;
+        
+        // Re-render to apply filter
+        this.render();
+        
+        // Update toggle button text to reflect current state
+        const toggleBtn = document.getElementById('btnTogglePhones');
+        if (toggleBtn) {
+            toggleBtn.innerText = this.showOnlyWithoutPhones 
+                ? '📵 Show All Contacts' 
+                : '📱 Show Only Without Phones';
+        }
+    }
+
+    /**
      * Render the contact grid
      * 
      * RENDERING PIPELINE:
@@ -252,6 +288,11 @@ class ContactManager {
             c.fn.toLowerCase().includes(this.filterStr) ||
             c.tels.some(t => t.includes(this.filterStr))
         );
+
+        // Apply phone filter if enabled (show only contacts without phones)
+        if (this.showOnlyWithoutPhones) {
+            visible = visible.filter(c => c.tels.length === 0);
+        }
 
         // === SORT CONTACTS ===
         // Apply alphabetical sort if enabled
