@@ -1,0 +1,38 @@
+BEGIN:VCARD
+VERSION:4.0
+FN:Maria García
+N:García;Maria;;;
+TEL;TYPE=cell:+34612345678
+TEL;TYPE=work:+34913456789
+EMAIL:maria@example.com
+ORG:TechCorp
+TITLE:Senior Engineer
+ADR:;;Calle Mayor 123;Madrid;;28001;Spain
+BDAY:1990-05-15
+GENDER:F
+ANNIVERSARY:2015-06-20
+KIND:individual
+LANG:es
+URL:https://mariagarcia.example.com
+NOTE:vCard 4.0 test contact with all new fields
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+FN:Engineering Team
+N:Team;Engineering;;;
+EMAIL:engineering@example.com
+ORG:TechCorp
+KIND:group
+NOTE:Example of a group contact in vCard 4.0
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+FN:TechCorp HQ
+N:HQ;TechCorp;;;
+TEL;TYPE=work:+34915551234
+EMAIL:contact@techcorp.com
+ADR:;;Gran Vía 50;Madrid;;28013;Spain
+KIND:location
+URL:https://techcorp.example.com
+NOTE:Company location example
+END:VCARD
