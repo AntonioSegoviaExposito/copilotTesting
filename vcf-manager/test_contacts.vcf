@@ -1,0 +1,13 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:John Doe
+TEL:+1234567890
+EMAIL:john@example.com
+ORG:Test Company
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+FN:Jane Smith
+TEL:+0987654321
+EMAIL:jane@example.com
+END:VCARD

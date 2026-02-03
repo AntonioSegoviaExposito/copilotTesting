@@ -106,7 +106,7 @@ class AutoMerger {
         
         // If user cancelled, exit without starting merge
         if (!shouldContinue) {
-            return Toast.info('Fusión automática cancelada');
+            return Toast.info('Auto-merge cancelled');
         }
 
         // Initialize queue with found groups

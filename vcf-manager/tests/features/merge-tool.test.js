@@ -553,7 +553,7 @@ describe('MergeTool', () => {
             mergeTool.cloneContact();
             const clone = core.contacts[0];
             
-            expect(clone.fn).toContain('(Copia)');
+            expect(clone.fn).toContain('(Copy)');
         });
 
         test('should close modal after cloning', () => {
@@ -563,7 +563,7 @@ describe('MergeTool', () => {
 
         test('should show success toast', () => {
             mergeTool.cloneContact();
-            expect(Toast.success).toHaveBeenCalledWith('Contacto clonado correctamente');
+            expect(Toast.success).toHaveBeenCalledWith('Contact cloned successfully');
         });
 
         test('should not clone when multiple contacts selected', () => {
@@ -594,7 +594,7 @@ describe('MergeTool', () => {
     });
 
     describe('renderUI - Clone Button', () => {
-        test('should show clone button for single contact', () => {
+        test('should hide clone button in modal for single contact (now in FAB)', () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' }
             ];
@@ -602,10 +602,10 @@ describe('MergeTool', () => {
             mergeTool.renderUI();
             
             const cloneBtn = document.getElementById('cloneButton');
-            expect(cloneBtn.style.display).toBe('block');
+            expect(cloneBtn.style.display).toBe('none');
         });
 
-        test('should hide clone button for multiple contacts', () => {
+        test('should hide clone button in modal for multiple contacts', () => {
             core.contacts = [
                 { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' },
                 { _id: 'id2', fn: 'Jane', tels: [], emails: [], org: '' }

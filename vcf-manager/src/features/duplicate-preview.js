@@ -86,7 +86,7 @@ class DuplicatePreview {
         const groupCount = groups.length;
         
         // Detection mode label
-        const modeLabel = mode === 'name' ? 'por nombre' : 'por teléfono';
+        const modeLabel = mode === 'name' ? 'by name' : 'by phone';
         
         // Create dialog
         const dialog = document.createElement('div');
@@ -94,30 +94,30 @@ class DuplicatePreview {
         dialog.innerHTML = `
             <div class="duplicate-preview-header">
                 <h3 id="duplicate-preview-title" style="margin:0; color: var(--text)">
-                    🔍 Vista previa de duplicados
+                    🔍 Duplicates Preview
                 </h3>
-                <button class="duplicate-preview-close" aria-label="Cerrar" title="Cerrar">×</button>
+                <button class="duplicate-preview-close" aria-label="Close" title="Close">×</button>
             </div>
             
             <div class="duplicate-preview-body">
                 <div class="duplicate-preview-summary">
                     <div class="duplicate-preview-stat">
                         <div class="duplicate-preview-stat-value">${groupCount}</div>
-                        <div class="duplicate-preview-stat-label">${groupCount === 1 ? 'Grupo' : 'Grupos'}</div>
+                        <div class="duplicate-preview-stat-label">${groupCount === 1 ? 'Group' : 'Groups'}</div>
                     </div>
                     <div class="duplicate-preview-stat">
                         <div class="duplicate-preview-stat-value">${totalDuplicates}</div>
-                        <div class="duplicate-preview-stat-label">${totalDuplicates === 1 ? 'Contacto' : 'Contactos'}</div>
+                        <div class="duplicate-preview-stat-label">${totalDuplicates === 1 ? 'Contact' : 'Contacts'}</div>
                     </div>
                     <div class="duplicate-preview-mode">
-                        Detección ${modeLabel}
+                        Detection ${modeLabel}
                     </div>
                 </div>
                 
                 <div class="duplicate-preview-info">
-                    Se encontraron <strong>${groupCount}</strong> ${groupCount === 1 ? 'grupo' : 'grupos'} de duplicados 
-                    con un total de <strong>${totalDuplicates}</strong> contactos. 
-                    A continuación se muestran los grupos que serán combinados:
+                    Found <strong>${groupCount}</strong> ${groupCount === 1 ? 'group' : 'groups'} of duplicates 
+                    with a total of <strong>${totalDuplicates}</strong> contacts. 
+                    The following groups will be merged:
                 </div>
                 
                 <div class="duplicate-preview-groups">
@@ -127,10 +127,10 @@ class DuplicatePreview {
             
             <div class="duplicate-preview-footer">
                 <button class="btn btn-outline duplicate-preview-cancel">
-                    ❌ Cancelar
+                    ❌ Cancel
                 </button>
                 <button class="btn btn-primary duplicate-preview-continue">
-                    ✅ Continuar con la fusión
+                    ✅ Continue with Merge
                 </button>
             </div>
         `;
@@ -194,7 +194,7 @@ class DuplicatePreview {
     _renderGroups(groups) {
         return groups.map((group, index) => {
             const contactNames = group.map(contact => {
-                const name = escapeHtml(contact.fn || 'Sin nombre');
+                const name = escapeHtml(contact.fn || 'No name');
                 const phone = contact.tels.length > 0 ? escapeHtml(contact.tels[0]) : '';
                 const phoneHtml = phone ? `<span class="duplicate-preview-phone">${phone}</span>` : '';
                 

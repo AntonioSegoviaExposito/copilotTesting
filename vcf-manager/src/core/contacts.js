@@ -173,8 +173,8 @@ class ContactManager {
         dropZone.innerHTML = `
             <div class="drop-zone-content">
                 <div class="drop-zone-icon">📂</div>
-                <div class="drop-zone-text">Suelta los archivos VCF aquí</div>
-                <div class="drop-zone-hint">Archivos .vcf soportados</div>
+                <div class="drop-zone-text">Drop VCF files here</div>
+                <div class="drop-zone-hint">.vcf files supported</div>
             </div>
         `;
         document.body.appendChild(dropZone);
@@ -234,7 +234,7 @@ class ContactManager {
                     const fileList = this._createFileList(vcfFiles);
                     this.loadFiles(fileList);
                 } else {
-                    Toast.warning('Por favor, suelta archivos VCF (.vcf)');
+                    Toast.warning('Please drop VCF (.vcf) files');
                 }
             }
         });
@@ -298,7 +298,7 @@ class ContactManager {
             
             // Show success toast
             const fileCount = fileArray.length;
-            Toast.success(`${fileCount} ${fileCount === 1 ? 'archivo importado' : 'archivos importados'} correctamente`);
+            Toast.success(`${fileCount} ${fileCount === 1 ? 'file imported' : 'files imported'} successfully`);
             return;
         }
 
@@ -468,8 +468,8 @@ class ContactManager {
         const toggleBtn = document.getElementById('btnTogglePhones');
         if (toggleBtn) {
             toggleBtn.innerText = this.showOnlyWithoutPhones 
-                ? '📵 Show All Contacts' 
-                : '📱 Show Only Without Phones';
+                ? '📵 Show All' 
+                : '📵 No Phone';
         }
     }
 
@@ -598,7 +598,7 @@ class ContactManager {
             card.style.borderLeft = `4px solid ${contact._importColor}`;
             card.setAttribute('data-import-group', contact._importGroup);
             if (contact._importFileName) {
-                card.setAttribute('title', `Importado de: ${escapeHtmlAttr(contact._importFileName)}`);
+                card.setAttribute('title', `Imported from: ${escapeHtmlAttr(contact._importFileName)}`);
             }
         }
         
@@ -614,7 +614,7 @@ class ContactManager {
 
         // Show "more" indicator if additional phones exist
         const moreTels = contact.tels.length > Config.ui.maxTelsDisplay
-            ? `<small style="color:#94a3b8">+${contact.tels.length - Config.ui.maxTelsDisplay} mas</small>`
+            ? `<small style="color:#94a3b8">+${contact.tels.length - Config.ui.maxTelsDisplay} more</small>`
             : '';
 
         // Build card HTML
@@ -655,6 +655,7 @@ class ContactManager {
         const fab = document.getElementById('fab');
         const selCount = document.getElementById('selCount');
         const fabActionText = document.getElementById('fabActionText');
+        const fabCloneBtn = document.getElementById('fabCloneBtn');
 
         if (!fab) return;
 
@@ -668,6 +669,11 @@ class ContactManager {
             // Update action text based on selection count
             if (fabActionText) {
                 fabActionText.innerText = this.selected.size === 1 ? "✏️ EDIT" : "⚡ MERGE";
+            }
+            
+            // Show clone button only when exactly 1 contact selected
+            if (fabCloneBtn) {
+                fabCloneBtn.style.display = this.selected.size === 1 ? 'block' : 'none';
             }
         } else {
             // Hide FAB when no selection
@@ -781,7 +787,7 @@ class ContactManager {
      */
     async deleteSelected() {
         // Show confirmation dialog
-        const confirmed = await Toast.confirm(Config.messages.confirmDelete(this.selected.size), 'Eliminar', 'Cancelar');
+        const confirmed = await Toast.confirm(Config.messages.confirmDelete(this.selected.size), 'Delete', 'Cancel');
         if (!confirmed) return;
         
         // Filter out selected contacts
@@ -815,13 +821,19 @@ class ContactManager {
      */
     async clearAll() {
         // Show confirmation dialog
-        const confirmed = await Toast.confirm(Config.messages.confirmClear, 'Limpiar todo', 'Cancelar');
+        const confirmed = await Toast.confirm(Config.messages.confirmClear, 'Clear All', 'Cancel');
         if (confirmed) {
+            // Clear selection first to avoid stale references
+            // Note: Using manual clear instead of deselectAll() to avoid triggering
+            // render() twice (once here, once after contacts=[] below)
+            this.selected.clear();
+            this.selectOrder = [];
+            
             // Empty the contacts array
             this.contacts = [];
             
-            // Clear selection and re-render
-            this.deselectAll();
+            // Re-render to update UI
+            this.render();
         }
     }
 
@@ -896,6 +908,26 @@ class ContactManager {
         
         // Re-render to update UI
         this.render();
+    }
+
+    /**
+     * Clone the selected contact
+     * 
+     * REQUIREMENTS:
+     * - Exactly one contact must be selected
+     * - Delegates to mergeTool.cloneContact()
+     * 
+     * @returns {void}
+     * 
+     * @example
+     * <button onclick="core.cloneSelected()">Clone</button>
+     */
+    cloneSelected() {
+        // Guard: Require exactly one contact selected
+        if (this.selected.size !== 1) return;
+        
+        // Delegate to merge tool clone functionality
+        mergeTool.cloneContact();
     }
 }
 
