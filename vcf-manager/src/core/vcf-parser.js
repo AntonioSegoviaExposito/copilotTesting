@@ -24,7 +24,9 @@
  * - BDAY (Birthday) - optional
  * 
  * AI MAINTENANCE NOTES:
- * - Uses VCF version 3.0 specification (RFC 2426)
+ * - Supports both VCF version 3.0 (RFC 2426) and 4.0 (RFC 6350)
+ * - Automatically detects vCard version during import
+ * - Converts 3.0 to 4.0 internally while preserving original version
  * - To add new field: update _parseBlock() and export()
  * - Phone numbers normalized during export for consistency
  * - Optional fields return undefined (not empty string) when missing
@@ -46,6 +48,11 @@ import Toast from '../utils/toast.js';
  * @property {string} [note] - Notes (optional)
  * @property {string} [url] - Website URL (optional)
  * @property {string} [bday] - Birthday in YYYY-MM-DD format (optional)
+ * @property {string} [gender] - Gender (vCard 4.0: M/F/O/N/U or custom text)
+ * @property {string} [anniversary] - Anniversary date (vCard 4.0)
+ * @property {string} [kind] - Kind of object (vCard 4.0: individual/group/org/location)
+ * @property {string} [lang] - Language preference (vCard 4.0)
+ * @property {string} [_originalVersion] - Original vCard version detected during import
  */
 
 /**
@@ -140,9 +147,15 @@ const VCFParser = {
             return matches.map(line => line.split(':')[1] || '');
         };
 
+        // Detect original vCard version
+        const version = get('VERSION') || '3.0';
+
         return {
             // Generate unique ID for internal tracking
             _id: this._generateId(),
+            
+            // Store original version for export decision
+            _originalVersion: version,
             
             // Full name: try FN, then N, then default
             fn: this._decode(get('FN')) || this._decode(get('N').replace(/;/g, ' ')) || Config.messages.noName,
@@ -161,7 +174,13 @@ const VCFParser = {
             adr: this._decode(get('ADR')?.replace(/;/g, ' ')) || undefined,
             note: this._decode(get('NOTE')) || undefined,
             url: this._decode(get('URL')) || undefined,
-            bday: this._decode(get('BDAY')) || undefined
+            bday: this._decode(get('BDAY')) || undefined,
+            
+            // vCard 4.0 specific fields
+            gender: this._decode(get('GENDER')) || undefined,
+            anniversary: this._decode(get('ANNIVERSARY')) || undefined,
+            kind: this._decode(get('KIND')) || undefined,
+            lang: this._decode(get('LANG')) || undefined
         };
     },
 
@@ -216,9 +235,10 @@ const VCFParser = {
      * 
      * EXPORT LOGIC:
      * 1. For each contact, create BEGIN/END:VCARD block
-     * 2. Use VCF version 3.0
+     * 2. Use specified VCF version (defaults to 4.0)
      * 3. Normalize phone numbers for consistency
      * 4. Include optional fields only if defined
+     * 5. Handle version-specific syntax differences
      * 
      * VCF FIELD MAPPING:
      * - FN: Full name (contact.fn)
@@ -231,33 +251,40 @@ const VCFParser = {
      * - NOTE: Notes (if present)
      * - URL: Website (if present)
      * - BDAY: Birthday (if present)
+     * - GENDER: Gender (vCard 4.0 only)
+     * - ANNIVERSARY: Anniversary (vCard 4.0 only)
+     * - KIND: Kind of object (vCard 4.0 only)
+     * - LANG: Language preference (vCard 4.0 only)
      * 
      * AI MAINTENANCE NOTE:
      * To export new field:
      * 1. Add field to contact object in _parseBlock()
      * 2. Add conditional export here: if (contact.newField) output += ...
-     * 3. Follow VCF 3.0 field format
+     * 3. Follow VCF version-specific field format
      * 
      * @param {Contact[]} contacts - Array of contact objects to export
+     * @param {string} [version='4.0'] - vCard version to export (3.0 or 4.0)
      * @returns {string} Complete VCF file content (all contacts)
      * 
      * @example
-     * const vcfContent = VCFParser.export(contacts);
-     * // Returns: "BEGIN:VCARD\nVERSION:3.0\nFN:John..."
+     * const vcfContent = VCFParser.export(contacts, '4.0');
+     * // Returns: "BEGIN:VCARD\nVERSION:4.0\nFN:John..."
      */
-    export(contacts) {
+    export(contacts, version = Config.vcard.defaultVersion) {
         let output = '';
 
         contacts.forEach(contact => {
-            // Start vCard block
-            output += 'BEGIN:VCARD\nVERSION:3.0\n';
+            // Start vCard block with specified version
+            output += `BEGIN:VCARD\nVERSION:${version}\n`;
             
             // Required fields: FN (full name) and N (structured name)
             output += `FN:${contact.fn}\nN:;${contact.fn};;;\n`;
             
             // Phone numbers: normalize and mark as CELL type
+            // vCard 4.0 uses TYPE=cell (lowercase), 3.0 uses TYPE=CELL (uppercase)
+            const telType = version === '4.0' ? 'cell' : 'CELL';
             contact.tels.forEach(tel => {
-                output += `TEL;TYPE=CELL:${PhoneUtils.normalize(tel)}\n`;
+                output += `TEL;TYPE=${telType}:${PhoneUtils.normalize(tel)}\n`;
             });
             
             // Email addresses
@@ -275,6 +302,14 @@ const VCFParser = {
             if (contact.url) output += `URL:${contact.url}\n`;
             if (contact.bday) output += `BDAY:${contact.bday}\n`;
             
+            // vCard 4.0 specific fields (only export if version is 4.0)
+            if (version === '4.0') {
+                if (contact.gender) output += `GENDER:${contact.gender}\n`;
+                if (contact.anniversary) output += `ANNIVERSARY:${contact.anniversary}\n`;
+                if (contact.kind) output += `KIND:${contact.kind}\n`;
+                if (contact.lang) output += `LANG:${contact.lang}\n`;
+            }
+            
             // End vCard block
             output += 'END:VCARD\n';
         });
@@ -283,34 +318,49 @@ const VCFParser = {
     },
 
     /**
+     * Check if any contacts were imported with an older vCard version
+     * 
+     * @param {Contact[]} contacts - Array of contact objects
+     * @returns {boolean} True if any contact has _originalVersion < 4.0
+     */
+    hasLegacyVersionContacts(contacts) {
+        return contacts.some(contact => 
+            contact._originalVersion && 
+            contact._originalVersion !== '4.0'
+        );
+    },
+
+    /**
      * Download contacts as VCF file (trigger browser download)
      * 
      * DOWNLOAD PROCESS:
      * 1. Validate contacts array is not empty
-     * 2. Export contacts to VCF format
-     * 3. Create Blob with VCF content
-     * 4. Create temporary download link
-     * 5. Trigger click to download
-     * 6. Clean up temporary link
+     * 2. Check if user wants to upgrade from legacy version
+     * 3. Export contacts to VCF format
+     * 4. Create Blob with VCF content
+     * 5. Create temporary download link
+     * 6. Trigger click to download
+     * 7. Clean up temporary link
      * 
      * FILENAME FORMAT: contactos_[timestamp].vcf
      * Example: contactos_1643723456789.vcf
      * 
      * @param {Contact[]} contacts - Array of contact objects to download
+     * @param {string} [version] - Optional vCard version override
      * @returns {void}
      * 
      * @example
      * VCFParser.download(core.contacts); // Downloads all contacts
      */
-    download(contacts) {
+    download(contacts, version) {
         // Validate non-empty list
         if (contacts.length === 0) {
             Toast.warning(Config.messages.emptyList);
             return;
         }
 
-        // Convert contacts to VCF format
-        const content = this.export(contacts);
+        // Convert contacts to VCF format with specified version
+        const content = this.export(contacts, version);
         
         // Create Blob with proper MIME type
         const blob = new Blob([content], { type: 'text/vcard' });

@@ -83,6 +83,10 @@ function isValidHexColor(color) {
  * @property {string} [data.note] - Notes (optional)
  * @property {string} [data.url] - Website URL (optional)
  * @property {string} [data.bday] - Birthday in YYYY-MM-DD format (optional)
+ * @property {string} [data.gender] - Gender (vCard 4.0, optional)
+ * @property {string} [data.anniversary] - Anniversary date (vCard 4.0, optional)
+ * @property {string} [data.kind] - Kind of object (vCard 4.0, optional)
+ * @property {string} [data.lang] - Language preference (vCard 4.0, optional)
  * @property {Contact[]} originalObjects - Array of source contacts [master, ...slaves]
  */
 
@@ -268,7 +272,12 @@ class MergeTool {
                 adr: masterContact.adr || slaves.find(s => s.adr)?.adr || undefined,
                 note: masterContact.note || slaves.find(s => s.note)?.note || undefined,
                 url: masterContact.url || slaves.find(s => s.url)?.url || undefined,
-                bday: masterContact.bday || slaves.find(s => s.bday)?.bday || undefined
+                bday: masterContact.bday || slaves.find(s => s.bday)?.bday || undefined,
+                // vCard 4.0 fields
+                gender: masterContact.gender || slaves.find(s => s.gender)?.gender || undefined,
+                anniversary: masterContact.anniversary || slaves.find(s => s.anniversary)?.anniversary || undefined,
+                kind: masterContact.kind || slaves.find(s => s.kind)?.kind || undefined,
+                lang: masterContact.lang || slaves.find(s => s.lang)?.lang || undefined
             },
             originalObjects: [masterContact, ...slaves] // Keep references for display
         };
@@ -539,6 +548,38 @@ class MergeTool {
         if (data.url !== undefined) html += textInput('Website', 'url', data.url);
         if (data.bday !== undefined) html += textInput('Birthday (YYYY-MM-DD)', 'bday', data.bday);
         if (data.note !== undefined) html += textInput('Notes', 'note', data.note);
+        
+        // vCard 4.0 fields
+        if (data.gender !== undefined) {
+            html += `
+            <div class="input-group">
+                <div class="input-header"><span class="input-label">Gender</span></div>
+                <select class="input-field" onchange="mergeTool.pending.data.gender = this.value">
+                    <option value="">Not specified</option>
+                    <option value="M" ${data.gender === 'M' ? 'selected' : ''}>Male</option>
+                    <option value="F" ${data.gender === 'F' ? 'selected' : ''}>Female</option>
+                    <option value="O" ${data.gender === 'O' ? 'selected' : ''}>Other</option>
+                    <option value="N" ${data.gender === 'N' ? 'selected' : ''}>None/Not applicable</option>
+                    <option value="U" ${data.gender === 'U' ? 'selected' : ''}>Unknown</option>
+                </select>
+            </div>
+            `;
+        }
+        if (data.anniversary !== undefined) html += textInput('Anniversary (YYYY-MM-DD)', 'anniversary', data.anniversary);
+        if (data.kind !== undefined) {
+            html += `
+            <div class="input-group">
+                <div class="input-header"><span class="input-label">Kind</span></div>
+                <select class="input-field" onchange="mergeTool.pending.data.kind = this.value">
+                    <option value="individual" ${data.kind === 'individual' ? 'selected' : ''}>Individual</option>
+                    <option value="group" ${data.kind === 'group' ? 'selected' : ''}>Group</option>
+                    <option value="org" ${data.kind === 'org' ? 'selected' : ''}>Organization</option>
+                    <option value="location" ${data.kind === 'location' ? 'selected' : ''}>Location</option>
+                </select>
+            </div>
+            `;
+        }
+        if (data.lang !== undefined) html += textInput('Language (e.g., en, es, fr)', 'lang', data.lang);
 
         // Inject HTML into container
         container.innerHTML = html;
@@ -610,9 +651,16 @@ class MergeTool {
 
         const type = selector.value;
         
-        // Initialize field as empty string if not present
+        // Initialize field with appropriate default value if not present
         if (this.pending.data[type] === undefined) {
-            this.pending.data[type] = '';
+            // Set appropriate default values for vCard 4.0 fields
+            if (type === 'kind') {
+                this.pending.data[type] = 'individual'; // Default kind
+            } else if (type === 'gender') {
+                this.pending.data[type] = ''; // Empty to show "Not specified"
+            } else {
+                this.pending.data[type] = ''; // Empty string for text fields
+            }
         }
         
         // Re-render to show new field

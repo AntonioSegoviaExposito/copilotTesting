@@ -62,6 +62,12 @@ const Config = {
     version: '11.1',
     appName: 'VCF Manager',
 
+    // vCard version settings
+    vcard: {
+        defaultVersion: '4.0',      // Default vCard version for export (4.0 for modern features)
+        supportedVersions: ['2.1', '3.0', '4.0']  // Supported vCard versions
+    },
+
     // Phone number settings (configurable for different countries)
     phone: {
         defaultCountryCode: '+34',  // Spain country code (can be configured)
@@ -86,7 +92,10 @@ const Config = {
         autoMergeComplete: 'Automatic merge completed!',
         autoMergeCancelled: 'Auto-merge cancelled.',
         sortAlpha: 'List sorted alphabetically',
-        sortCreation: 'List sorted by creation order'
+        sortCreation: 'List sorted by creation order',
+        vcardVersionUpgrade: 'This file was imported in an older vCard format (v3.0). Would you like to export it in the modern vCard 4.0 format for better compatibility with current devices, or keep the legacy v3.0 format?',
+        vcardVersion40: 'Modern format (vCard 4.0) - Recommended for iOS 14+, Android 10+, modern email clients',
+        vcardVersion30: 'Legacy format (vCard 3.0) - For older devices and email clients'
     }
 };
 

@@ -80,10 +80,38 @@ END:VCARD`;
             expect(contacts[0].url).toBe('https://example.com');
             expect(contacts[0].bday).toBe('1990-01-15');
         });
+
+        test('should parse vCard 4.0 specific fields', () => {
+            const vcfContent = `BEGIN:VCARD
+VERSION:4.0
+FN:John Doe
+GENDER:M
+ANNIVERSARY:2010-06-15
+KIND:individual
+LANG:en
+END:VCARD`;
+
+            const contacts = VCFParser.parse(vcfContent);
+            expect(contacts[0]._originalVersion).toBe('4.0');
+            expect(contacts[0].gender).toBe('M');
+            expect(contacts[0].anniversary).toBe('2010-06-15');
+            expect(contacts[0].kind).toBe('individual');
+            expect(contacts[0].lang).toBe('en');
+        });
+
+        test('should detect vCard 3.0 version', () => {
+            const vcfContent = `BEGIN:VCARD
+VERSION:3.0
+FN:John Doe
+END:VCARD`;
+
+            const contacts = VCFParser.parse(vcfContent);
+            expect(contacts[0]._originalVersion).toBe('3.0');
+        });
     });
 
     describe('export', () => {
-        test('should export contacts to VCF format', () => {
+        test('should export contacts to VCF 4.0 format by default', () => {
             const contacts = [
                 {
                     _id: 'id1',
@@ -95,6 +123,28 @@ END:VCARD`;
             ];
 
             const output = VCFParser.export(contacts);
+
+            expect(output).toContain('BEGIN:VCARD');
+            expect(output).toContain('VERSION:4.0');
+            expect(output).toContain('FN:John Doe');
+            expect(output).toContain('TEL;TYPE=cell:+34612345678');
+            expect(output).toContain('EMAIL:john@test.com');
+            expect(output).toContain('ORG:Test Company');
+            expect(output).toContain('END:VCARD');
+        });
+
+        test('should export contacts to VCF 3.0 format when specified', () => {
+            const contacts = [
+                {
+                    _id: 'id1',
+                    fn: 'John Doe',
+                    tels: ['+34612345678'],
+                    emails: ['john@test.com'],
+                    org: 'Test Company'
+                }
+            ];
+
+            const output = VCFParser.export(contacts, '3.0');
 
             expect(output).toContain('BEGIN:VCARD');
             expect(output).toContain('VERSION:3.0');
@@ -136,6 +186,71 @@ END:VCARD`;
             expect(output).toContain('NOTE:Important');
             expect(output).toContain('URL:https://test.com');
             expect(output).toContain('BDAY:1990-01-01');
+        });
+
+        test('should include vCard 4.0 specific fields when version is 4.0', () => {
+            const contacts = [{
+                _id: 'id1',
+                fn: 'John',
+                tels: [],
+                emails: [],
+                org: '',
+                gender: 'M',
+                anniversary: '2010-06-15',
+                kind: 'individual',
+                lang: 'en'
+            }];
+
+            const output = VCFParser.export(contacts, '4.0');
+            expect(output).toContain('VERSION:4.0');
+            expect(output).toContain('GENDER:M');
+            expect(output).toContain('ANNIVERSARY:2010-06-15');
+            expect(output).toContain('KIND:individual');
+            expect(output).toContain('LANG:en');
+        });
+
+        test('should NOT include vCard 4.0 specific fields when version is 3.0', () => {
+            const contacts = [{
+                _id: 'id1',
+                fn: 'John',
+                tels: [],
+                emails: [],
+                org: '',
+                gender: 'M',
+                anniversary: '2010-06-15',
+                kind: 'individual',
+                lang: 'en'
+            }];
+
+            const output = VCFParser.export(contacts, '3.0');
+            expect(output).toContain('VERSION:3.0');
+            expect(output).not.toContain('GENDER:');
+            expect(output).not.toContain('ANNIVERSARY:');
+            expect(output).not.toContain('KIND:');
+            expect(output).not.toContain('LANG:');
+        });
+    });
+
+    describe('hasLegacyVersionContacts', () => {
+        test('should return true when contacts have version 3.0', () => {
+            const contacts = [
+                { _id: 'id1', fn: 'John', _originalVersion: '3.0', tels: [], emails: [], org: '' }
+            ];
+            expect(VCFParser.hasLegacyVersionContacts(contacts)).toBe(true);
+        });
+
+        test('should return false when all contacts are version 4.0', () => {
+            const contacts = [
+                { _id: 'id1', fn: 'John', _originalVersion: '4.0', tels: [], emails: [], org: '' }
+            ];
+            expect(VCFParser.hasLegacyVersionContacts(contacts)).toBe(false);
+        });
+
+        test('should return false when no version info is present', () => {
+            const contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' }
+            ];
+            expect(VCFParser.hasLegacyVersionContacts(contacts)).toBe(false);
         });
     });
 

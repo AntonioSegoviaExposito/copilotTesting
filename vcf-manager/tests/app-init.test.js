@@ -215,8 +215,9 @@ END:VCARD`;
         }];
         const vcf = VCFParser.export(contacts);
         expect(vcf).toContain('BEGIN:VCARD');
+        expect(vcf).toContain('VERSION:4.0');
         expect(vcf).toContain('FN:Test User');
-        expect(vcf).toContain('TEL;TYPE=CELL:+34612345678');
+        expect(vcf).toContain('TEL;TYPE=cell:+34612345678');
     });
 });
 
