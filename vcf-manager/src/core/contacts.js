@@ -824,6 +824,8 @@ class ContactManager {
         const confirmed = await Toast.confirm(Config.messages.confirmClear, 'Clear All', 'Cancel');
         if (confirmed) {
             // Clear selection first to avoid stale references
+            // Note: Using manual clear instead of deselectAll() to avoid triggering
+            // render() twice (once here, once after contacts=[] below)
             this.selected.clear();
             this.selectOrder = [];
             

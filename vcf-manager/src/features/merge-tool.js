@@ -773,8 +773,8 @@ class MergeTool {
         // Clear pending merge state
         this.pending = null;
 
-        // Clear selection when cancelling (not when committing successfully)
-        // Success case is handled by commit() which calls deselectAll() separately
+        // Clear selection when cancelling (prevents stale selections)
+        // Note: Success case calls deselectAll() after close() in commit() method
         if (!isSuccess) {
             core.deselectAll();
         }
