@@ -697,6 +697,15 @@ main {
     gap: 10px;
 }
 
+.duplicate-preview-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px white, 0 0 0 3px rgba(0,0,0,0.1);
+}
+
 .duplicate-preview-phone {
     margin-left: auto;
     color: #64748b;

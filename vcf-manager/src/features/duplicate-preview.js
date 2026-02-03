@@ -197,7 +197,13 @@ class DuplicatePreview {
                 const name = escapeHtml(contact.fn || 'Sin nombre');
                 const phone = contact.tels.length > 0 ? escapeHtml(contact.tels[0]) : '';
                 const phoneHtml = phone ? `<span class="duplicate-preview-phone">${phone}</span>` : '';
-                return `<div class="duplicate-preview-contact">${name}${phoneHtml}</div>`;
+                
+                // Add import group color indicator if available
+                const colorDot = contact._importColor && this._isValidHexColor(contact._importColor)
+                    ? `<span class="duplicate-preview-color-dot" style="background-color: ${contact._importColor};" title="Grupo de importación ${contact._importGroup}"></span>`
+                    : '';
+                
+                return `<div class="duplicate-preview-contact">${colorDot}${name}${phoneHtml}</div>`;
             }).join('');
             
             return `
@@ -211,6 +217,16 @@ class DuplicatePreview {
                 </div>
             `;
         }).join('');
+    }
+
+    /**
+     * Validate that a string is a safe hex color
+     * @private
+     * @param {string} color - Color to validate
+     * @returns {boolean} True if valid hex color
+     */
+    _isValidHexColor(color) {
+        return /^#[0-9A-Fa-f]{6}$/.test(color);
     }
 }
 
