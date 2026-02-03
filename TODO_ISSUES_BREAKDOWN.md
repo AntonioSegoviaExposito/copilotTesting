@@ -528,24 +528,31 @@ Example structure:
 // vcf-manager/tests/visual.test.js
 import { test, expect } from '@playwright/test';
 
-describe('Visual Regression Tests', () => {
+test.describe('Visual Regression Tests', () => {
     test('should match contact card snapshot', async ({ page }) => {
-        await page.goto('http://localhost:5173');
+        await page.goto('/'); // Uses baseURL from playwright.config.js
         await expect(page.locator('.contact-card').first()).toHaveScreenshot('contact-card.png');
     });
     
     test('should match modal layout snapshot', async ({ page }) => {
-        await page.goto('http://localhost:5173');
+        await page.goto('/');
         await page.click('button:has-text("Add Contact")');
         await expect(page.locator('.modal')).toHaveScreenshot('modal-layout.png');
     });
     
     test('should maintain responsive design', async ({ page }) => {
         await page.setViewportSize({ width: 375, height: 667 }); // Mobile
-        await page.goto('http://localhost:5173');
+        await page.goto('/');
         await expect(page).toHaveScreenshot('mobile-view.png');
     });
 });
+
+// Configure base URL in playwright.config.js:
+// export default {
+//   use: {
+//     baseURL: process.env.BASE_URL || 'http://localhost:5173'
+//   }
+// }
 ```
 
 **5. Test Utilities & Helpers**
