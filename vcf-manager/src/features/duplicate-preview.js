@@ -22,9 +22,22 @@
  * - Returns a Promise that resolves to true (continue) or false (cancel)
  * - Displays groups with contact names for easy identification
  * - Auto-scrolls if many groups exist
+ * - HTML content is escaped to prevent XSS attacks
  */
 
 import Config from '../config.js';
+
+/**
+ * Escape HTML special characters to prevent XSS
+ * @private
+ * @param {string} str - String to escape
+ * @returns {string} Escaped string safe for HTML insertion
+ */
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
 
 /**
  * Duplicate Preview utility class
@@ -181,11 +194,10 @@ class DuplicatePreview {
     _renderGroups(groups) {
         return groups.map((group, index) => {
             const contactNames = group.map(contact => {
-                const name = contact.fn || 'Sin nombre';
-                const phones = contact.tels.length > 0 
-                    ? `<span class="duplicate-preview-phone">${contact.tels[0]}</span>` 
-                    : '';
-                return `<div class="duplicate-preview-contact">${name}${phones}</div>`;
+                const name = escapeHtml(contact.fn || 'Sin nombre');
+                const phone = contact.tels.length > 0 ? escapeHtml(contact.tels[0]) : '';
+                const phoneHtml = phone ? `<span class="duplicate-preview-phone">${phone}</span>` : '';
+                return `<div class="duplicate-preview-contact">${name}${phoneHtml}</div>`;
             }).join('');
             
             return `

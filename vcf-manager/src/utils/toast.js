@@ -22,9 +22,22 @@
  * - Toasts are automatically removed from DOM after animation completes
  * - Confirmation dialogs block interaction with overlay until resolved
  * - All animations done via CSS classes for performance
+ * - Messages are HTML-escaped to prevent XSS attacks
  */
 
 import Config from '../config.js';
+
+/**
+ * Escape HTML special characters to prevent XSS
+ * @private
+ * @param {string} str - String to escape
+ * @returns {string} Escaped string safe for HTML insertion
+ */
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
 
 /**
  * Toast notification utility class
@@ -86,7 +99,7 @@ class Toast {
         
         toast.innerHTML = `
             <span class="toast-icon">${icons[type] || icons.info}</span>
-            <span class="toast-message">${message}</span>
+            <span class="toast-message">${escapeHtml(message)}</span>
             <button class="toast-close" aria-label="Close notification">×</button>
         `;
         
@@ -195,10 +208,10 @@ class Toast {
             const dialog = document.createElement('div');
             dialog.className = 'toast-confirm-dialog';
             dialog.innerHTML = `
-                <div class="toast-confirm-message" id="toast-confirm-message">${message}</div>
+                <div class="toast-confirm-message" id="toast-confirm-message">${escapeHtml(message)}</div>
                 <div class="toast-confirm-buttons">
-                    <button class="btn btn-outline toast-confirm-cancel">${cancelText}</button>
-                    <button class="btn btn-primary toast-confirm-ok">${confirmText}</button>
+                    <button class="btn btn-outline toast-confirm-cancel">${escapeHtml(cancelText)}</button>
+                    <button class="btn btn-primary toast-confirm-ok">${escapeHtml(confirmText)}</button>
                 </div>
             `;
             
