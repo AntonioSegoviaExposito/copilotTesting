@@ -357,7 +357,7 @@ class MergeTool {
                 <div class="source-item ${isMaster ? 'master' : ''}" ${onclick}>
                     <div style="font-weight:bold; color:${isMaster ? 'var(--primary)' : '#64748b'}; font-size:0.7rem; margin-bottom:5px;">
                         ${isMaster ? '<span class="master-badge">MASTER</span>' : '<span class="slave-badge">SLAVE</span>'}
-                        <span class="click-hint">👈 Convertir en Master</span>
+                        <span class="click-hint">👈 Set as Master</span>
                     </div>
                     <div style="font-weight:bold; font-size:1rem">${contact.fn}</div>
                     <div style="font-size:0.8rem; margin-top:5px; color:#475569">
@@ -442,12 +442,12 @@ class MergeTool {
 
         // === BUILD FORM HTML ===
         let html = `
-            ${textInput('Nombre Completo', 'fn', data.fn)}
+            ${textInput('Full Name', 'fn', data.fn)}
             
             <div class="input-group">
                 <div class="input-header">
-                    <span class="input-label">Teléfonos (${data.tels.length})</span>
-                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('tels')">+ Añadir</button>
+                    <span class="input-label">Phones (${data.tels.length})</span>
+                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('tels')">+ Add</button>
                 </div>
                 ${data.tels.map((tel, i) => `
                     <div class="item-row">
@@ -461,7 +461,7 @@ class MergeTool {
             <div class="input-group">
                 <div class="input-header">
                     <span class="input-label">Emails (${data.emails.length})</span>
-                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('emails')">+ Añadir</button>
+                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('emails')">+ Add</button>
                 </div>
                 ${data.emails.map((email, i) => `
                     <div class="item-row">
@@ -481,10 +481,10 @@ class MergeTool {
         if (data.org !== undefined) {
             html += `
             <div class="input-group">
-                <div class="input-header"><span class="input-label">Organización</span></div>
+                <div class="input-header"><span class="input-label">Organization</span></div>
                 <input class="input-field" list="orgList" value="${data.org || ''}" 
                     oninput="mergeTool.pending.data.org = this.value" 
-                    placeholder="Selecciona o escribe una organización...">
+                    placeholder="Select or type an organization...">
                 <datalist id="orgList">
                     ${existingOrgs.map(org => `<option value="${org}">`).join('')}
                 </datalist>
@@ -492,11 +492,11 @@ class MergeTool {
             `;
         }
         
-        if (data.title !== undefined) html += textInput('Cargo / Título', 'title', data.title);
-        if (data.adr !== undefined) html += textInput('Dirección', 'adr', data.adr);
-        if (data.url !== undefined) html += textInput('Sitio Web', 'url', data.url);
-        if (data.bday !== undefined) html += textInput('Cumpleaños (YYYY-MM-DD)', 'bday', data.bday);
-        if (data.note !== undefined) html += textInput('Notas', 'note', data.note);
+        if (data.title !== undefined) html += textInput('Title / Position', 'title', data.title);
+        if (data.adr !== undefined) html += textInput('Address', 'adr', data.adr);
+        if (data.url !== undefined) html += textInput('Website', 'url', data.url);
+        if (data.bday !== undefined) html += textInput('Birthday (YYYY-MM-DD)', 'bday', data.bday);
+        if (data.note !== undefined) html += textInput('Notes', 'note', data.note);
 
         // Inject HTML into container
         container.innerHTML = html;

@@ -444,13 +444,13 @@ describe('MergeTool', () => {
 
         test('should render name input', () => {
             const form = document.getElementById('mergeResultForm');
-            expect(form.innerHTML).toContain('Nombre Completo');
+            expect(form.innerHTML).toContain('Full Name');
             expect(form.innerHTML).toContain('John Doe');
         });
 
         test('should render phone inputs', () => {
             const form = document.getElementById('mergeResultForm');
-            expect(form.innerHTML).toContain('Teléfonos');
+            expect(form.innerHTML).toContain('Phones');
         });
 
         test('should render email inputs', () => {
@@ -460,16 +460,16 @@ describe('MergeTool', () => {
 
         test('should render org input when org exists', () => {
             const form = document.getElementById('mergeResultForm');
-            expect(form.innerHTML).toContain('Organización');
+            expect(form.innerHTML).toContain('Organization');
         });
 
         test('should render optional fields when present', () => {
             const form = document.getElementById('mergeResultForm');
-            expect(form.innerHTML).toContain('Cargo');
-            expect(form.innerHTML).toContain('Dirección');
-            expect(form.innerHTML).toContain('Notas');
-            expect(form.innerHTML).toContain('Sitio Web');
-            expect(form.innerHTML).toContain('Cumpleaños');
+            expect(form.innerHTML).toContain('Title / Position');
+            expect(form.innerHTML).toContain('Address');
+            expect(form.innerHTML).toContain('Notes');
+            expect(form.innerHTML).toContain('Website');
+            expect(form.innerHTML).toContain('Birthday');
         });
 
         test('should not render optional fields when undefined', () => {
@@ -642,7 +642,7 @@ describe('MergeTool', () => {
             mergeTool.addCustomField();
             
             const form = document.getElementById('mergeResultForm');
-            expect(form.innerHTML).toContain('Organización');
+            expect(form.innerHTML).toContain('Organization');
             expect(form.innerHTML).toContain('orgList'); // datalist for autocomplete
         });
 
