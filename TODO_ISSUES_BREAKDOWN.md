@@ -530,7 +530,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Visual Regression Tests', () => {
     test('should match contact card snapshot', async ({ page }) => {
-        await page.goto('/'); // Uses baseURL from playwright.config.js
+        await page.goto('/');
         await expect(page.locator('.contact-card').first()).toHaveScreenshot('contact-card.png');
     });
     
@@ -546,13 +546,25 @@ test.describe('Visual Regression Tests', () => {
         await expect(page).toHaveScreenshot('mobile-view.png');
     });
 });
+```
 
-// Configure base URL in playwright.config.js:
-// export default {
-//   use: {
-//     baseURL: process.env.BASE_URL || 'http://localhost:5173'
-//   }
-// }
+**Playwright Configuration:**
+```javascript
+// vcf-manager/playwright.config.js (create if doesn't exist)
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests',
+  use: {
+    baseURL: process.env.BASE_URL || 'http://localhost:5173',
+    screenshot: 'only-on-failure',
+  },
+  webServer: {
+    command: 'npm run dev',
+    port: 5173,
+    reuseExistingServer: !process.env.CI,
+  },
+});
 ```
 
 **5. Test Utilities & Helpers**
