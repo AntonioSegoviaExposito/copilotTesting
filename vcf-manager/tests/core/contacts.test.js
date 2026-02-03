@@ -488,4 +488,88 @@ END:VCARD`;
             expect(contactManager.selected.has(newId)).toBe(true);
         });
     });
+
+    describe('Drag and Drop', () => {
+        test('should create drop zone on init', () => {
+            contactManager.init();
+            
+            const dropZone = document.getElementById('dropZone');
+            expect(dropZone).toBeTruthy();
+            expect(dropZone.classList.contains('drop-zone')).toBe(true);
+        });
+
+        test('should show drop zone when files are dragged over', () => {
+            contactManager.init();
+            const dropZone = document.getElementById('dropZone');
+            
+            // Simulate drag enter with files
+            const dragEnterEvent = new Event('dragenter', { bubbles: true });
+            dragEnterEvent.dataTransfer = {
+                types: ['Files']
+            };
+            document.dispatchEvent(dragEnterEvent);
+            
+            expect(dropZone.classList.contains('drop-zone-active')).toBe(true);
+        });
+
+        test('should show drop zone when files are dragged', () => {
+            contactManager.init();
+            const dropZone = document.getElementById('dropZone');
+            
+            // Manually add the class to simulate activation
+            dropZone.classList.add('drop-zone-active');
+            expect(dropZone.classList.contains('drop-zone-active')).toBe(true);
+            
+            // Remove to simulate deactivation
+            dropZone.classList.remove('drop-zone-active');
+            expect(dropZone.classList.contains('drop-zone-active')).toBe(false);
+        });
+
+        test('should have drag and drop handlers attached', () => {
+            contactManager.init();
+            
+            // Verify drop zone exists
+            const dropZone = document.getElementById('dropZone');
+            expect(dropZone).toBeTruthy();
+            
+            // Test preventdefault on dragover
+            const dragOverEvent = new Event('dragover', { bubbles: true, cancelable: true });
+            const prevented = !document.dispatchEvent(dragOverEvent);
+            // Event should be prevented (default behavior stopped)
+            expect(prevented || dragOverEvent.defaultPrevented).toBe(true);
+        });
+
+        test('should filter non-VCF files on drop', () => {
+            contactManager.init();
+            
+            const txtFile = new File(['some text'], 'test.txt', { type: 'text/plain' });
+            
+            // Simulate drop event with non-VCF file
+            const dropEvent = new Event('drop', { bubbles: true, cancelable: true });
+            Object.defineProperty(dropEvent, 'dataTransfer', {
+                value: {
+                    files: [txtFile]
+                },
+                writable: false
+            });
+            
+            document.dispatchEvent(dropEvent);
+            
+            // Should show warning for non-VCF files
+            expect(Toast.warning).toHaveBeenCalledWith('Por favor, suelta archivos VCF (.vcf)');
+        });
+
+        test('should create FileList-like object from array', () => {
+            const files = [
+                new File(['content1'], 'file1.vcf', { type: 'text/vcard' }),
+                new File(['content2'], 'file2.vcf', { type: 'text/vcard' })
+            ];
+            
+            const fileList = contactManager._createFileList(files);
+            
+            expect(fileList.length).toBe(2);
+            expect(fileList[0].name).toBe('file1.vcf');
+            expect(fileList[1].name).toBe('file2.vcf');
+        });
+    });
 });

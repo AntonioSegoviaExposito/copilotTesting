@@ -130,6 +130,7 @@ class ContactManager {
      * 
      * SETUP:
      * - Binds file input change event to loadFile()
+     * - Sets up drag and drop handlers for file import
      * 
      * CALLED BY: initApp() in app.js after instance creation
      * 
@@ -141,6 +142,120 @@ class ContactManager {
             // Bind file selection to loadFiles method (supports multiple files)
             fileInput.addEventListener('change', (e) => this.loadFiles(e.target.files));
         }
+        
+        // Set up drag and drop for file import
+        this._setupDragAndDrop();
+    }
+
+    /**
+     * Set up drag and drop event handlers for file import
+     * 
+     * LOGIC:
+     * 1. Create drop zone overlay (hidden by default)
+     * 2. Attach drag event listeners to document
+     * 3. Show overlay when files are dragged over page
+     * 4. Process dropped files with same loadFiles() method
+     * 5. Hide overlay when drag ends
+     * 
+     * SECURITY:
+     * - Only accepts .vcf files
+     * - Validates file types before processing
+     * - Prevents default browser behavior for security
+     * 
+     * @private
+     * @returns {void}
+     */
+    _setupDragAndDrop() {
+        // Create drop zone overlay
+        const dropZone = document.createElement('div');
+        dropZone.id = 'dropZone';
+        dropZone.className = 'drop-zone';
+        dropZone.innerHTML = `
+            <div class="drop-zone-content">
+                <div class="drop-zone-icon">📂</div>
+                <div class="drop-zone-text">Suelta los archivos VCF aquí</div>
+                <div class="drop-zone-hint">Archivos .vcf soportados</div>
+            </div>
+        `;
+        document.body.appendChild(dropZone);
+        
+        let dragCounter = 0; // Track nested drag enter/leave events
+        
+        // Prevent default drag behaviors on document
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        
+        document.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Check if dragging files (not text or other elements)
+            if (e.dataTransfer && e.dataTransfer.types && e.dataTransfer.types.includes('Files')) {
+                dragCounter++;
+                if (dragCounter === 1) {
+                    dropZone.classList.add('drop-zone-active');
+                }
+            }
+        });
+        
+        document.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Only decrement if we had previously incremented
+            if (e.dataTransfer && e.dataTransfer.types && e.dataTransfer.types.includes('Files')) {
+                dragCounter--;
+                if (dragCounter === 0) {
+                    dropZone.classList.remove('drop-zone-active');
+                }
+            }
+        });
+        
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            dragCounter = 0;
+            dropZone.classList.remove('drop-zone-active');
+            
+            // Get dropped files
+            const files = e.dataTransfer.files;
+            
+            if (files && files.length > 0) {
+                // Filter for .vcf files only
+                const vcfFiles = Array.from(files).filter(file => 
+                    file.name.toLowerCase().endsWith('.vcf')
+                );
+                
+                if (vcfFiles.length > 0) {
+                    // Convert array to FileList-like object
+                    const fileList = this._createFileList(vcfFiles);
+                    this.loadFiles(fileList);
+                } else {
+                    Toast.warning('Por favor, suelta archivos VCF (.vcf)');
+                }
+            }
+        });
+    }
+
+    /**
+     * Create a FileList-like object from an array of files
+     * 
+     * FileList is read-only, so we create a compatible object
+     * 
+     * @private
+     * @param {File[]} files - Array of File objects
+     * @returns {Object} FileList-like object
+     */
+    _createFileList(files) {
+        const fileList = {};
+        files.forEach((file, index) => {
+            fileList[index] = file;
+        });
+        fileList.length = files.length;
+        return fileList;
     }
 
     /**
