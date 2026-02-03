@@ -556,7 +556,7 @@ END:VCARD`;
             document.dispatchEvent(dropEvent);
             
             // Should show warning for non-VCF files
-            expect(Toast.warning).toHaveBeenCalledWith('Por favor, suelta archivos VCF (.vcf)');
+            expect(Toast.warning).toHaveBeenCalledWith('Please drop VCF (.vcf) files');
         });
 
         test('should create FileList-like object from array', () => {

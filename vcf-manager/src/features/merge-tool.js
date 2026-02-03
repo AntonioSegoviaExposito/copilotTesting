@@ -315,10 +315,16 @@ class MergeTool {
             title.innerText = slavesCount > 0 ? `Merge (${slavesCount + 1})` : "Edit";
         }
 
-        // Show/hide clone button (only for single contact edit mode)
+        // Hide clone button in modal (it's now in the FAB)
         const cloneBtn = document.getElementById('cloneButton');
         if (cloneBtn) {
-            cloneBtn.style.display = slavesCount === 0 ? 'block' : 'none';
+            cloneBtn.style.display = 'none';
+        }
+
+        // Hide sources column when editing single contact (no merge needed)
+        const sourcesCol = modal?.querySelector('.col-sources');
+        if (sourcesCol) {
+            sourcesCol.style.display = slavesCount === 0 ? 'none' : 'block';
         }
 
         // Render both panels
@@ -767,6 +773,12 @@ class MergeTool {
         // Clear pending merge state
         this.pending = null;
 
+        // Clear selection when cancelling (not when committing successfully)
+        // Success case is handled by commit() which calls deselectAll() separately
+        if (!isSuccess) {
+            core.deselectAll();
+        }
+
         // Cancel auto-merge if closing without success
         // This handles user cancelling during queue processing
         if (autoMerger.active && !isSuccess) {
@@ -778,11 +790,11 @@ class MergeTool {
      * Clone the current contact being edited
      * 
      * CLONE WORKFLOW:
-     * 1. Validate that we're in edit mode (single contact)
-     * 2. Create a copy of the current pending data
-     * 3. Generate new unique ID for the clone
+     * 1. Validate that we're in edit mode (single contact selected)
+     * 2. Get contact data from pending or from selection
+     * 3. Create a copy with a new unique ID
      * 4. Add cloned contact to contacts array
-     * 5. Close modal and select the new clone
+     * 5. Close modal (if open) and deselect
      * 6. Show success message
      * 
      * USE CASE:
@@ -790,47 +802,84 @@ class MergeTool {
      * - Saves time by copying all fields and then editing
      * 
      * CALLED BY:
-     * - User clicking "Clone" button in edit mode
+     * - User clicking "Clone" button in FAB (when 1 selected)
+     * - User clicking "Clone" button in edit modal
      * 
      * @returns {void}
      * 
      * @example
-     * // User edits contact, clicks "Clone"
+     * // User selects contact, clicks "Clone" in FAB
      * // New contact created with same data but different ID
-     * // User can then edit the clone separately
      */
     cloneContact() {
-        // Validate we're in edit mode (single contact)
-        if (!this.pending || this.pending.originalObjects.length > 1) return;
+        // Get source contact data
+        let sourceContact;
+        
+        if (this.pending && this.pending.originalObjects.length === 1) {
+            // Clone from modal (use pending data with user edits)
+            sourceContact = {
+                fn: this.pending.data.fn,
+                tels: [...this.pending.data.tels.filter(t => t.length > 0)],
+                emails: [...this.pending.data.emails.filter(e => e.length > 0)],
+                org: this.pending.data.org,
+                title: this.pending.data.title,
+                adr: this.pending.data.adr,
+                url: this.pending.data.url,
+                bday: this.pending.data.bday,
+                note: this.pending.data.note
+            };
+        } else if (core.selected.size === 1) {
+            // Clone from FAB (use selected contact as-is)
+            const selectedId = Array.from(core.selected)[0];
+            const originalContact = core.findById(selectedId);
+            if (!originalContact) return;
+            
+            sourceContact = {
+                fn: originalContact.fn,
+                tels: [...originalContact.tels],
+                emails: [...originalContact.emails],
+                org: originalContact.org,
+                title: originalContact.title,
+                adr: originalContact.adr,
+                url: originalContact.url,
+                bday: originalContact.bday,
+                note: originalContact.note
+            };
+        } else {
+            // Invalid state - not in edit mode and no single selection
+            return;
+        }
 
         // Generate unique ID for clone
         const cloneId = 'clone_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
 
-        // Create cloned contact with current pending data
+        // Create cloned contact with source data
         const clonedContact = {
             _id: cloneId,
-            fn: this.pending.data.fn + ' (Copia)',
-            tels: [...this.pending.data.tels.filter(t => t.length > 0)],
-            emails: [...this.pending.data.emails.filter(e => e.length > 0)],
-            org: this.pending.data.org,
-            title: this.pending.data.title,
-            adr: this.pending.data.adr,
-            url: this.pending.data.url,
-            bday: this.pending.data.bday,
-            note: this.pending.data.note
+            fn: sourceContact.fn + ' (Copy)',
+            tels: sourceContact.tels,
+            emails: sourceContact.emails,
+            org: sourceContact.org,
+            title: sourceContact.title,
+            adr: sourceContact.adr,
+            url: sourceContact.url,
+            bday: sourceContact.bday,
+            note: sourceContact.note
         };
 
         // Add cloned contact to beginning of contacts array
         core.contacts.unshift(clonedContact);
 
-        // Close modal
-        this.close(true);
+        // Close modal if open
+        if (this.pending) {
+            this.close(true);
+        }
 
         // Deselect all and render
         core.deselectAll();
 
         // Show success message
-        Toast.success('Contacto clonado correctamente');
+        Toast.success('Contact cloned successfully');
     }
 }
 

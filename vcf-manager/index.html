@@ -26,7 +26,7 @@
 
     <div class="header-group">
         <button class="btn btn-outline" onclick="core.toggleSort()">🔤 Sort A-Z</button>
-        <button class="btn btn-outline" id="btnTogglePhones" onclick="core.togglePhoneFilter()">📱 Show Only Without Phones</button>
+        <button class="btn btn-outline" id="btnTogglePhones" onclick="core.togglePhoneFilter()">📵 No Phone</button>
     </div>
 
     <div class="divider"></div>
@@ -61,6 +61,7 @@
     <button class="btn btn-primary" style="padding: 0.6rem 1.2rem;" onclick="mergeTool.init()">
         <span id="fabActionText">MERGE</span>
     </button>
+    <button class="btn btn-outline" id="fabCloneBtn" style="padding: 0.6rem 1.2rem; display:none;" onclick="core.cloneSelected()">📋 Clone</button>
     <button class="btn btn-danger" onclick="core.deleteSelected()">🗑️</button>
     <button style="background:none; border:none; color:#94a3b8; font-size:1.5rem; cursor:pointer; margin-left:5px" onclick="core.deselectAll()">×</button>
 </div>

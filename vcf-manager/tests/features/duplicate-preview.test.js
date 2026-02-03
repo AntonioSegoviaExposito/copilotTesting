@@ -122,7 +122,7 @@ describe('DuplicatePreview', () => {
             await vi.advanceTimersByTimeAsync(0);
             
             const mode = document.querySelector('.duplicate-preview-mode');
-            expect(mode.textContent).toContain('nombre');
+            expect(mode.textContent).toContain('by name');
             
             // Clean up
             document.querySelector('.duplicate-preview-cancel').click();
@@ -136,7 +136,7 @@ describe('DuplicatePreview', () => {
             await vi.advanceTimersByTimeAsync(0);
             
             const mode = document.querySelector('.duplicate-preview-mode');
-            expect(mode.textContent).toContain('teléfono');
+            expect(mode.textContent).toContain('by phone');
             
             // Clean up
             document.querySelector('.duplicate-preview-cancel').click();
@@ -227,7 +227,7 @@ describe('DuplicatePreview', () => {
             await vi.advanceTimersByTimeAsync(0);
             
             const contacts = document.querySelectorAll('.duplicate-preview-contact');
-            expect(contacts[0].textContent).toContain('Sin nombre');
+            expect(contacts[0].textContent).toContain('No name');
             
             // Clean up
             document.querySelector('.duplicate-preview-cancel').click();
@@ -314,7 +314,7 @@ describe('DuplicatePreview', () => {
             await vi.advanceTimersByTimeAsync(0);
             
             const labels = document.querySelectorAll('.duplicate-preview-stat-label');
-            expect(labels[0].textContent).toBe('Grupo');
+            expect(labels[0].textContent).toBe('Group');
             
             // Clean up
             document.querySelector('.duplicate-preview-cancel').click();
@@ -331,7 +331,7 @@ describe('DuplicatePreview', () => {
             await vi.advanceTimersByTimeAsync(0);
             
             const labels = document.querySelectorAll('.duplicate-preview-stat-label');
-            expect(labels[0].textContent).toBe('Grupos');
+            expect(labels[0].textContent).toBe('Groups');
             
             // Clean up
             document.querySelector('.duplicate-preview-cancel').click();
