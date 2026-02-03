@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -11,15 +11,18 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   test:
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: npm
@@ -34,6 +37,7 @@ jobs:
         working-directory: vcf-manager
 
   deploy:
+    name: Deploy to Pages
     needs: test
     runs-on: ubuntu-latest
     environment:
@@ -41,21 +45,28 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
-      - name: Build deploy folder
+      - name: Prepare deployment folder
         run: |
+          echo "📦 Preparing deployment folder..."
           mkdir -p deploy
           cp vcf-manager/index.html deploy/
           cp -r vcf-manager/css deploy/
           cp -r vcf-manager/src deploy/
           touch deploy/.nojekyll
+          echo "✅ Deployment folder ready"
+          ls -la deploy/
       
-      - uses: actions/configure-pages@v5
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
       
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: deploy
       
-      - uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages
         id: deployment
+        uses: actions/deploy-pages@v4
