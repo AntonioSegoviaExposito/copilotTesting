@@ -556,12 +556,13 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   use: {
+    // Using relative URLs (/) with baseURL configured
     baseURL: process.env.BASE_URL || 'http://localhost:5173',
     screenshot: 'only-on-failure',
   },
   webServer: {
     command: 'npm run dev',
-    port: 5173,
+    port: 5173, // Should match baseURL port
     reuseExistingServer: !process.env.CI,
   },
 });
