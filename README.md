@@ -1,6 +1,7 @@
 # VCF Manager
 
-![Tests](https://github.com/AntonioSegoviaExposito/copilotTesting/workflows/Test%20%26%20Deploy/badge.svg)
+![CI](https://github.com/AntonioSegoviaExposito/copilotTesting/workflows/CI/badge.svg)
+![Deploy](https://github.com/AntonioSegoviaExposito/copilotTesting/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)
 
 > **⚠️ AI-Generated & Maintained**: This project is generated and maintained by AI agents. Code quality, architecture decisions, and documentation are continuously optimized through automated processes.
 
@@ -83,14 +84,14 @@ npm run test:watch    # Watch mode
 npm run test:coverage # Coverage report
 ```
 
-**351 tests** | **99.87% coverage** | Vitest + V8
+**320 tests** | **99.87% coverage** | Vitest + V8
 
 ## Architecture
 
 - **Vanilla ES6+ modules** - No framework dependencies
 - **ES module imports** - Proper `import`/`export` syntax
 - **Window globals** - `core`, `mergeTool`, `autoMerger` exposed for HTML onclick handlers
-- **Single workflow CI** - Tests on PR, deploys on push to main
+- **GitHub Actions CI/CD** - Tests on PR, deploys to GitHub Pages on push to main
 
 ### Module Dependencies
 
