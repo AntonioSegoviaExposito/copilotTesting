@@ -191,6 +191,200 @@ describe('ClassName', () => {
 - [ ] README.md updated if user-facing changes
 - [ ] No debug code left behind
 
+## Creating High-Quality Pull Requests
+
+A well-crafted PR makes review faster, reduces back-and-forth, and serves as valuable documentation for future developers (human or AI). Follow these principles to create professional, comprehensive PRs.
+
+### PR Title
+
+**Format**: `<Type>: <Brief description>`
+
+**Examples**:
+- ✅ `Internationalization, KISS principles, and contact filter enhancement`
+- ✅ `Fix: Resolve phone number normalization edge case`
+- ✅ `Feature: Add bulk contact deletion`
+
+**Guidelines**:
+- Clear and concise (under 72 characters ideal)
+- Descriptive enough to understand the change without reading details
+- Use professional, direct language
+
+### PR Description Structure
+
+A high-quality PR description should have:
+
+1. **Overview Section**
+   - Brief summary of what changed and why
+   - High-level impact on users/system
+
+2. **Detailed Changes by Category**
+   - Group related changes logically
+   - Use clear headers (Translation, Documentation, New Feature, Bug Fix, etc.)
+   - Bullet points for easy scanning
+
+3. **Technical Implementation** (for complex changes)
+   - Code snippets showing key changes
+   - Before/after comparisons when relevant
+   - Algorithm or architecture decisions explained
+
+4. **Visual Documentation**
+   - Screenshots for ALL UI changes (required)
+   - Before/after comparisons for modifications
+   - Animated GIFs for interactions/workflows (when helpful)
+   - Clearly labeled captions
+
+5. **Testing Evidence**
+   - Test results summary (e.g., "259 tests passing")
+   - Security scan results (e.g., "0 vulnerabilities (CodeQL)")
+   - Manual testing performed
+   - Edge cases validated
+
+### Screenshot Best Practices
+
+Screenshots are REQUIRED for any UI change, no matter how small.
+
+**When to Include Screenshots**:
+- New UI elements or features
+- Modified layouts or styling
+- Button/label text changes
+- Different states of interactive elements (hover, active, disabled)
+- Error states or validation messages
+- Before/after for modifications
+
+**Screenshot Quality Guidelines**:
+- Show the full context (not just the changed element)
+- Use real, representative data (not "test test test")
+- Capture both default and active states
+- Include browser chrome if relevant for responsive design
+- Label screenshots clearly (e.g., "Default state:", "Filter active:")
+
+**Format**:
+```markdown
+**Default state (all contacts):**
+![All contacts](screenshot-url)
+
+**Filter active (contacts without phones only):**
+![Filtered view](screenshot-url)
+```
+
+### Why This Approach Works
+
+**Clear Organization**:
+- Reviewers can quickly understand scope and impact
+- Related changes are grouped logically
+- Easy to reference specific sections in comments
+
+**Evidence-Based**:
+- Screenshots prove the feature works as intended
+- Test results provide confidence in code quality
+- Security scans demonstrate safety
+
+**Self-Documenting**:
+- Future developers understand the "why" not just the "what"
+- Code snippets show implementation approach
+- Screenshots serve as visual regression baseline
+
+**Efficiency**:
+- Reduces "can you show me..." requests
+- Answers questions before they're asked
+- Enables async review (no need for live demos)
+
+### PR Description Template
+
+```markdown
+## Summary
+[Brief overview of what changed and why]
+
+## Changes
+
+### [Category 1: e.g., Translation]
+- Change 1
+- Change 2
+
+### [Category 2: e.g., New Feature]
+**Feature Name**: [Brief description]
+
+**Implementation:**
+```javascript
+// Key code snippet
+```
+
+**UI Screenshots:**
+[Before/after screenshots with clear labels]
+
+## Testing
+- X tests passing
+- Security scan: 0 vulnerabilities
+- Manual testing: [What was tested]
+
+## Additional Notes
+[Any breaking changes, migration steps, or follow-up items]
+```
+
+### Examples of Good PR Practices
+
+**Good: Comprehensive Visual Documentation**
+```markdown
+**Before (all contacts shown):**
+![Before screenshot with 3 contacts visible]
+
+**After (filter applied, only 2 contacts without phones):**
+![After screenshot with 2 contacts visible]
+```
+
+**Bad: No Visual Evidence**
+```markdown
+Added a filter button. It works.
+```
+
+**Good: Specific Test Results**
+```markdown
+## Testing
+- 259 tests passing (0 new failures)
+- 0 security vulnerabilities (CodeQL scan)
+- Manual testing: Verified filter toggles correctly, button label updates dynamically
+```
+
+**Bad: Vague Testing Claims**
+```markdown
+## Testing
+Everything works fine.
+```
+
+**Good: Technical Implementation Details**
+```markdown
+**Implementation:**
+```javascript
+// ContactManager state
+this.showOnlyWithoutPhones = false;
+
+// Filter logic in render()
+if (this.showOnlyWithoutPhones) {
+    visible = visible.filter(c => c.tels.length === 0);
+}
+```
+```
+
+**Bad: No Implementation Context**
+```markdown
+Added some code to filter contacts.
+```
+
+### Review-Friendly Practices
+
+1. **Keep PRs Focused**: One logical change per PR (not "fix everything")
+2. **Link Issues**: Reference related issues or discussions
+3. **Explain Trade-offs**: If you chose approach A over B, explain why
+4. **Highlight Risks**: Call out any breaking changes or migration needs
+5. **Request Specific Feedback**: If you're unsure about a decision, ask explicitly
+
+### Post-Merge Documentation
+
+After PR is merged:
+- Update relevant documentation files if needed
+- Close related issues with reference to PR
+- Update project roadmap or changelog if applicable
+
 ---
 
 **Last Updated**: 2026-02-03 | **Version**: 11.1
