@@ -666,7 +666,7 @@ class ContactManager {
      */
     async deleteSelected() {
         // Show confirmation dialog
-        const confirmed = await Toast.confirm(Config.messages.confirmDelete(this.selected.size), 'Delete', 'Cancel');
+        const confirmed = await Toast.confirm(Config.messages.confirmDelete(this.selected.size), 'Eliminar', 'Cancelar');
         if (!confirmed) return;
         
         // Filter out selected contacts
@@ -700,7 +700,7 @@ class ContactManager {
      */
     async clearAll() {
         // Show confirmation dialog
-        const confirmed = await Toast.confirm(Config.messages.confirmClear, 'Clear All', 'Cancel');
+        const confirmed = await Toast.confirm(Config.messages.confirmClear, 'Limpiar todo', 'Cancelar');
         if (confirmed) {
             // Empty the contacts array
             this.contacts = [];
