@@ -1,9 +1,7 @@
-name: Test & Deploy
+name: Deploy
 
 on:
   push:
-    branches: [main]
-  pull_request:
     branches: [main]
 
 permissions:
@@ -31,18 +29,11 @@ jobs:
         run: npm ci
         working-directory: vcf-manager
       
-      - name: Run tests with coverage
-        run: npm run test:coverage
+      - name: Run tests
+        run: npm test
         working-directory: vcf-manager
-      
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: vcf-manager/coverage/
 
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: test
     runs-on: ubuntu-latest
     environment:
@@ -52,18 +43,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage
-          path: coverage
-      
       - name: Build deploy folder
         run: |
           mkdir -p deploy
           cp vcf-manager/index.html deploy/
           cp -r vcf-manager/css deploy/
           cp -r vcf-manager/src deploy/
-          cp -r coverage deploy/
           touch deploy/.nojekyll
       
       - uses: actions/configure-pages@v5
