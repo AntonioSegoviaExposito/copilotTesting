@@ -298,71 +298,7 @@ This is particularly important for:
 
 **Suggested Implementation:**
 
-**1. Performance Testing Framework**
-
-Create `vcf-manager/tests/performance.test.js`:
-
-```javascript
-import { describe, it, expect } from 'vitest';
-
-describe('Performance Tests', () => {
-    it('should parse 1000 contacts in under 1 second', () => {
-        const start = performance.now();
-        // Parse large VCF file
-        const end = performance.now();
-        expect(end - start).toBeLessThan(1000);
-    });
-    
-    it('should detect duplicates in under 2 seconds', () => {
-        // Test duplicate detection performance
-    });
-    
-    it('should render 1000 contacts in under 500ms', () => {
-        // Test rendering performance
-    });
-});
-```
-
-**2. Runtime Performance Guard**
-
-Create `vcf-manager/src/utils/performance-guard.js`:
-
-```javascript
-export class PerformanceGuard {
-    static wrapFunction(fn, name, timeoutMs = 5000) {
-        return function(...args) {
-            const start = performance.now();
-            let timeoutId;
-            
-            const checkTimeout = new Promise((_, reject) => {
-                timeoutId = setTimeout(() => {
-                    reject(new Error(`Function ${name} exceeded ${timeoutMs}ms`));
-                }, timeoutMs);
-            });
-            
-            const result = fn.apply(this, args);
-            clearTimeout(timeoutId);
-            
-            const duration = performance.now() - start;
-            if (duration > timeoutMs * 0.8) {
-                console.warn(`Performance warning: ${name} took ${duration}ms`);
-            }
-            
-            return result;
-        };
-    }
-    
-    static monitorLoop(maxIterations = 10000) {
-        let count = 0;
-        return () => {
-            count++;
-            if (count > maxIterations) {
-                throw new Error(`Loop exceeded ${maxIterations} iterations`);
-            }
-        };
-    }
-}
-```
+Some lib focus on this in node o similar, lets try prevent write a lot of new code, remember KISS
 
 **3. Integration with Existing Code**
 
@@ -372,27 +308,12 @@ Wrap performance-critical functions:
 - VCF parsing functions
 - Search/filter operations
 
-**4. Monitoring Dashboard (Optional)**
-
-Add a dev-mode panel showing:
-- Function execution times
-- Memory usage
-- Warning flags for slow operations
-
 ### Testing Requirements
 
 - Performance test suite covering key operations
 - Benchmarks for comparison across changes
 - CI integration to catch performance regressions
 - Load testing with large datasets (1000+, 5000+, 10000+ contacts)
-
-### Tools & Libraries
-
-Consider integrating:
-- **Vitest** (already used): Built-in performance testing
-- **web-vitals**: Core Web Vitals metrics
-- **performance.mark/measure**: Native browser APIs
-- **Performance Observer API**: Monitor long tasks
 
 ### User Impact
 
