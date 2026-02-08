@@ -26,18 +26,7 @@
  */
 
 import Config from '../config.js';
-
-/**
- * Escape HTML special characters to prevent XSS
- * @private
- * @param {string} str - String to escape
- * @returns {string} Escaped string safe for HTML insertion
- */
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
+import { escapeHtml } from './html.js';
 
 /**
  * Toast notification utility class

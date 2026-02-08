@@ -31,35 +31,7 @@ import Config from '../config.js';
 import PhoneUtils from '../utils/phone.js';
 import Toast from '../utils/toast.js';
 import VCFParser from './vcf-parser.js';
-
-/**
- * Validate that a string is a safe hex color
- * @private
- * @param {string} color - Color to validate
- * @returns {boolean} True if valid hex color
- */
-function isValidHexColor(color) {
-    return /^#[0-9A-Fa-f]{6}$/.test(color);
-}
-
-/**
- * Escape HTML for safe attribute insertion
- * @private
- * @param {string} str - String to escape
- * @returns {string} Escaped string
- */
-function escapeHtmlAttr(str) {
-    return str.replace(/[&<>"']/g, char => {
-        const escape = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
-        };
-        return escape[char];
-    });
-}
+import { escapeHtml, isValidHexColor } from '../utils/html.js';
 
 /**
  * @typedef {Object} Contact
@@ -327,7 +299,7 @@ class ContactManager {
         };
         
         reader.onerror = () => {
-            Toast.error(`Error al leer el archivo: ${file.name}`);
+            Toast.error(`Error reading file: ${file.name}`);
             // Continue with next file even if this one fails
             this._processFilesSequentially(fileArray, index + 1);
         };
@@ -464,12 +436,16 @@ class ContactManager {
         // Re-render to apply filter
         this.render();
         
-        // Update toggle button text to reflect current state
+        // Update toggle button text and visual state to reflect current filter
         const toggleBtn = document.getElementById('btnTogglePhones');
         if (toggleBtn) {
-            toggleBtn.innerText = this.showOnlyWithoutPhones 
-                ? '📵 Show All' 
-                : '📵 No Phone';
+            if (this.showOnlyWithoutPhones) {
+                toggleBtn.innerText = '📵 Show All';
+                toggleBtn.classList.add('btn-pulse-red');
+            } else {
+                toggleBtn.innerText = '📵 No Phone';
+                toggleBtn.classList.remove('btn-pulse-red');
+            }
         }
     }
 
@@ -598,7 +574,7 @@ class ContactManager {
             card.style.borderLeft = `4px solid ${contact._importColor}`;
             card.setAttribute('data-import-group', contact._importGroup);
             if (contact._importFileName) {
-                card.setAttribute('title', `Imported from: ${escapeHtmlAttr(contact._importFileName)}`);
+                card.setAttribute('title', `Imported from: ${escapeHtml(contact._importFileName)}`);
             }
         }
         
@@ -609,7 +585,7 @@ class ContactManager {
         // Show up to maxTelsDisplay phones with formatting
         const telsHtml = contact.tels
             .slice(0, Config.ui.maxTelsDisplay)
-            .map(t => `<span>📞 ${PhoneUtils.format(t)}</span>`)
+            .map(t => `<span>📞 ${escapeHtml(PhoneUtils.format(t))}</span>`)
             .join('');
 
         // Show "more" indicator if additional phones exist
@@ -621,8 +597,8 @@ class ContactManager {
         // Badge shows selection number (1-indexed) when selected
         card.innerHTML = `
             <div class="badge">${selectionIndex + 1}</div>
-            <div style="font-weight:bold; font-size:1.05rem; margin-bottom:4px;">${contact.fn}</div>
-            <div style="font-size:0.8rem; color:#64748b; margin-bottom:8px;">${contact.org || ''}</div>
+            <div style="font-weight:bold; font-size:1.05rem; margin-bottom:4px;">${escapeHtml(contact.fn)}</div>
+            <div style="font-size:0.8rem; color:#64748b; margin-bottom:8px;">${escapeHtml(contact.org || '')}</div>
             <div style="display:flex; flex-direction:column; gap:4px; font-size:0.85rem; color:#334155;">
                 ${telsHtml}
                 ${moreTels}
@@ -887,13 +863,14 @@ class ContactManager {
         // Generate unique ID
         const newId = 'new_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
         
-        // Create new empty contact
+        // Create new empty contact (flag for validation on commit/close)
         const newContact = {
             _id: newId,
             fn: '',
             tels: [],
             emails: [],
-            org: ''
+            org: '',
+            _isNewContact: true
         };
         
         // Add to beginning of contacts array

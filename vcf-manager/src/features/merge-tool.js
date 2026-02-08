@@ -46,28 +46,7 @@
 
 import PhoneUtils from '../utils/phone.js';
 import Toast from '../utils/toast.js';
-
-/**
- * Escape HTML special characters to prevent XSS
- * @private
- * @param {string} str - String to escape
- * @returns {string} Escaped string safe for HTML insertion
- */
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-/**
- * Validate that a string is a safe hex color
- * @private
- * @param {string} color - Color to validate
- * @returns {boolean} True if valid hex color
- */
-function isValidHexColor(color) {
-    return /^#[0-9A-Fa-f]{6}$/.test(color);
-}
+import { escapeHtml, isValidHexColor } from '../utils/html.js';
 
 /**
  * @typedef {Object} PendingMerge
@@ -323,8 +302,16 @@ class MergeTool {
 
         // Hide sources column when editing single contact (no merge needed)
         const sourcesCol = modal?.querySelector('.col-sources');
+        const resultCol = modal?.querySelector('.col-result');
         if (sourcesCol) {
             sourcesCol.style.display = slavesCount === 0 ? 'none' : 'block';
+        }
+        if (resultCol) {
+            if (slavesCount === 0) {
+                resultCol.classList.add('col-result-full');
+            } else {
+                resultCol.classList.remove('col-result-full');
+            }
         }
 
         // Render both panels
@@ -694,8 +681,33 @@ class MergeTool {
      * // After commit:
      * // core.contacts = [Merged, Other1, Other2]
      */
+    /**
+     * Check if a contact has meaningful data (name, phone, or email)
+     * @private
+     * @param {Object} data - Contact data to validate
+     * @returns {boolean} True if contact has at least one meaningful field
+     */
+    _hasData(data) {
+        const hasName = data.fn && data.fn.trim().length > 0;
+        const hasPhone = data.tels && data.tels.some(t => t.length > 0);
+        const hasEmail = data.emails && data.emails.some(e => e.length > 0);
+        return hasName || hasPhone || hasEmail;
+    }
+
     commit() {
         const pending = this.pending;
+
+        // === VALIDATE NEW CONTACT ===
+        // Prevent empty contact creation (Issue #1)
+        const isNewContact = pending.originalObjects.length === 1 && pending.originalObjects[0]._isNewContact;
+        if (isNewContact && !this._hasData(pending.data)) {
+            Toast.warning('Cannot create empty contact. Add at least a name, phone, or email.');
+            // Remove the empty contact from the list
+            core.contacts = core.contacts.filter(c => c._id !== pending.targetId);
+            this.close(true);
+            core.deselectAll();
+            return;
+        }
 
         // === BUILD MERGED CONTACT ===
         // Create new contact object with merged data
@@ -766,6 +778,14 @@ class MergeTool {
      * mergeTool.close();            // close(false) → cancels auto-merge
      */
     close(isSuccess = false) {
+        // If cancelling a new contact that has no data, remove it
+        if (!isSuccess && this.pending) {
+            const isNewContact = this.pending.originalObjects.length === 1 && this.pending.originalObjects[0]._isNewContact;
+            if (isNewContact && !this._hasData(this.pending.data)) {
+                core.contacts = core.contacts.filter(c => c._id !== this.pending.targetId);
+            }
+        }
+
         // Hide modal UI
         const modal = document.getElementById('mergeModal');
         if (modal) modal.style.display = 'none';

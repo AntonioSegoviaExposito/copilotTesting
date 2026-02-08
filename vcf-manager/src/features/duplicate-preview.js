@@ -26,18 +26,7 @@
  */
 
 import Config from '../config.js';
-
-/**
- * Escape HTML special characters to prevent XSS
- * @private
- * @param {string} str - String to escape
- * @returns {string} Escaped string safe for HTML insertion
- */
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
+import { escapeHtml, isValidHexColor } from '../utils/html.js';
 
 /**
  * Duplicate Preview utility class
@@ -199,8 +188,8 @@ class DuplicatePreview {
                 const phoneHtml = phone ? `<span class="duplicate-preview-phone">${phone}</span>` : '';
                 
                 // Add import group color indicator if available
-                const colorDot = contact._importColor && this._isValidHexColor(contact._importColor)
-                    ? `<span class="duplicate-preview-color-dot" style="background-color: ${contact._importColor};" title="Grupo de importación ${contact._importGroup}"></span>`
+                const colorDot = contact._importColor && isValidHexColor(contact._importColor)
+                    ? `<span class="duplicate-preview-color-dot" style="background-color: ${contact._importColor};" title="Import group ${contact._importGroup}"></span>`
                     : '';
                 
                 return `<div class="duplicate-preview-contact">${colorDot}${name}${phoneHtml}</div>`;
@@ -209,7 +198,7 @@ class DuplicatePreview {
             return `
                 <div class="duplicate-preview-group">
                     <div class="duplicate-preview-group-header">
-                        Grupo ${index + 1} <span class="duplicate-preview-count">(${group.length} contactos)</span>
+                        Group ${index + 1} <span class="duplicate-preview-count">(${group.length} contacts)</span>
                     </div>
                     <div class="duplicate-preview-contacts">
                         ${contactNames}
@@ -219,15 +208,6 @@ class DuplicatePreview {
         }).join('');
     }
 
-    /**
-     * Validate that a string is a safe hex color
-     * @private
-     * @param {string} color - Color to validate
-     * @returns {boolean} True if valid hex color
-     */
-    _isValidHexColor(color) {
-        return /^#[0-9A-Fa-f]{6}$/.test(color);
-    }
 }
 
 // Export singleton instance

@@ -324,8 +324,9 @@ const VCFParser = {
         document.body.appendChild(link);
         link.click();
         
-        // Clean up: remove link from DOM
+        // Clean up: remove link from DOM and revoke object URL to free memory
         document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
     }
 };
 

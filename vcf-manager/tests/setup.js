@@ -57,8 +57,9 @@ globalThis.DuplicatePreview = DuplicatePreview;
 // Mock DuplicatePreview.show to auto-confirm by default
 DuplicatePreview.show = vi.fn(async () => true); // Default to confirmed
 
-// Mock URL.createObjectURL
+// Mock URL.createObjectURL and URL.revokeObjectURL
 globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+globalThis.URL.revokeObjectURL = vi.fn();
 
 // Mock FileReader
 class MockFileReader {
