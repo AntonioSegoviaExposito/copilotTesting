@@ -321,6 +321,11 @@ main {
     margin: 0 auto;
 }
 
+/* Remove gray background from modal body when editing single contact */
+.modal-body.single-edit {
+    background: white;
+}
+
 .input-group {
     margin-bottom: 1.2rem;
 }

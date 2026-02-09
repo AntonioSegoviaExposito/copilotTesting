@@ -303,6 +303,7 @@ class MergeTool {
         // Hide sources column when editing single contact (no merge needed)
         const sourcesCol = modal?.querySelector('.col-sources');
         const resultCol = modal?.querySelector('.col-result');
+        const modalBody = modal?.querySelector('.modal-body');
         if (sourcesCol) {
             sourcesCol.style.display = slavesCount === 0 ? 'none' : 'block';
         }
@@ -311,6 +312,14 @@ class MergeTool {
                 resultCol.classList.add('col-result-full');
             } else {
                 resultCol.classList.remove('col-result-full');
+            }
+        }
+        // Remove gray background when editing single contact to avoid white bands
+        if (modalBody) {
+            if (slavesCount === 0) {
+                modalBody.classList.add('single-edit');
+            } else {
+                modalBody.classList.remove('single-edit');
             }
         }
 
