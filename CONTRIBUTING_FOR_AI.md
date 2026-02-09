@@ -35,7 +35,7 @@ Your main mission is:
    - Surgical precision: change only what's necessary
    - Preserve working code unless there's a compelling reason to refactor
 
-3. **Test-Driven** - Run tests before and after changes (`npm test`)
+3. **Test-Driven** - Run tests before and after changes
    - Establish baseline before making changes
    - Verify changes don't break existing functionality
    - Maintain or improve test coverage
@@ -44,7 +44,7 @@ Your main mission is:
    - Match the existing codebase architecture
    - Use established patterns, don't invent new ones unnecessarily
 
-5. **Documentation** - Update JSDoc comments when changing function signatures
+5. **Documentation**
    - Clear, concise documentation
    - Explain the "why" not just the "what"
 
@@ -57,7 +57,7 @@ Before making any change, ask yourself:
 - **Simpler?** Is there a simpler way to achieve the same goal?
 - **Trade-offs?** What are we gaining? What are we losing?
 - **Impact?** What other parts of the system does this affect?
-- **Maintenance?** Will this be easy to maintain and understand in 6 months?
+- **Maintenance?** Will this be easy to maintain and understand?
 
 ## Architecture Philosophy
 
