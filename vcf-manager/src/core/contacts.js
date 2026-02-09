@@ -516,6 +516,7 @@ class ContactManager {
         // === SHOW EMPTY STATE ===
         if (visible.length === 0) {
             grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#94a3b8">${Config.messages.noData}</div>`;
+            this._updateFAB();
             return;
         }
 

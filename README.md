@@ -3,103 +3,34 @@
 ![CI](https://github.com/AntonioSegoviaExposito/copilotTesting/workflows/CI/badge.svg)
 ![Deploy](https://github.com/AntonioSegoviaExposito/copilotTesting/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)
 
-> **⚠️ AI-Generated & Maintained**: This project is generated and maintained by AI agents. Code quality, architecture decisions, and documentation are continuously optimized through automated processes.
-
-A modern contact management application for VCF (vCard) files with duplicate detection and merging.
+A contact management SPA for VCF (vCard) files with duplicate detection and merging. Pure vanilla ES6+ -- no frameworks, no build process, zero runtime dependencies.
 
 **Live Demo**: https://antoniosegoviaexposito.github.io/copilotTesting/
 
-**Coverage Report**: https://antoniosegoviaexposito.github.io/copilotTesting/coverage/
-
 ## Features
 
-- **Import/Export** - Parse and generate VCF (vCard) files
-- **Duplicate Detection** - Find duplicates by name or phone number
-- **Contact Merging** - Manual and automatic merge with master/slave pattern
-- **Search & Filter** - Real-time contact search
-- **Clean UI** - Modern, responsive dark-themed interface
+- Import/export VCF files (single or multiple, with drag & drop)
+- Duplicate detection by name or phone number
+- Contact merging (manual and automatic with master/slave pattern)
+- Real-time search and filtering
+- Toast notifications and confirmation dialogs
+- Add, edit, clone, and delete contacts
 
 ## Quick Start
 
 ```bash
 cd vcf-manager
-npm install
-npm test
+npm install    # Dev dependencies only (Vitest)
+npm test       # 320 tests, ~99.87% coverage
 ```
 
-Open `index.html` in a browser (or use a local HTTP server).
-
-## Project Structure
-
-```
-vcf-manager/
-├── index.html              # App entry (ES module loader)
-├── css/styles.css          # Styles
-├── src/
-│   ├── app.js              # Bootstrap, exposes globals to window
-│   ├── config.js           # App settings
-│   ├── core/
-│   │   ├── contacts.js     # Contact management, UI rendering
-│   │   └── vcf-parser.js   # VCF parse/export
-│   ├── features/
-│   │   ├── auto-merger.js  # Duplicate detection queue
-│   │   └── merge-tool.js   # Merge modal UI
-│   └── utils/
-│       └── phone.js        # Phone normalization
-└── tests/                  # Vitest test suites
-```
-
-## Testing
-
-```bash
-npm test              # Run tests
-npm run test:watch    # Watch mode
-npm run test:coverage # Coverage report
-```
-
-**320 tests** | **99.87% coverage** | Vitest + V8
+Open `vcf-manager/index.html` in a browser. No build step required.
 
 ## Architecture
 
-- **Vanilla ES6+ modules** - No framework dependencies
-- **ES module imports** - Proper `import`/`export` syntax
-- **Window globals** - `core`, `mergeTool`, `autoMerger` exposed for HTML onclick handlers
-- **GitHub Actions CI/CD** - Tests on PR, deploys to GitHub Pages on push to main
+Vanilla ES6 modules running entirely in the browser. Node/npm used only for testing.
 
-### Module Dependencies
-
-```
-config.js (no deps)
-    ↓
-phone.js → config
-    ↓
-vcf-parser.js → config, phone
-    ↓
-contacts.js → config, phone, vcf-parser
-    ↓
-merge-tool.js → phone (uses window.core, window.autoMerger)
-auto-merger.js → config, phone (uses window.core, window.mergeTool)
-    ↓
-app.js → imports all, exposes to window, calls init()
-```
-
-## Configuration
-
-Edit `src/config.js`:
-
-```javascript
-const Config = {
-    version: '11.1',
-    phone: {
-        defaultCountryCode: '+34',  // Change for your country
-        minLength: 9
-    },
-    ui: {
-        maxTelsDisplay: 3
-    },
-    messages: { /* user-facing strings */ }
-};
-```
+See [CONTRIBUTING_FOR_AI.md](CONTRIBUTING_FOR_AI.md) for file organization, coding standards, and architecture details.
 
 ## License
 
