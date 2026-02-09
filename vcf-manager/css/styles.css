@@ -317,7 +317,7 @@ main {
 /* When sources column is hidden (single contact edit), result takes full width */
 .col-result.col-result-full {
     width: 100%;
-    max-width: 600px;
+    max-width: 100%;
     margin: 0 auto;
 }
 
