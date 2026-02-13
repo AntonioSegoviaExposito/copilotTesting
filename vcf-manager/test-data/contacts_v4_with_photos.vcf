@@ -1,0 +1,77 @@
+BEGIN:VCARD
+VERSION:4.0
+FN:Dr. Maria Rodriguez
+N:;Dr. Maria Rodriguez;;;
+KIND:individual
+TEL;TYPE=cell,voice;VALUE=uri:tel:+34954123456
+EMAIL;TYPE=internet:maria.rodriguez@hospital.es
+ORG:Hospital Central
+TITLE:Chief Surgeon
+PHOTO;MEDIATYPE=image/jpeg:https://i.pravatar.cc/150?img=5
+GENDER:F
+ANNIVERSARY:2015-06-12
+LANG:es
+NICKNAME:Mari
+GEO:geo:37.3886303,-5.9953403
+TZ:Europe/Madrid
+CATEGORIES:Medical,Staff
+ROLE:Chief of Surgery
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+FN:John Smith
+N:;John Smith;;;
+KIND:individual
+TEL;TYPE=cell,voice;VALUE=uri:tel:+34612345678
+EMAIL;TYPE=internet:john.smith@tech.com
+ORG:Tech Solutions Inc.
+TITLE:Software Engineer
+PHOTO;MEDIATYPE=image/jpeg:https://i.pravatar.cc/150?img=12
+GENDER:M
+BDAY:1990-05-15
+LANG:en
+IMPP:xmpp:jsmith@jabber.org
+IMPP:sip:john@sip.example.com
+GEO:geo:40.4168,-3.7038
+TZ:Europe/Madrid
+NICKNAME:Johnny
+CATEGORIES:Developer,Remote
+ROLE:Senior Developer
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+FN:Sophie Dubois
+N:;Sophie Dubois;;;
+KIND:individual
+TEL;TYPE=cell,voice;VALUE=uri:tel:+33612345678
+EMAIL;TYPE=internet:sophie.dubois@design.fr
+ORG:Creative Studio Paris
+TITLE:UX Designer
+PHOTO;MEDIATYPE=image/jpeg:https://i.pravatar.cc/150?img=47
+GENDER:F
+BDAY:1988-03-22
+ANNIVERSARY:2018-09-01
+LANG:fr
+GEO:geo:48.8566,2.3522
+TZ:Europe/Paris
+CATEGORIES:Design,Creative
+ROLE:Lead Designer
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+FN:Ahmed Hassan
+N:;Ahmed Hassan;;;
+KIND:individual
+TEL;TYPE=cell,voice;VALUE=uri:tel:+34611222333
+EMAIL;TYPE=internet:ahmed.hassan@consulting.es
+ORG:Business Solutions
+TITLE:Senior Consultant
+PHOTO;MEDIATYPE=image/jpeg:https://i.pravatar.cc/150?img=33
+GENDER:M
+LANG:ar
+IMPP:xmpp:ahmed@jabber.org
+GEO:geo:41.3851,2.1734
+TZ:Europe/Madrid
+CATEGORIES:Business,Consulting
+ROLE:Strategic Advisor
+END:VCARD
