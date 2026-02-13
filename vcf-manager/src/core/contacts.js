@@ -45,6 +45,17 @@ import { escapeHtml, isValidHexColor } from '../utils/html.js';
  * @property {string} [note] - Notes (optional)
  * @property {string} [url] - Website URL (optional)
  * @property {string} [bday] - Birthday in YYYY-MM-DD format (optional)
+ * @property {string} [photo] - Photo URI or data URI (optional, v4.0)
+ * @property {string} [gender] - Gender (optional, v4.0)
+ * @property {string} [kind] - Entity type (optional, v4.0, defaults to "individual")
+ * @property {string} [anniversary] - Anniversary date (optional, v4.0)
+ * @property {string} [lang] - Preferred language (optional, v4.0)
+ * @property {string[]} [impp] - Instant messaging addresses (optional, v4.0)
+ * @property {string} [geo] - Geographic position (optional, v4.0)
+ * @property {string} [tz] - Time zone (optional, v4.0)
+ * @property {string} [nickname] - Nickname (optional)
+ * @property {string} [categories] - Categories (optional)
+ * @property {string} [role] - Role (optional)
  */
 
 /**
