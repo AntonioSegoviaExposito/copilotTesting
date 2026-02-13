@@ -195,7 +195,10 @@ const VCFParser = {
             kind: this._decode(get('KIND')) || undefined,
             anniversary: this._decode(get('ANNIVERSARY')) || undefined,
             lang: this._decode(get('LANG')) || undefined,
-            impp: getAll('IMPP').map(i => this._decode(i)).filter(i => i) || undefined,
+            impp: (() => {
+                const imppValues = getAll('IMPP').map(i => this._decode(i)).filter(i => i);
+                return imppValues.length > 0 ? imppValues : undefined;
+            })(),
             geo: this._decode(get('GEO')) || undefined,
             tz: this._decode(get('TZ')) || undefined,
             nickname: this._decode(get('NICKNAME')) || undefined,
@@ -346,9 +349,16 @@ const VCFParser = {
                     output += `PHOTO:${contact.photo}\n`;
                 } else {
                     // Assume it's a URL, add MEDIATYPE parameter
-                    const mediaType = contact.photo.match(/\.(jpg|jpeg)$/i) ? 'image/jpeg' : 
-                                     contact.photo.match(/\.png$/i) ? 'image/png' :
-                                     contact.photo.match(/\.gif$/i) ? 'image/gif' : 'image/jpeg';
+                    // Extract file extension and map to MIME type
+                    const extensionMatch = contact.photo.match(/\.([^.]+)$/i);
+                    const extension = extensionMatch ? extensionMatch[1].toLowerCase() : '';
+                    const mimeTypes = {
+                        'jpg': 'image/jpeg',
+                        'jpeg': 'image/jpeg',
+                        'png': 'image/png',
+                        'gif': 'image/gif'
+                    };
+                    const mediaType = mimeTypes[extension] || 'image/jpeg';
                     output += `PHOTO;MEDIATYPE=${mediaType}:${contact.photo}\n`;
                 }
             }
