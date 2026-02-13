@@ -567,7 +567,6 @@ class MergeTool {
         // === vCard 4.0 FIELDS ===
         // Photo field with preview
         if (data.photo !== undefined) {
-            const isDataUri = data.photo && data.photo.startsWith('data:');
             const photoValue = escapeHtml(data.photo || '');
             html += `
             <div class="input-group">
@@ -577,7 +576,7 @@ class MergeTool {
                     placeholder="https://example.com/photo.jpg or data:image/...">
                 ${data.photo ? `
                 <div style="margin-top: 10px; text-align: center;">
-                    <img id="photoPreview" src="${photoValue}" alt="Photo preview" 
+                    <img id="photoPreview" src="${photoValue}" alt="Contact photo preview" 
                         style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 2px solid var(--border);"
                         onerror="this.style.display='none'">
                 </div>
@@ -626,9 +625,13 @@ class MergeTool {
      */
     updatePhotoPreview() {
         const preview = document.getElementById('photoPreview');
-        if (preview && this.pending.data.photo) {
-            preview.src = this.pending.data.photo;
-            preview.style.display = 'block';
+        if (preview) {
+            if (this.pending.data.photo && this.pending.data.photo.trim()) {
+                preview.src = this.pending.data.photo;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
         }
     }
 
