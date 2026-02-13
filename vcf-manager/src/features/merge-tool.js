@@ -233,6 +233,22 @@ class MergeTool {
         // Add slave emails
         slaves.forEach(s => s.emails.forEach(e => combinedEmails.add(e)));
 
+        // === COMBINE IMPP (Instant Messaging) ===
+        // Use Set for automatic deduplication
+        const combinedImpp = new Set();
+        
+        // Add master IMPP addresses if present
+        if (masterContact.impp && Array.isArray(masterContact.impp)) {
+            masterContact.impp.forEach(i => combinedImpp.add(i));
+        }
+        
+        // Add slave IMPP addresses
+        slaves.forEach(s => {
+            if (s.impp && Array.isArray(s.impp)) {
+                s.impp.forEach(i => combinedImpp.add(i));
+            }
+        });
+
         // === BUILD PENDING STRUCTURE ===
         // Master fields take priority, fallback to first slave with value
         this.pending = {
@@ -247,7 +263,19 @@ class MergeTool {
                 adr: masterContact.adr || slaves.find(s => s.adr)?.adr || undefined,
                 note: masterContact.note || slaves.find(s => s.note)?.note || undefined,
                 url: masterContact.url || slaves.find(s => s.url)?.url || undefined,
-                bday: masterContact.bday || slaves.find(s => s.bday)?.bday || undefined
+                bday: masterContact.bday || slaves.find(s => s.bday)?.bday || undefined,
+                // vCard 4.0 fields
+                photo: masterContact.photo || slaves.find(s => s.photo)?.photo || undefined,
+                gender: masterContact.gender || slaves.find(s => s.gender)?.gender || undefined,
+                kind: masterContact.kind || slaves.find(s => s.kind)?.kind || undefined,
+                anniversary: masterContact.anniversary || slaves.find(s => s.anniversary)?.anniversary || undefined,
+                lang: masterContact.lang || slaves.find(s => s.lang)?.lang || undefined,
+                impp: combinedImpp.size > 0 ? Array.from(combinedImpp) : undefined, // Combined and deduplicated
+                geo: masterContact.geo || slaves.find(s => s.geo)?.geo || undefined,
+                tz: masterContact.tz || slaves.find(s => s.tz)?.tz || undefined,
+                nickname: masterContact.nickname || slaves.find(s => s.nickname)?.nickname || undefined,
+                categories: masterContact.categories || slaves.find(s => s.categories)?.categories || undefined,
+                role: masterContact.role || slaves.find(s => s.role)?.role || undefined
             },
             originalObjects: [masterContact, ...slaves] // Keep references for display
         };
@@ -536,8 +564,75 @@ class MergeTool {
         if (data.bday !== undefined) html += textInput('Birthday (YYYY-MM-DD)', 'bday', data.bday);
         if (data.note !== undefined) html += textInput('Notes', 'note', data.note);
 
+        // === vCard 4.0 FIELDS ===
+        // Photo field with preview
+        if (data.photo !== undefined) {
+            const photoValue = escapeHtml(data.photo || '');
+            html += `
+            <div class="input-group">
+                <div class="input-header"><span class="input-label">Photo (URL or Data URI)</span></div>
+                <input class="input-field" value="${photoValue}" 
+                    oninput="mergeTool.pending.data.photo = this.value; mergeTool.updatePhotoPreview()" 
+                    placeholder="https://example.com/photo.jpg or data:image/...">
+                ${data.photo ? `
+                <div style="margin-top: 10px; text-align: center;">
+                    <img id="photoPreview" src="${photoValue}" alt="Contact photo preview" 
+                        style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 2px solid var(--border);"
+                        onerror="this.style.display='none'">
+                </div>
+                ` : ''}
+            </div>
+            `;
+        }
+
+        if (data.nickname !== undefined) html += textInput('Nickname', 'nickname', data.nickname);
+        if (data.gender !== undefined) html += textInput('Gender (M/F/O/N/U)', 'gender', data.gender);
+        if (data.kind !== undefined) html += textInput('Kind (individual/group/org/location)', 'kind', data.kind);
+        if (data.anniversary !== undefined) html += textInput('Anniversary (YYYY-MM-DD)', 'anniversary', data.anniversary);
+        if (data.lang !== undefined) html += textInput('Language (e.g., en, es)', 'lang', data.lang);
+        if (data.geo !== undefined) html += textInput('Geographic Position (geo:lat,lon)', 'geo', data.geo);
+        if (data.tz !== undefined) html += textInput('Timezone (e.g., Europe/Madrid)', 'tz', data.tz);
+        if (data.categories !== undefined) html += textInput('Categories (comma-separated)', 'categories', data.categories);
+        if (data.role !== undefined) html += textInput('Role', 'role', data.role);
+
+        // IMPP (Instant Messaging) field - array type like tels/emails
+        if (data.impp !== undefined && Array.isArray(data.impp)) {
+            html += `
+            <div class="input-group">
+                <div class="input-header">
+                    <span class="input-label">Instant Messaging (${data.impp.length})</span>
+                    <button class="btn btn-outline btn-sm" onclick="mergeTool.addField('impp')">+ Add</button>
+                </div>
+                ${data.impp.map((impp, i) => `
+                    <div class="item-row">
+                        <input class="input-field" value="${escapeHtml(impp)}" placeholder="xmpp:user@domain.com"
+                            onchange="mergeTool.pending.data.impp[${i}] = this.value">
+                        <button class="btn btn-danger" onclick="mergeTool.removeItem('impp', ${i})">×</button>
+                    </div>
+                `).join('')}
+            </div>
+            `;
+        }
+
         // Inject HTML into container
         container.innerHTML = html;
+    }
+
+    /**
+     * Update photo preview when photo URL changes
+     * Called by oninput event on photo input field
+     * @returns {void}
+     */
+    updatePhotoPreview() {
+        const preview = document.getElementById('photoPreview');
+        if (preview) {
+            if (this.pending.data.photo && this.pending.data.photo.trim()) {
+                preview.src = this.pending.data.photo;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
     }
 
     /**
@@ -552,8 +647,9 @@ class MergeTool {
      * SUPPORTED TYPES:
      * - 'tels': Phone numbers array
      * - 'emails': Email addresses array
+     * - 'impp': Instant messaging addresses array
      * 
-     * @param {string} type - Field type ('tels' or 'emails')
+     * @param {string} type - Field type ('tels', 'emails', or 'impp')
      * @returns {void}
      * 
      * @example
@@ -563,6 +659,11 @@ class MergeTool {
      * // Form re-renders with 3 phone inputs (last one empty)
      */
     addField(type) {
+        // If field is undefined (like impp), initialize as empty array first
+        if (this.pending.data[type] === undefined) {
+            this.pending.data[type] = [];
+        }
+        
         // Add empty string to array
         this.pending.data[type].push('');
         
