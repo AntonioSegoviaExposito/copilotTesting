@@ -216,7 +216,7 @@ END:VCARD`;
         const vcf = VCFParser.export(contacts);
         expect(vcf).toContain('BEGIN:VCARD');
         expect(vcf).toContain('FN:Test User');
-        expect(vcf).toContain('TEL;TYPE=CELL:+34612345678');
+        expect(vcf).toContain('TEL;TYPE=cell,voice;VALUE=uri:tel:+34612345678');
     });
 });
 

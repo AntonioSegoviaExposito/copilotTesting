@@ -11,7 +11,7 @@
  * - Triggering browser download of VCF files
  * - Decoding quoted-printable encoding
  * 
- * SUPPORTED VCF FIELDS:
+ * SUPPORTED VCF FIELDS (v4.0):
  * - FN (Full Name) - required
  * - N (Name) - fallback if FN missing
  * - TEL (Telephone) - array, supports multiple
@@ -22,9 +22,21 @@
  * - NOTE - optional
  * - URL (Website) - optional
  * - BDAY (Birthday) - optional
+ * - PHOTO (Photo) - optional, supports URI and data URI
+ * - GENDER (Gender) - optional (v4.0)
+ * - KIND (Entity type) - optional (v4.0, defaults to "individual")
+ * - ANNIVERSARY (Anniversary) - optional (v4.0)
+ * - LANG (Language) - optional (v4.0)
+ * - IMPP (Instant Messaging) - array (v4.0)
+ * - GEO (Geographic position) - optional (v4.0)
+ * - TZ (Time zone) - optional (v4.0)
+ * - NICKNAME (Nickname) - optional
+ * - CATEGORIES (Categories) - optional
+ * - ROLE (Role) - optional
  * 
  * AI MAINTENANCE NOTES:
- * - Uses VCF version 3.0 specification (RFC 2426)
+ * - Uses VCF version 4.0 specification (RFC 6350)
+ * - Imports v2.1/3.0 vCards and converts to v4.0 on export
  * - To add new field: update _parseBlock() and export()
  * - Phone numbers normalized during export for consistency
  * - Optional fields return undefined (not empty string) when missing
@@ -46,6 +58,17 @@ import Toast from '../utils/toast.js';
  * @property {string} [note] - Notes (optional)
  * @property {string} [url] - Website URL (optional)
  * @property {string} [bday] - Birthday in YYYY-MM-DD format (optional)
+ * @property {string} [photo] - Photo URI or data URI (optional, v4.0)
+ * @property {string} [gender] - Gender (optional, v4.0)
+ * @property {string} [kind] - Entity type (optional, v4.0, defaults to "individual")
+ * @property {string} [anniversary] - Anniversary date (optional, v4.0)
+ * @property {string} [lang] - Preferred language (optional, v4.0)
+ * @property {string[]} [impp] - Instant messaging addresses (optional, v4.0)
+ * @property {string} [geo] - Geographic position (optional, v4.0)
+ * @property {string} [tz] - Time zone (optional, v4.0)
+ * @property {string} [nickname] - Nickname (optional)
+ * @property {string} [categories] - Categories (optional)
+ * @property {string} [role] - Role (optional)
  */
 
 /**
@@ -136,8 +159,11 @@ const VCFParser = {
         const getAll = (key) => {
             // Regex: ^KEY(optional params):VALUE$ (global, case-insensitive, multiline)
             const matches = block.match(new RegExp(`^${key}(?:;[^:]*)?:(.*)$`, 'gim')) || [];
-            // Extract value after colon
-            return matches.map(line => line.split(':')[1] || '');
+            // Extract value after first colon (handles URIs with multiple colons)
+            return matches.map(line => {
+                const colonIndex = line.indexOf(':');
+                return colonIndex >= 0 ? line.substring(colonIndex + 1) : '';
+            });
         };
 
         return {
@@ -161,7 +187,20 @@ const VCFParser = {
             adr: this._decode(get('ADR')?.replace(/;/g, ' ')) || undefined,
             note: this._decode(get('NOTE')) || undefined,
             url: this._decode(get('URL')) || undefined,
-            bday: this._decode(get('BDAY')) || undefined
+            bday: this._decode(get('BDAY')) || undefined,
+            
+            // vCard 4.0 fields
+            photo: this._decode(get('PHOTO')) || undefined,
+            gender: this._decode(get('GENDER')) || undefined,
+            kind: this._decode(get('KIND')) || undefined,
+            anniversary: this._decode(get('ANNIVERSARY')) || undefined,
+            lang: this._decode(get('LANG')) || undefined,
+            impp: getAll('IMPP').map(i => this._decode(i)).filter(i => i) || undefined,
+            geo: this._decode(get('GEO')) || undefined,
+            tz: this._decode(get('TZ')) || undefined,
+            nickname: this._decode(get('NICKNAME')) || undefined,
+            categories: this._decode(get('CATEGORIES')) || undefined,
+            role: this._decode(get('ROLE')) || undefined
         };
     },
 
@@ -212,68 +251,119 @@ const VCFParser = {
     },
 
     /**
-     * Export contacts to VCF format
+     * Export contacts to VCF format (version 4.0)
      * 
      * EXPORT LOGIC:
      * 1. For each contact, create BEGIN/END:VCARD block
-     * 2. Use VCF version 3.0
-     * 3. Normalize phone numbers for consistency
-     * 4. Include optional fields only if defined
+     * 2. Use VCF version 4.0 (RFC 6350)
+     * 3. VERSION must appear immediately after BEGIN:VCARD
+     * 4. Normalize phone numbers for consistency
+     * 5. Include optional fields only if defined
+     * 6. Use UTF-8 encoding (mandatory in v4.0)
      * 
-     * VCF FIELD MAPPING:
+     * VCF FIELD MAPPING (v4.0):
      * - FN: Full name (contact.fn)
      * - N: Structured name (derived from fn)
-     * - TEL: Phone numbers (normalized via PhoneUtils)
-     * - EMAIL: Email addresses
+     * - TEL: Phone numbers (normalized via PhoneUtils, with TYPE parameter)
+     * - EMAIL: Email addresses (with TYPE parameter)
      * - ORG: Organization
      * - TITLE: Job title (if present)
      * - ADR: Address (if present)
      * - NOTE: Notes (if present)
      * - URL: Website (if present)
      * - BDAY: Birthday (if present)
+     * - PHOTO: Photo URI or data URI (if present, v4.0)
+     * - GENDER: Gender (if present, v4.0)
+     * - KIND: Entity type (if present, v4.0)
+     * - ANNIVERSARY: Anniversary (if present, v4.0)
+     * - LANG: Language (if present, v4.0)
+     * - IMPP: Instant messaging (if present, v4.0)
+     * - GEO: Geographic position (if present, v4.0)
+     * - TZ: Time zone (if present, v4.0)
+     * - NICKNAME: Nickname (if present)
+     * - CATEGORIES: Categories (if present)
+     * - ROLE: Role (if present)
      * 
      * AI MAINTENANCE NOTE:
      * To export new field:
      * 1. Add field to contact object in _parseBlock()
      * 2. Add conditional export here: if (contact.newField) output += ...
-     * 3. Follow VCF 3.0 field format
+     * 3. Follow VCF 4.0 field format
      * 
      * @param {Contact[]} contacts - Array of contact objects to export
      * @returns {string} Complete VCF file content (all contacts)
      * 
      * @example
      * const vcfContent = VCFParser.export(contacts);
-     * // Returns: "BEGIN:VCARD\nVERSION:3.0\nFN:John..."
+     * // Returns: "BEGIN:VCARD\nVERSION:4.0\nFN:John..."
      */
     export(contacts) {
         let output = '';
 
         contacts.forEach(contact => {
             // Start vCard block
-            output += 'BEGIN:VCARD\nVERSION:3.0\n';
+            output += 'BEGIN:VCARD\n';
+            
+            // VERSION must come immediately after BEGIN:VCARD in v4.0
+            output += 'VERSION:4.0\n';
             
             // Required fields: FN (full name) and N (structured name)
             output += `FN:${contact.fn}\nN:;${contact.fn};;;\n`;
             
-            // Phone numbers: normalize and mark as CELL type
+            // KIND field (entity type, v4.0)
+            // Default to "individual" if not specified
+            if (contact.kind) {
+                output += `KIND:${contact.kind}\n`;
+            }
+            
+            // Phone numbers: normalize and use TYPE parameter (v4.0 style)
             contact.tels.forEach(tel => {
-                output += `TEL;TYPE=CELL:${PhoneUtils.normalize(tel)}\n`;
+                output += `TEL;TYPE=cell,voice;VALUE=uri:tel:${PhoneUtils.normalize(tel)}\n`;
             });
             
-            // Email addresses
+            // Email addresses with TYPE parameter
             contact.emails.forEach(email => {
-                output += `EMAIL:${email}\n`;
+                output += `EMAIL;TYPE=internet:${email}\n`;
             });
             
             // Organization (always included, may be empty string)
             if (contact.org) output += `ORG:${contact.org}\n`;
             
-            // Optional fields: only include if defined
+            // Optional v3.0 fields: only include if defined
             if (contact.title) output += `TITLE:${contact.title}\n`;
             if (contact.adr) output += `ADR:;;${contact.adr};;;;\n`;
             if (contact.note) output += `NOTE:${contact.note}\n`;
             if (contact.url) output += `URL:${contact.url}\n`;
             if (contact.bday) output += `BDAY:${contact.bday}\n`;
+            if (contact.nickname) output += `NICKNAME:${contact.nickname}\n`;
+            if (contact.role) output += `ROLE:${contact.role}\n`;
+            if (contact.categories) output += `CATEGORIES:${contact.categories}\n`;
+            
+            // vCard 4.0 specific fields
+            if (contact.photo) {
+                // Check if it's a data URI or regular URI
+                if (contact.photo.startsWith('data:')) {
+                    output += `PHOTO:${contact.photo}\n`;
+                } else {
+                    // Assume it's a URL, add MEDIATYPE parameter
+                    const mediaType = contact.photo.match(/\.(jpg|jpeg)$/i) ? 'image/jpeg' : 
+                                     contact.photo.match(/\.png$/i) ? 'image/png' :
+                                     contact.photo.match(/\.gif$/i) ? 'image/gif' : 'image/jpeg';
+                    output += `PHOTO;MEDIATYPE=${mediaType}:${contact.photo}\n`;
+                }
+            }
+            if (contact.gender) output += `GENDER:${contact.gender}\n`;
+            if (contact.anniversary) output += `ANNIVERSARY:${contact.anniversary}\n`;
+            if (contact.lang) output += `LANG:${contact.lang}\n`;
+            if (contact.geo) output += `GEO:${contact.geo}\n`;
+            if (contact.tz) output += `TZ:${contact.tz}\n`;
+            
+            // IMPP (instant messaging): can have multiple
+            if (contact.impp && contact.impp.length > 0) {
+                contact.impp.forEach(impp => {
+                    output += `IMPP:${impp}\n`;
+                });
+            }
             
             // End vCard block
             output += 'END:VCARD\n';
