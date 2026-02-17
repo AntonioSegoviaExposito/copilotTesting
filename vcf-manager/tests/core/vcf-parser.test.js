@@ -294,6 +294,53 @@ END:VCARD`;
         });
     });
 
+    describe('_decode (data URI handling)', () => {
+        test('should not corrupt base64 data URIs with = padding', () => {
+            const dataUri = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+            const vcfContent = `BEGIN:VCARD
+VERSION:4.0
+FN:John Doe
+PHOTO:${dataUri}
+END:VCARD`;
+
+            const contacts = VCFParser.parse(vcfContent);
+            expect(contacts[0].photo).toBe(dataUri);
+        });
+
+        test('should not corrupt data URIs containing hex-like sequences', () => {
+            // Base64 can contain sequences like AB, CD, EF after = that look like hex
+            const dataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+            const vcfContent = `BEGIN:VCARD
+VERSION:4.0
+FN:Jane
+PHOTO:${dataUri}
+END:VCARD`;
+
+            const contacts = VCFParser.parse(vcfContent);
+            expect(contacts[0].photo).toBe(dataUri);
+        });
+
+        test('should still decode quoted-printable strings normally', () => {
+            const vcfContent = `BEGIN:VCARD
+VERSION:3.0
+FN:Jos=C3=A9
+END:VCARD`;
+
+            const contacts = VCFParser.parse(vcfContent);
+            expect(contacts[0].fn).toBe('José');
+        });
+
+        test('should handle empty string in _decode', () => {
+            const vcfContent = `BEGIN:VCARD
+VERSION:4.0
+FN:John
+END:VCARD`;
+
+            const contacts = VCFParser.parse(vcfContent);
+            expect(contacts[0].fn).toBe('John');
+        });
+    });
+
     describe('download', () => {
         test('should show warning toast when contacts list is empty', () => {
             VCFParser.download([]);

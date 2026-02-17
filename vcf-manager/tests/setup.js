@@ -16,19 +16,30 @@ document.body.innerHTML = `
     </div>
     <div id="queueToast" class="queue-toast"></div>
     <div id="autoMergeHint"></div>
-    <div id="mergeModal" class="modal-overlay">
+    <div id="mergeModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">>
         <div id="modalTitle"></div>
         <div id="mergeSourcesList"></div>
         <div id="mergeResultForm"></div>
         <button id="cloneButton" style="display:none"></button>
     </div>
     <select id="addFieldSelector">
-        <option value="org">Añadir Organización</option>
-        <option value="title">Añadir Cargo / Título</option>
-        <option value="adr">Añadir Dirección</option>
-        <option value="note">Añadir Notas</option>
-        <option value="url">Añadir Sitio Web (URL)</option>
-        <option value="bday">Añadir Cumpleaños</option>
+        <option value="org">Add Organization</option>
+        <option value="title">Add Title</option>
+        <option value="adr">Add Address</option>
+        <option value="note">Add Notes</option>
+        <option value="url">Add Website (URL)</option>
+        <option value="bday">Add Birthday</option>
+        <option value="photo">Add Photo (v4.0)</option>
+        <option value="nickname">Add Nickname (v4.0)</option>
+        <option value="gender">Add Gender (v4.0)</option>
+        <option value="kind">Add Kind (v4.0)</option>
+        <option value="anniversary">Add Anniversary (v4.0)</option>
+        <option value="lang">Add Language (v4.0)</option>
+        <option value="impp">Add Instant Messaging (v4.0)</option>
+        <option value="geo">Add Geographic Position (v4.0)</option>
+        <option value="tz">Add Timezone (v4.0)</option>
+        <option value="categories">Add Categories (v4.0)</option>
+        <option value="role">Add Role (v4.0)</option>
     </select>
 `;
 
@@ -65,10 +76,22 @@ globalThis.URL.revokeObjectURL = vi.fn();
 class MockFileReader {
     constructor() {
         this.onload = null;
+        this.onerror = null;
     }
     readAsText(file) {
         if (this.onload && file._content) {
             this.onload({ target: { result: file._content } });
+        }
+    }
+    readAsDataURL(file) {
+        if (file._error && this.onerror) {
+            this.onerror(new Error('Read failed'));
+            return;
+        }
+        if (this.onload) {
+            // Simulate data URI result
+            const dataUri = file._dataUri || 'data:image/png;base64,mockBase64Data';
+            this.onload({ target: { result: dataUri } });
         }
     }
 }
@@ -89,6 +112,7 @@ const VCFParser = (await import('../src/core/vcf-parser.js')).default;
 const ContactManager = (await import('../src/core/contacts.js')).default;
 const AutoMerger = (await import('../src/features/auto-merger.js')).default;
 const MergeTool = (await import('../src/features/merge-tool.js')).default;
+const { escapeHtml } = (await import('../src/utils/html.js'));
 
 // Expose to global scope
 globalThis.Config = Config;
@@ -97,6 +121,7 @@ globalThis.VCFParser = VCFParser;
 globalThis.ContactManager = ContactManager;
 globalThis.AutoMerger = AutoMerger;
 globalThis.MergeTool = MergeTool;
+globalThis.escapeHtml = escapeHtml;
 
 // Also export CoreSystem alias for backward compatibility with existing tests
 globalThis.CoreSystem = ContactManager;

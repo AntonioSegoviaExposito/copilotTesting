@@ -32,7 +32,7 @@
     <div class="divider"></div>
 
     <div class="header-group">
-        <div style="font-size:0.7rem; font-weight:bold; color:#94a3b8; margin-right:5px">Find duplicates and merge:</div>
+        <div style="font-size:0.7rem; font-weight:bold; color:var(--text-light); margin-right:5px">Find duplicates and merge:</div>
         <button class="btn btn-warning" onclick="autoMerger.start('name')">🅰️ By Name</button>
         <button class="btn btn-warning" onclick="autoMerger.start('phone')">📞 By Phone</button>
     </div>
@@ -63,11 +63,11 @@
     </button>
     <button class="btn btn-outline" id="fabCloneBtn" style="padding: 0.6rem 1.2rem; display:none;" onclick="core.cloneSelected()">📋 Clone</button>
     <button class="btn btn-danger" onclick="core.deleteSelected()">🗑️</button>
-    <button style="background:none; border:none; color:#94a3b8; font-size:1.5rem; cursor:pointer; margin-left:5px" onclick="core.deselectAll()">×</button>
+    <button style="background:none; border:none; color:var(--text-light); font-size:1.5rem; cursor:pointer; margin-left:5px" onclick="core.deselectAll()">×</button>
 </div>
 
 <!-- Merge Modal -->
-<div class="modal-overlay" id="mergeModal">
+<div class="modal-overlay" id="mergeModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
         <div class="modal-header">
             <h3 id="modalTitle" style="margin:0">Configure Contact</h3>
@@ -79,7 +79,7 @@
         </div>
         <div class="modal-body">
             <div class="col-sources">
-                <div style="font-size:0.8rem; font-weight:bold; color:#94a3b8; margin-bottom:1rem; text-transform:uppercase">SOURCES (CLICK TO SET AS MASTER)</div>
+                <div style="font-size:0.8rem; font-weight:bold; color:var(--text-light); margin-bottom:1rem; text-transform:uppercase">SOURCES (CLICK TO SET AS MASTER)</div>
                 <div id="mergeSourcesList"></div>
             </div>
 

@@ -80,6 +80,8 @@ class MergeTool {
     constructor() {
         /** @type {PendingMerge|null} Current pending merge operation (null when idle) */
         this.pending = null;
+        /** @type {Function|null} Bound Escape key handler for cleanup */
+        this._escapeHandler = null;
     }
 
     /**
@@ -285,7 +287,7 @@ class MergeTool {
      * Render the merge modal UI
      * 
      * MODAL SETUP:
-     * 1. Show modal (set display='flex' for flex centering)
+     * 1. Show modal (add 'modal-overlay-show' class for animated reveal)
      * 2. Update modal title based on operation type
      * 3. Render source contacts list (master/slave cards)
      * 4. Render editable result form
@@ -308,9 +310,20 @@ class MergeTool {
      * // Right: Editable form with combined data
      */
     renderUI() {
-        // Show modal container
+        // Show modal container with animation
         const modal = document.getElementById('mergeModal');
-        if (modal) modal.style.display = 'flex';
+        if (modal) {
+            modal.classList.remove('modal-overlay-hide');
+            modal.classList.add('modal-overlay-show');
+        }
+
+        // Add Escape key listener to close modal
+        this._escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                this.close(false);
+            }
+        };
+        document.addEventListener('keydown', this._escapeHandler);
 
         // Calculate slave count for title
         const slavesCount = this.pending.originalObjects.length - 1;
@@ -420,7 +433,7 @@ class MergeTool {
             list.innerHTML += `
                 <div class="source-item ${isMaster ? 'master' : ''}" ${onclick} style="position:relative;">
                     ${importColorBar}
-                    <div style="font-weight:bold; color:${isMaster ? 'var(--primary)' : '#64748b'}; font-size:0.7rem; margin-bottom:5px;">
+                    <div style="font-weight:bold; color:${isMaster ? 'var(--primary)' : 'var(--text-muted)'}; font-size:0.7rem; margin-bottom:5px;">
                         ${importGroupDot}
                         ${isMaster ? '<span class="master-badge">MASTER</span>' : '<span class="slave-badge">SLAVE</span>'}
                         <span class="click-hint">👈 Set as Master</span>
@@ -496,7 +509,7 @@ class MergeTool {
         const textInput = (label, key, value) => `
             <div class="input-group">
                 <div class="input-header"><span class="input-label">${label}</span></div>
-                <input class="input-field" value="${value}" oninput="mergeTool.pending.data.${key} = this.value">
+                <input class="input-field" value="${escapeHtml(value || '')}" oninput="mergeTool.pending.data.${key} = this.value">
             </div>
         `;
 
@@ -531,7 +544,7 @@ class MergeTool {
                 </div>
                 ${data.emails.map((email, i) => `
                     <div class="item-row">
-                        <input class="input-field" value="${email}" placeholder="email@..."
+                        <input class="input-field" value="${escapeHtml(email)}" placeholder="email@..."
                             onchange="mergeTool.pending.data.emails[${i}] = this.value">
                         <button class="btn btn-danger" onclick="mergeTool.removeItem('emails', ${i})">×</button>
                     </div>
@@ -548,11 +561,11 @@ class MergeTool {
             html += `
             <div class="input-group">
                 <div class="input-header"><span class="input-label">Organization</span></div>
-                <input class="input-field" list="orgList" value="${data.org || ''}" 
+                <input class="input-field" list="orgList" value="${escapeHtml(data.org || '')}" 
                     oninput="mergeTool.pending.data.org = this.value" 
                     placeholder="Select or type an organization...">
                 <datalist id="orgList">
-                    ${existingOrgs.map(org => `<option value="${org}">`).join('')}
+                    ${existingOrgs.map(org => `<option value="${escapeHtml(org)}">`).join('')}
                 </datalist>
             </div>
             `;
@@ -565,22 +578,28 @@ class MergeTool {
         if (data.note !== undefined) html += textInput('Notes', 'note', data.note);
 
         // === vCard 4.0 FIELDS ===
-        // Photo field with preview
+        // Photo field with preview and file attachment
         if (data.photo !== undefined) {
             const photoValue = escapeHtml(data.photo || '');
             html += `
             <div class="input-group">
                 <div class="input-header"><span class="input-label">Photo (URL or Data URI)</span></div>
-                <input class="input-field" value="${photoValue}" 
-                    oninput="mergeTool.pending.data.photo = this.value; mergeTool.updatePhotoPreview()" 
+                <input class="input-field" id="photoInput" value="${photoValue}" 
+                    onchange="mergeTool.pending.data.photo = this.value; mergeTool.updatePhotoPreview()" 
                     placeholder="https://example.com/photo.jpg or data:image/...">
-                ${data.photo ? `
+                <div style="margin-top: 6px;">
+                    <label class="btn btn-outline btn-sm" style="display:inline-flex; cursor:pointer;">
+                        Attach Image
+                        <input type="file" accept="image/*" style="display:none"
+                            onchange="mergeTool.handlePhotoFile(this.files[0])">
+                    </label>
+                </div>
                 <div style="margin-top: 10px; text-align: center;">
                     <img id="photoPreview" src="${photoValue}" alt="Contact photo preview" 
-                        style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 2px solid var(--border);"
+                        class="photo-preview"
+                        style="${data.photo ? '' : 'display:none'}"
                         onerror="this.style.display='none'">
                 </div>
-                ` : ''}
             </div>
             `;
         }
@@ -633,6 +652,41 @@ class MergeTool {
                 preview.style.display = 'none';
             }
         }
+    }
+
+    /**
+     * Handle a local image file selected by the user
+     * Reads the file as a data URI and sets it as the photo value
+     * 
+     * @param {File} file - Image file from file input
+     * @param {number} [maxSizeBytes=2097152] - Maximum file size in bytes (default 2MB)
+     * @returns {void}
+     */
+    handlePhotoFile(file, maxSizeBytes = 2 * 1024 * 1024) {
+        if (!file || !file.type.startsWith('image/')) {
+            Toast.warning('Please select an image file.');
+            return;
+        }
+
+        if (file.size > maxSizeBytes) {
+            Toast.warning(`Image too large. Maximum size is ${Math.round(maxSizeBytes / 1024 / 1024)}MB.`);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.pending.data.photo = e.target.result;
+            // Update the text input to show the data URI
+            const photoInput = document.getElementById('photoInput');
+            if (photoInput) {
+                photoInput.value = e.target.result;
+            }
+            this.updatePhotoPreview();
+        };
+        reader.onerror = () => {
+            Toast.warning('Failed to read image file.');
+        };
+        reader.readAsDataURL(file);
     }
 
     /**
@@ -707,9 +761,12 @@ class MergeTool {
 
         const type = selector.value;
         
-        // Initialize field as empty string if not present
+        // Array-type fields need to be initialized as arrays, not strings
+        const arrayFields = ['impp'];
+        
+        // Initialize field if not present
         if (this.pending.data[type] === undefined) {
-            this.pending.data[type] = '';
+            this.pending.data[type] = arrayFields.includes(type) ? [] : '';
         }
         
         // Re-render to show new field
@@ -831,7 +888,21 @@ class MergeTool {
             adr: pending.data.adr,
             url: pending.data.url,
             bday: pending.data.bday,
-            note: pending.data.note
+            note: pending.data.note,
+            // vCard 4.0 fields
+            photo: pending.data.photo,
+            gender: pending.data.gender,
+            kind: pending.data.kind,
+            anniversary: pending.data.anniversary,
+            lang: pending.data.lang,
+            impp: pending.data.impp && Array.isArray(pending.data.impp)
+                ? pending.data.impp.filter(i => i.length > 0)
+                : pending.data.impp,
+            geo: pending.data.geo,
+            tz: pending.data.tz,
+            nickname: pending.data.nickname,
+            categories: pending.data.categories,
+            role: pending.data.role
         };
 
         // === UPDATE CONTACT LIST ===
@@ -858,7 +929,7 @@ class MergeTool {
      * Close the merge modal
      * 
      * CLOSE WORKFLOW:
-     * 1. Hide modal (set display='none')
+     * 1. Hide modal (add 'modal-overlay-hide' class for animated close)
      * 2. Clear pending merge state
      * 3. If closing without success during auto-merge, cancel queue
      * 
@@ -896,9 +967,18 @@ class MergeTool {
             }
         }
 
-        // Hide modal UI
+        // Hide modal UI with animation
         const modal = document.getElementById('mergeModal');
-        if (modal) modal.style.display = 'none';
+        if (modal) {
+            modal.classList.add('modal-overlay-hide');
+            modal.classList.remove('modal-overlay-show');
+        }
+
+        // Remove Escape key listener
+        if (this._escapeHandler) {
+            document.removeEventListener('keydown', this._escapeHandler);
+            this._escapeHandler = null;
+        }
         
         // Clear pending merge state
         this.pending = null;
@@ -956,7 +1036,19 @@ class MergeTool {
                 adr: this.pending.data.adr,
                 url: this.pending.data.url,
                 bday: this.pending.data.bday,
-                note: this.pending.data.note
+                note: this.pending.data.note,
+                // vCard 4.0 fields
+                photo: this.pending.data.photo,
+                gender: this.pending.data.gender,
+                kind: this.pending.data.kind,
+                anniversary: this.pending.data.anniversary,
+                lang: this.pending.data.lang,
+                impp: this.pending.data.impp ? [...this.pending.data.impp] : undefined,
+                geo: this.pending.data.geo,
+                tz: this.pending.data.tz,
+                nickname: this.pending.data.nickname,
+                categories: this.pending.data.categories,
+                role: this.pending.data.role
             };
         } else if (core.selected.size === 1) {
             // Clone from FAB (use selected contact as-is)
@@ -973,7 +1065,19 @@ class MergeTool {
                 adr: originalContact.adr,
                 url: originalContact.url,
                 bday: originalContact.bday,
-                note: originalContact.note
+                note: originalContact.note,
+                // vCard 4.0 fields
+                photo: originalContact.photo,
+                gender: originalContact.gender,
+                kind: originalContact.kind,
+                anniversary: originalContact.anniversary,
+                lang: originalContact.lang,
+                impp: originalContact.impp ? [...originalContact.impp] : undefined,
+                geo: originalContact.geo,
+                tz: originalContact.tz,
+                nickname: originalContact.nickname,
+                categories: originalContact.categories,
+                role: originalContact.role
             };
         } else {
             // Invalid state - not in edit mode and no single selection
@@ -994,7 +1098,19 @@ class MergeTool {
             adr: sourceContact.adr,
             url: sourceContact.url,
             bday: sourceContact.bday,
-            note: sourceContact.note
+            note: sourceContact.note,
+            // vCard 4.0 fields
+            photo: sourceContact.photo,
+            gender: sourceContact.gender,
+            kind: sourceContact.kind,
+            anniversary: sourceContact.anniversary,
+            lang: sourceContact.lang,
+            impp: sourceContact.impp,
+            geo: sourceContact.geo,
+            tz: sourceContact.tz,
+            nickname: sourceContact.nickname,
+            categories: sourceContact.categories,
+            role: sourceContact.role
         };
 
         // Add cloned contact to beginning of contacts array

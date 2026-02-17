@@ -526,7 +526,24 @@ class ContactManager {
 
         // === SHOW EMPTY STATE ===
         if (visible.length === 0) {
-            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#94a3b8">${Config.messages.noData}</div>`;
+            const hasContacts = this.contacts.length > 0;
+            const isFiltering = this.filterStr.length > 0;
+            if (hasContacts || isFiltering) {
+                // Filtered but no matches
+                grid.innerHTML = `<div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <div class="empty-state-text">No contacts match your search</div>
+                    <div class="empty-state-hint">Try a different search term</div>
+                </div>`;
+            } else {
+                // No contacts at all
+                grid.innerHTML = `<div class="empty-state">
+                    <div class="empty-state-icon">📇</div>
+                    <div class="empty-state-text">${Config.messages.noData}</div>
+                    <div class="empty-state-hint">Import a VCF file or add a contact to get started</div>
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📂 Import VCF</button>
+                </div>`;
+            }
             this._updateFAB();
             return;
         }
@@ -555,7 +572,11 @@ class ContactManager {
      * SELECTION STATE:
      * - Selected cards have 'selected' class (background highlight)
      * - Badge shows selection order number (1-indexed)
-     * - Card click toggles selection
+     * - Card click or Enter/Space key toggles selection
+     * 
+     * ACCESSIBILITY:
+     * - Cards have tabindex="0", role="button", aria-label, aria-pressed
+     * - Enter and Space keys toggle selection (same as click)
      * 
      * PHONE NUMBER DISPLAY:
      * - Shows up to Config.ui.maxTelsDisplay (3) phone numbers
@@ -580,6 +601,10 @@ class ContactManager {
         // Create card container
         const card = document.createElement('div');
         card.className = `card ${isSelected ? 'selected' : ''}`;
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `${contact.fn}${isSelected ? ', selected' : ''}`);
+        card.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
         
         // Add import group indicator if present (with validation)
         if (contact._importColor && isValidHexColor(contact._importColor)) {
@@ -590,8 +615,14 @@ class ContactManager {
             }
         }
         
-        // Bind click to toggle selection
+        // Bind click and keyboard to toggle selection
         card.onclick = () => this.toggleSelect(contact._id);
+        card.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.toggleSelect(contact._id);
+            }
+        };
 
         // Format phone numbers for display
         // Show up to maxTelsDisplay phones with formatting
@@ -602,16 +633,31 @@ class ContactManager {
 
         // Show "more" indicator if additional phones exist
         const moreTels = contact.tels.length > Config.ui.maxTelsDisplay
-            ? `<small style="color:#94a3b8">+${contact.tels.length - Config.ui.maxTelsDisplay} more</small>`
+            ? `<small style="color:var(--text-light)">+${contact.tels.length - Config.ui.maxTelsDisplay} more</small>`
             : '';
 
         // Build card HTML
         // Badge shows selection number (1-indexed) when selected
+        // Photo thumbnail and nickname shown when available (v4.0)
+        const photoHtml = contact.photo
+            ? `<img src="${escapeHtml(contact.photo)}" alt="" class="card-photo" onerror="this.style.display='none'">`
+            : '';
+        
+        const nicknameHtml = contact.nickname
+            ? `<div class="card-nickname">${escapeHtml(contact.nickname)}</div>`
+            : '';
+
         card.innerHTML = `
             <div class="badge">${selectionIndex + 1}</div>
-            <div style="font-weight:bold; font-size:1.05rem; margin-bottom:4px;">${escapeHtml(contact.fn)}</div>
-            <div style="font-size:0.8rem; color:#64748b; margin-bottom:8px;">${escapeHtml(contact.org || '')}</div>
-            <div style="display:flex; flex-direction:column; gap:4px; font-size:0.85rem; color:#334155;">
+            <div class="card-header">
+                ${photoHtml}
+                <div class="card-header-info">
+                    <div style="font-weight:bold; font-size:1.05rem;">${escapeHtml(contact.fn)}</div>
+                    ${nicknameHtml}
+                </div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">${escapeHtml(contact.org || '')}</div>
+            <div style="display:flex; flex-direction:column; gap:4px; font-size:0.85rem; color:var(--text);">
                 ${telsHtml}
                 ${moreTels}
             </div>

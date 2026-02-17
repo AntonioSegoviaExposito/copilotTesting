@@ -242,6 +242,8 @@ const VCFParser = {
      */
     _decode(str) {
         if (!str) return '';
+        // Data URIs (base64) contain '=' padding that must not be decoded
+        if (str.startsWith('data:')) return str.trim();
         try {
             // Only decode if contains '=' (encoding marker)
             return str.includes('=') 

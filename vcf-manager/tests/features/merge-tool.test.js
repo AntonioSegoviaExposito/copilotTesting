@@ -213,7 +213,7 @@ describe('MergeTool', () => {
 
         test('should display merge modal', () => {
             mergeTool.renderUI();
-            expect(document.getElementById('mergeModal').style.display).toBe('flex');
+            expect(document.getElementById('mergeModal').classList.contains('modal-overlay-show')).toBe(true);
         });
 
         test('should set modal title for merge', () => {
@@ -237,6 +237,27 @@ describe('MergeTool', () => {
             mergeTool.renderUI();
             const sourcesList = document.getElementById('mergeSourcesList');
             expect(sourcesList.querySelector('.source-item.master')).toBeTruthy();
+        });
+
+        test('should have ARIA attributes on merge modal', () => {
+            mergeTool.renderUI();
+            const modal = document.getElementById('mergeModal');
+            expect(modal.getAttribute('role')).toBe('dialog');
+            expect(modal.getAttribute('aria-modal')).toBe('true');
+            expect(modal.getAttribute('aria-labelledby')).toBe('modalTitle');
+        });
+
+        test('should register Escape key listener on renderUI', () => {
+            mergeTool.renderUI();
+            expect(mergeTool._escapeHandler).toBeTruthy();
+        });
+
+        test('should close modal on Escape key press', () => {
+            mergeTool.renderUI();
+            const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+            document.dispatchEvent(event);
+            const modal = document.getElementById('mergeModal');
+            expect(modal.classList.contains('modal-overlay-show')).toBe(false);
         });
     });
 
@@ -399,9 +420,10 @@ describe('MergeTool', () => {
         });
 
         test('should hide merge modal', () => {
-            document.getElementById('mergeModal').style.display = 'flex';
+            document.getElementById('mergeModal').classList.add('modal-overlay-show');
             mergeTool.close();
-            expect(document.getElementById('mergeModal').style.display).toBe('none');
+            expect(document.getElementById('mergeModal').classList.contains('modal-overlay-show')).toBe(false);
+            expect(document.getElementById('mergeModal').classList.contains('modal-overlay-hide')).toBe(true);
         });
 
         test('should set pending to null', () => {
@@ -419,6 +441,13 @@ describe('MergeTool', () => {
             autoMerger.active = true;
             mergeTool.close(true);
             expect(autoMerger.active).toBe(true);
+        });
+
+        test('should remove Escape key listener on close', () => {
+            mergeTool.renderUI();
+            expect(mergeTool._escapeHandler).toBeTruthy();
+            mergeTool.close();
+            expect(mergeTool._escapeHandler).toBeNull();
         });
     });
 
@@ -684,6 +713,394 @@ describe('MergeTool', () => {
             mergeTool.buildPending(['id1', 'id2']);
             
             expect(mergeTool.pending.data.org).toBe('SlaveCompany');
+        });
+    });
+
+    describe('vCard 4.0 Fields', () => {
+        const v4Contact = {
+            _id: 'v4id1',
+            fn: 'Alice v4',
+            tels: ['+34600111222'],
+            emails: ['alice@v4.com'],
+            org: 'v4 Corp',
+            photo: 'https://example.com/photo.jpg',
+            gender: 'F',
+            kind: 'individual',
+            anniversary: '2020-06-15',
+            lang: 'en',
+            impp: ['xmpp:alice@chat.com', 'sip:alice@voip.com'],
+            geo: 'geo:40.4168,-3.7038',
+            tz: 'Europe/Madrid',
+            nickname: 'Ally',
+            categories: 'friends,work',
+            role: 'Engineer'
+        };
+
+        const v4Contact2 = {
+            _id: 'v4id2',
+            fn: 'Bob v4',
+            tels: ['+34600333444'],
+            emails: ['bob@v4.com'],
+            org: '',
+            photo: 'https://example.com/bob.jpg',
+            gender: 'M',
+            impp: ['xmpp:bob@chat.com']
+        };
+
+        describe('buildPending preserves v4.0 fields', () => {
+            beforeEach(() => {
+                core.contacts = [v4Contact, v4Contact2];
+            });
+
+            test('should preserve photo from master', () => {
+                mergeTool.buildPending(['v4id1']);
+                expect(mergeTool.pending.data.photo).toBe('https://example.com/photo.jpg');
+            });
+
+            test('should preserve all v4.0 scalar fields from master', () => {
+                mergeTool.buildPending(['v4id1']);
+                expect(mergeTool.pending.data.gender).toBe('F');
+                expect(mergeTool.pending.data.kind).toBe('individual');
+                expect(mergeTool.pending.data.anniversary).toBe('2020-06-15');
+                expect(mergeTool.pending.data.lang).toBe('en');
+                expect(mergeTool.pending.data.geo).toBe('geo:40.4168,-3.7038');
+                expect(mergeTool.pending.data.tz).toBe('Europe/Madrid');
+                expect(mergeTool.pending.data.nickname).toBe('Ally');
+                expect(mergeTool.pending.data.categories).toBe('friends,work');
+                expect(mergeTool.pending.data.role).toBe('Engineer');
+            });
+
+            test('should combine and deduplicate impp from master and slaves', () => {
+                mergeTool.buildPending(['v4id1', 'v4id2']);
+                expect(mergeTool.pending.data.impp).toContain('xmpp:alice@chat.com');
+                expect(mergeTool.pending.data.impp).toContain('sip:alice@voip.com');
+                expect(mergeTool.pending.data.impp).toContain('xmpp:bob@chat.com');
+                expect(mergeTool.pending.data.impp.length).toBe(3);
+            });
+
+            test('should fallback v4.0 fields from slave when master has none', () => {
+                mergeTool.buildPending(['v4id2', 'v4id1']);
+                expect(mergeTool.pending.data.nickname).toBe('Ally');
+                expect(mergeTool.pending.data.role).toBe('Engineer');
+            });
+        });
+
+        describe('commit preserves v4.0 fields', () => {
+            beforeEach(() => {
+                core.contacts = [v4Contact, { _id: 'other', fn: 'Other', tels: [], emails: [], org: '' }];
+                core.selectOrder = ['v4id1'];
+                core.selected.add('v4id1');
+                mergeTool.init();
+            });
+
+            test('should preserve photo after commit', () => {
+                mergeTool.commit();
+                expect(core.contacts[0].photo).toBe('https://example.com/photo.jpg');
+            });
+
+            test('should preserve all v4.0 scalar fields after commit', () => {
+                mergeTool.commit();
+                const committed = core.contacts[0];
+                expect(committed.gender).toBe('F');
+                expect(committed.kind).toBe('individual');
+                expect(committed.anniversary).toBe('2020-06-15');
+                expect(committed.lang).toBe('en');
+                expect(committed.geo).toBe('geo:40.4168,-3.7038');
+                expect(committed.tz).toBe('Europe/Madrid');
+                expect(committed.nickname).toBe('Ally');
+                expect(committed.categories).toBe('friends,work');
+                expect(committed.role).toBe('Engineer');
+            });
+
+            test('should preserve impp array after commit', () => {
+                mergeTool.commit();
+                const committed = core.contacts[0];
+                expect(committed.impp).toContain('xmpp:alice@chat.com');
+                expect(committed.impp).toContain('sip:alice@voip.com');
+            });
+
+            test('should filter empty impp entries on commit', () => {
+                mergeTool.pending.data.impp.push('');
+                mergeTool.commit();
+                expect(core.contacts[0].impp).not.toContain('');
+            });
+        });
+
+        describe('cloneContact preserves v4.0 fields', () => {
+            beforeEach(() => {
+                core.contacts = [v4Contact];
+                core.selectOrder = ['v4id1'];
+                mergeTool.init();
+            });
+
+            test('should clone photo field', () => {
+                mergeTool.cloneContact();
+                const clone = core.contacts[0];
+                expect(clone.photo).toBe('https://example.com/photo.jpg');
+            });
+
+            test('should clone all v4.0 scalar fields', () => {
+                mergeTool.cloneContact();
+                const clone = core.contacts[0];
+                expect(clone.gender).toBe('F');
+                expect(clone.kind).toBe('individual');
+                expect(clone.anniversary).toBe('2020-06-15');
+                expect(clone.lang).toBe('en');
+                expect(clone.geo).toBe('geo:40.4168,-3.7038');
+                expect(clone.tz).toBe('Europe/Madrid');
+                expect(clone.nickname).toBe('Ally');
+                expect(clone.categories).toBe('friends,work');
+                expect(clone.role).toBe('Engineer');
+            });
+
+            test('should clone impp array', () => {
+                mergeTool.cloneContact();
+                const clone = core.contacts[0];
+                expect(clone.impp).toContain('xmpp:alice@chat.com');
+                expect(clone.impp).toContain('sip:alice@voip.com');
+                expect(clone.impp.length).toBe(2);
+            });
+
+            test('should deep copy impp (not share reference)', () => {
+                mergeTool.cloneContact();
+                const clone = core.contacts[0];
+                clone.impp.push('new@im.com');
+                // Original should not be affected
+                expect(v4Contact.impp.length).toBe(2);
+            });
+        });
+
+        describe('addCustomField handles array types', () => {
+            beforeEach(() => {
+                core.contacts = [
+                    { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' }
+                ];
+                core.selectOrder = ['id1'];
+                mergeTool.init();
+            });
+
+            test('should initialize impp as empty array (not string)', () => {
+                document.getElementById('addFieldSelector').value = 'impp';
+                mergeTool.addCustomField();
+                expect(Array.isArray(mergeTool.pending.data.impp)).toBe(true);
+                expect(mergeTool.pending.data.impp.length).toBe(0);
+            });
+
+            test('should initialize scalar v4.0 fields as empty string', () => {
+                document.getElementById('addFieldSelector').value = 'photo';
+                mergeTool.addCustomField();
+                expect(mergeTool.pending.data.photo).toBe('');
+
+                document.getElementById('addFieldSelector').value = 'nickname';
+                mergeTool.addCustomField();
+                expect(mergeTool.pending.data.nickname).toBe('');
+            });
+
+            test('should render impp section after adding via dropdown', () => {
+                document.getElementById('addFieldSelector').value = 'impp';
+                mergeTool.addCustomField();
+                
+                const form = document.getElementById('mergeResultForm');
+                expect(form.innerHTML).toContain('Instant Messaging');
+            });
+        });
+
+        describe('renderResultForm renders v4.0 fields', () => {
+            beforeEach(() => {
+                core.contacts = [v4Contact];
+                core.selectOrder = ['v4id1'];
+                mergeTool.init();
+            });
+
+            test('should render photo field with preview', () => {
+                const form = document.getElementById('mergeResultForm');
+                expect(form.innerHTML).toContain('Photo');
+                expect(form.innerHTML).toContain('photoPreview');
+            });
+
+            test('should render photo file attachment button', () => {
+                const form = document.getElementById('mergeResultForm');
+                expect(form.innerHTML).toContain('Attach Image');
+                expect(form.innerHTML).toContain('type="file"');
+            });
+
+            test('should render nickname field', () => {
+                const form = document.getElementById('mergeResultForm');
+                expect(form.innerHTML).toContain('Nickname');
+                expect(form.innerHTML).toContain('Ally');
+            });
+
+            test('should render gender field', () => {
+                const form = document.getElementById('mergeResultForm');
+                expect(form.innerHTML).toContain('Gender');
+            });
+
+            test('should render impp array with add/remove buttons', () => {
+                const form = document.getElementById('mergeResultForm');
+                expect(form.innerHTML).toContain('Instant Messaging');
+                expect(form.innerHTML).toContain('xmpp:alice@chat.com');
+                expect(form.innerHTML).toContain('sip:alice@voip.com');
+            });
+        });
+    });
+
+    describe('updatePhotoPreview', () => {
+        beforeEach(() => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '', photo: 'https://example.com/photo.jpg' }
+            ];
+            core.selectOrder = ['id1'];
+            mergeTool.init();
+        });
+
+        test('should show preview when photo has value', () => {
+            const preview = document.getElementById('photoPreview');
+            expect(preview).toBeTruthy();
+            // Verify the preview is displayed (photo has value from init)
+            mergeTool.updatePhotoPreview();
+            expect(preview.style.display).toBe('block');
+        });
+
+        test('should hide preview when photo is empty', () => {
+            mergeTool.pending.data.photo = '';
+            mergeTool.updatePhotoPreview();
+            const preview = document.getElementById('photoPreview');
+            expect(preview.style.display).toBe('none');
+        });
+
+        test('should hide preview when photo is whitespace only', () => {
+            mergeTool.pending.data.photo = '   ';
+            mergeTool.updatePhotoPreview();
+            const preview = document.getElementById('photoPreview');
+            expect(preview.style.display).toBe('none');
+        });
+
+        test('should update src when photo changes', () => {
+            mergeTool.pending.data.photo = 'https://new.example.com/pic.png';
+            mergeTool.updatePhotoPreview();
+            const preview = document.getElementById('photoPreview');
+            expect(preview.src).toBe('https://new.example.com/pic.png');
+        });
+    });
+
+    describe('handlePhotoFile', () => {
+        beforeEach(() => {
+            core.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '', photo: '' }
+            ];
+            core.selectOrder = ['id1'];
+            mergeTool.init();
+        });
+
+        test('should reject non-image files', () => {
+            const file = { type: 'text/plain', size: 100 };
+            mergeTool.handlePhotoFile(file);
+            expect(Toast.warning).toHaveBeenCalledWith('Please select an image file.');
+        });
+
+        test('should reject null file', () => {
+            mergeTool.handlePhotoFile(null);
+            expect(Toast.warning).toHaveBeenCalledWith('Please select an image file.');
+        });
+
+        test('should reject files exceeding size limit', () => {
+            const file = { type: 'image/jpeg', size: 3 * 1024 * 1024 };
+            Object.defineProperty(file, 'type', { value: 'image/jpeg' });
+            mergeTool.handlePhotoFile(file);
+            expect(Toast.warning).toHaveBeenCalledWith('Image too large. Maximum size is 2MB.');
+        });
+
+        test('should accept files within size limit', () => {
+            const file = { type: 'image/jpeg', size: 1024 * 1024, _dataUri: 'data:image/jpeg;base64,abc123' };
+            Object.defineProperty(file, 'type', { value: 'image/jpeg' });
+            mergeTool.handlePhotoFile(file);
+            expect(mergeTool.pending.data.photo).toBe('data:image/jpeg;base64,abc123');
+        });
+
+        test('should accept custom size limit parameter', () => {
+            const file = { type: 'image/png', size: 500 };
+            Object.defineProperty(file, 'type', { value: 'image/png' });
+            mergeTool.handlePhotoFile(file, 100);
+            expect(Toast.warning).toHaveBeenCalledWith('Image too large. Maximum size is 0MB.');
+        });
+
+        test('should set photo data and update input field', () => {
+            const file = { type: 'image/png', size: 1000, _dataUri: 'data:image/png;base64,testData' };
+            Object.defineProperty(file, 'type', { value: 'image/png' });
+            mergeTool.handlePhotoFile(file);
+
+            expect(mergeTool.pending.data.photo).toBe('data:image/png;base64,testData');
+            const photoInput = document.getElementById('photoInput');
+            if (photoInput) {
+                expect(photoInput.value).toBe('data:image/png;base64,testData');
+            }
+        });
+
+        test('should handle reader.onerror by showing warning toast', () => {
+            const file = { type: 'image/jpeg', size: 100, _error: true };
+            Object.defineProperty(file, 'type', { value: 'image/jpeg' });
+            mergeTool.handlePhotoFile(file);
+            expect(Toast.warning).toHaveBeenCalledWith('Failed to read image file.');
+        });
+    });
+
+    describe('XSS Prevention in renderResultForm', () => {
+        test('should escape double quotes in text input values', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'Test "Name"', tels: [], emails: [], org: '' }
+            ];
+            core.selectOrder = ['id1'];
+            mergeTool.init();
+
+            const form = document.getElementById('mergeResultForm');
+            // The value should be escaped - should not break out of attribute
+            expect(form.innerHTML).toContain('&quot;');
+            expect(form.innerHTML).not.toMatch(/value="Test "Name""/);
+        });
+
+        test('should escape HTML in email values', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'Test', tels: [], emails: ['" onfocus="alert(1)'], org: '' }
+            ];
+            core.selectOrder = ['id1'];
+            mergeTool.init();
+
+            const form = document.getElementById('mergeResultForm');
+            expect(form.innerHTML).toContain('&quot;');
+        });
+
+        test('should escape HTML in organization datalist options', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'A', tels: [], emails: [], org: 'Safe Org' },
+                { _id: 'id2', fn: 'B', tels: [], emails: [], org: '"><script>alert(1)</script>' }
+            ];
+            core.selectOrder = ['id1'];
+            mergeTool.init();
+
+            // Verify the malicious org value is contained in an option's value attribute
+            // but did NOT break out of the attribute to inject a real script element
+            const form = document.getElementById('mergeResultForm');
+            const datalist = form.querySelector('#orgList');
+            expect(datalist).toBeTruthy();
+            // The option should contain the malicious string as text value, not as parsed HTML
+            const options = datalist.querySelectorAll('option');
+            const maliciousOption = Array.from(options).find(o => o.value.includes('script'));
+            expect(maliciousOption).toBeTruthy();
+            // The value should be the literal string, not interpreted as HTML
+            expect(maliciousOption.value).toBe('"><script>alert(1)</script>');
+            // No actual script elements should exist in the form
+            expect(form.querySelector('script')).toBeFalsy();
+        });
+
+        test('should escape HTML in IMPP values', () => {
+            core.contacts = [
+                { _id: 'id1', fn: 'Test', tels: [], emails: [], org: '', impp: ['" onmouseover="alert(1)'] }
+            ];
+            core.selectOrder = ['id1'];
+            mergeTool.init();
+
+            const form = document.getElementById('mergeResultForm');
+            expect(form.innerHTML).toContain('&quot;');
         });
     });
 });

@@ -77,7 +77,7 @@ describe('Integration Tests', () => {
             await autoMerger.start('name');
 
             // First group should be shown
-            expect(document.getElementById('mergeModal').style.display).toBe('flex');
+            expect(document.getElementById('mergeModal').classList.contains('modal-overlay-show')).toBe(true);
             expect(core.selected.size).toBe(2);
 
             // Commit first merge
@@ -155,6 +155,114 @@ END:VCARD`;
             expect(core.contacts[0].tels).toContain('+34612345678');
             expect(core.contacts[0].emails).toContain('test@example.com');
             expect(core.contacts[0].org).toBe('Test Company');
+        });
+
+        test('should maintain v4.0 fields through parse-edit-commit-export round trip', () => {
+            const vcfContent = `BEGIN:VCARD
+VERSION:4.0
+FN:Juan Carlos Pérez
+TEL:+34612345678
+EMAIL:juan@example.com
+ORG:Inditex
+PHOTO:https://example.com/photo.jpg
+GENDER:M
+KIND:individual
+ANNIVERSARY:2010-07-23
+LANG:es
+IMPP:xmpp:juan@jabber.org
+IMPP:sip:juan@example.com
+GEO:geo:37.386013,-5.992425
+TZ:Europe/Madrid
+NICKNAME:Juancar
+CATEGORIES:Developer,Remote
+ROLE:Software Architect
+END:VCARD`;
+
+            // Step 1: Parse VCF
+            const mockFile = createMockVCFFile(vcfContent);
+            core.loadFile(mockFile);
+            expect(core.contacts.length).toBe(1);
+            const contact = core.contacts[0];
+
+            // Verify all v4.0 fields parsed
+            expect(contact.photo).toBe('https://example.com/photo.jpg');
+            expect(contact.gender).toBe('M');
+            expect(contact.kind).toBe('individual');
+            expect(contact.anniversary).toBe('2010-07-23');
+            expect(contact.lang).toBe('es');
+            expect(contact.impp).toEqual(['xmpp:juan@jabber.org', 'sip:juan@example.com']);
+            expect(contact.geo).toBe('geo:37.386013,-5.992425');
+            expect(contact.tz).toBe('Europe/Madrid');
+            expect(contact.nickname).toBe('Juancar');
+            expect(contact.categories).toBe('Developer,Remote');
+            expect(contact.role).toBe('Software Architect');
+
+            // Step 2: Select and edit via merge tool
+            core.toggleSelect(contact._id);
+            mergeTool.init();
+            expect(mergeTool.pending).not.toBeNull();
+
+            // Modify a v4.0 field
+            mergeTool.pending.data.nickname = 'JC';
+            mergeTool.pending.data.role = 'Lead Architect';
+
+            // Step 3: Commit
+            mergeTool.commit();
+            expect(core.contacts.length).toBe(1);
+            const updated = core.contacts[0];
+
+            // Verify v4.0 fields survived commit
+            expect(updated.photo).toBe('https://example.com/photo.jpg');
+            expect(updated.gender).toBe('M');
+            expect(updated.kind).toBe('individual');
+            expect(updated.anniversary).toBe('2010-07-23');
+            expect(updated.lang).toBe('es');
+            expect(updated.impp).toEqual(['xmpp:juan@jabber.org', 'sip:juan@example.com']);
+            expect(updated.geo).toBe('geo:37.386013,-5.992425');
+            expect(updated.tz).toBe('Europe/Madrid');
+            expect(updated.nickname).toBe('JC');
+            expect(updated.categories).toBe('Developer,Remote');
+            expect(updated.role).toBe('Lead Architect');
+
+            // Step 4: Export and verify VCF output
+            const exported = VCFParser.export(core.contacts);
+            expect(exported).toContain('VERSION:4.0');
+            expect(exported).toContain('FN:Juan Carlos Pérez');
+            expect(exported).toContain('PHOTO;MEDIATYPE=image/jpeg:https://example.com/photo.jpg');
+            expect(exported).toContain('GENDER:M');
+            expect(exported).toContain('KIND:individual');
+            expect(exported).toContain('ANNIVERSARY:2010-07-23');
+            expect(exported).toContain('LANG:es');
+            expect(exported).toContain('IMPP:xmpp:juan@jabber.org');
+            expect(exported).toContain('IMPP:sip:juan@example.com');
+            expect(exported).toContain('GEO:geo:37.386013,-5.992425');
+            expect(exported).toContain('TZ:Europe/Madrid');
+            expect(exported).toContain('NICKNAME:JC');
+            expect(exported).toContain('CATEGORIES:Developer,Remote');
+            expect(exported).toContain('ROLE:Lead Architect');
+        });
+
+        test('should preserve PHOTO data URI through full round trip', () => {
+            const dataUri = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+            const vcfContent = `BEGIN:VCARD
+VERSION:4.0
+FN:Photo Test
+PHOTO:${dataUri}
+END:VCARD`;
+
+            // Parse
+            const mockFile = createMockVCFFile(vcfContent);
+            core.loadFile(mockFile);
+            expect(core.contacts[0].photo).toBe(dataUri);
+
+            // Edit + commit
+            core.toggleSelect(core.contacts[0]._id);
+            mergeTool.init();
+            mergeTool.commit();
+
+            // Export
+            const exported = VCFParser.export(core.contacts);
+            expect(exported).toContain(`PHOTO:${dataUri}`);
         });
     });
 

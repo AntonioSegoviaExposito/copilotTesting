@@ -306,7 +306,7 @@ describe('ContactManager', () => {
         test('should show empty state when no contacts match filter', () => {
             contactManager.filterStr = 'nonexistent';
             contactManager.render();
-            expect(document.getElementById('grid').innerHTML).toContain(Config.messages.noData);
+            expect(document.getElementById('grid').innerHTML).toContain('No contacts match your search');
         });
     });
 
@@ -570,6 +570,131 @@ END:VCARD`;
             expect(fileList.length).toBe(2);
             expect(fileList[0].name).toBe('file1.vcf');
             expect(fileList[1].name).toBe('file2.vcf');
+        });
+    });
+
+    describe('Card Rendering with v4.0 fields', () => {
+        test('should render photo thumbnail on card when photo is present', () => {
+            contactManager.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '', photo: 'https://example.com/photo.jpg' }
+            ];
+            contactManager.render();
+
+            const img = document.querySelector('.card-photo');
+            expect(img).toBeTruthy();
+            expect(img.tagName).toBe('IMG');
+            expect(img.getAttribute('src')).toBe('https://example.com/photo.jpg');
+        });
+
+        test('should not render photo thumbnail when photo is absent', () => {
+            contactManager.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' }
+            ];
+            contactManager.render();
+
+            const img = document.querySelector('.card-photo');
+            expect(img).toBeFalsy();
+        });
+
+        test('should render nickname on card when nickname is present', () => {
+            contactManager.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '', nickname: 'Johnny' }
+            ];
+            contactManager.render();
+
+            const nickname = document.querySelector('.card-nickname');
+            expect(nickname).toBeTruthy();
+            expect(nickname.textContent).toBe('Johnny');
+        });
+
+        test('should not render nickname when nickname is absent', () => {
+            contactManager.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '' }
+            ];
+            contactManager.render();
+
+            const nickname = document.querySelector('.card-nickname');
+            expect(nickname).toBeFalsy();
+        });
+
+        test('should escape HTML in photo URL to prevent XSS', () => {
+            contactManager.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '', photo: '" onerror="alert(1)' }
+            ];
+            contactManager.render();
+
+            // The card should not have an onerror handler injected via the src attribute
+            const card = document.querySelector('.card');
+            const scripts = card.querySelectorAll('[onerror*="alert"]');
+            // The img should still exist with escaped src, not execute arbitrary handlers
+            const img = card.querySelector('img.card-photo');
+            expect(img).toBeTruthy();
+            // DOM getAttribute returns the attribute as-is after parsing
+            // Key check: the onerror attribute should NOT be a separate attribute set by injection
+            expect(img.getAttribute('onerror')).toBe("this.style.display='none'");
+        });
+
+        test('should escape HTML in nickname to prevent XSS', () => {
+            contactManager.contacts = [
+                { _id: 'id1', fn: 'John', tels: [], emails: [], org: '', nickname: '<script>alert(1)</script>' }
+            ];
+            contactManager.render();
+
+            const nickname = document.querySelector('.card-nickname');
+            expect(nickname.innerHTML).not.toContain('<script>');
+            expect(nickname.textContent).toContain('<script>');
+        });
+    });
+
+    describe('keyboard accessibility', () => {
+        beforeEach(() => {
+            contactManager.contacts = [
+                { _id: 'id1', fn: 'Alpha', tels: ['612345678'], emails: [], org: 'Org1' },
+                { _id: 'id2', fn: 'Beta', tels: ['698765432'], emails: [], org: 'Org2' }
+            ];
+        });
+
+        test('should add tabindex, role, and aria-label to cards', () => {
+            contactManager.render();
+            const card = document.querySelector('.card');
+            expect(card.getAttribute('tabindex')).toBe('0');
+            expect(card.getAttribute('role')).toBe('button');
+            expect(card.getAttribute('aria-label')).toContain('Alpha');
+            expect(card.getAttribute('aria-pressed')).toBe('false');
+        });
+
+        test('should set aria-pressed to true when card is selected', () => {
+            contactManager.selected.add('id1');
+            contactManager.selectOrder.push('id1');
+            contactManager.render();
+            const cards = document.querySelectorAll('.card');
+            const selectedCard = Array.from(cards).find(c => c.getAttribute('aria-label').includes('Alpha'));
+            expect(selectedCard.getAttribute('aria-pressed')).toBe('true');
+            expect(selectedCard.getAttribute('aria-label')).toContain('selected');
+        });
+
+        test('should toggle selection on Enter key', () => {
+            contactManager.render();
+            const card = document.querySelector('.card');
+            const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+            card.dispatchEvent(event);
+            expect(contactManager.selected.size).toBe(1);
+        });
+
+        test('should toggle selection on Space key', () => {
+            contactManager.render();
+            const card = document.querySelector('.card');
+            const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+            card.dispatchEvent(event);
+            expect(contactManager.selected.size).toBe(1);
+        });
+
+        test('should not toggle selection on other keys', () => {
+            contactManager.render();
+            const card = document.querySelector('.card');
+            const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
+            card.dispatchEvent(event);
+            expect(contactManager.selected.size).toBe(0);
         });
     });
 });
